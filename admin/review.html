@@ -106,7 +106,7 @@
     }
     async function deleteItem(id) {
       if (confirm('⚠️ هل أنت متأكد من حذف هذا المحتوى نهائيًا؟')) {
-        await API.admin.delete(id);
+        await API.admin.removeItem(id);
         loadContent();
       }
     }
