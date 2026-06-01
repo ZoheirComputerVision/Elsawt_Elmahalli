@@ -130,7 +130,7 @@
               <td>${catNames[item.category]||item.category}</td>
               <td>${Math.round(item.overall_score*100)}%</td>
               <td style="display:flex;gap:5px;">
-                <a href="/news.html?id=${item.id}" class="btn btn-sm btn-primary">عرض</a>
+                <a href="/article/${item.id}" class="btn btn-sm btn-primary">عرض</a>
                 <button class="btn btn-sm btn-success" onclick="approveItem(${item.id})">✓ قبول</button>
                 <button class="btn btn-sm btn-danger" onclick="rejectItem(${item.id})">✗ رفض</button>
                 <button class="btn btn-sm" style="background:#6b7280;color:white;" onclick="deleteItem(${item.id})">🗑 حذف</button>

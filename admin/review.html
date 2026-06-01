@@ -74,7 +74,7 @@
             <td>${Math.round(item.overall_score*100)}%</td>
             <td>${(item.event_date||item.created_at||'').substring(0,10)}</td>
             <td style="display:flex;gap:4px;flex-wrap:wrap;">
-              <a href="/news.html?id=${item.id}" class="btn btn-sm btn-primary">عرض</a>
+              <a href="/article/${item.id}" class="btn btn-sm btn-primary">عرض</a>
               ${item.status !== 'published' ? `<button class="btn btn-sm btn-success" onclick="approveItem(${item.id})">✓ قبول</button>` : ''}
               ${item.status !== 'rejected' ? `<button class="btn btn-sm btn-danger" onclick="rejectItem(${item.id})">✗ رفض</button>` : ''}
               ${item.status === 'draft' ? `<button class="btn btn-sm btn-accent" onclick="generateItem(${item.id})">🖋 توليد</button>` : ''}
