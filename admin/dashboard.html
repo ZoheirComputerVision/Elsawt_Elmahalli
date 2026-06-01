@@ -133,6 +133,7 @@
                 <a href="/article/${item.id}" class="btn btn-sm btn-primary">عرض</a>
                 <button class="btn btn-sm btn-success" onclick="approveItem(${item.id})">✓ قبول</button>
                 <button class="btn btn-sm btn-danger" onclick="rejectItem(${item.id})">✗ رفض</button>
+                <button class="btn btn-sm" style="background:#2563eb;color:white;" onclick="openEditModal(${item.id})">✏️ تعديل</button>
                 <button class="btn btn-sm" style="background:#6b7280;color:white;" onclick="deleteItem(${item.id})">🗑 حذف</button>
               </td>
             </tr>`;
@@ -179,6 +180,35 @@
       }
     }
 
+    let editingId = null;
+    async function openEditModal(id) {
+      editingId = id;
+      const data = await API.admin.getContentById(id);
+      document.getElementById('edit-title').value = data.title || '';
+      document.getElementById('edit-body').value = (data.body || '').replace(/<br>/g, '\n');
+      document.getElementById('edit-category').value = data.category || 'uncategorized';
+      document.getElementById('edit-source').value = data.source_name || '';
+      document.getElementById('edit-date').value = data.event_date || '';
+      document.getElementById('edit-modal').classList.add('active');
+    }
+    function closeEditModal() {
+      document.getElementById('edit-modal').classList.remove('active');
+      editingId = null;
+    }
+    async function saveEdit() {
+      if (!editingId) return;
+      const data = {
+        title: document.getElementById('edit-title').value,
+        body: document.getElementById('edit-body').value,
+        category: document.getElementById('edit-category').value,
+        source_name: document.getElementById('edit-source').value,
+        event_date: document.getElementById('edit-date').value,
+      };
+      await API.admin.updateItem(editingId, data);
+      closeEditModal();
+      loadDashboard();
+    }
+
     async function runCollector() {
       document.getElementById('action-result').innerHTML = '<div class="alert alert-info">📡 جاري جمع البيانات...</div>';
       const res = await API.admin.collect();
@@ -221,5 +251,46 @@
 
     document.addEventListener('DOMContentLoaded', loadDashboard);
   </script>
+
+<div class="modal-overlay" id="edit-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>✏️ تعديل المحتوى</h3>
+      <button class="btn btn-sm" onclick="closeEditModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <form id="edit-form">
+        <div class="form-group">
+          <label>العنوان</label>
+          <input type="text" class="form-control" id="edit-title" required>
+        </div>
+        <div class="form-group">
+          <label>المحتوى</label>
+          <textarea class="form-control" id="edit-body" required></textarea>
+        </div>
+        <div class="form-group">
+          <label>التصنيف</label>
+          <select class="form-control" id="edit-category">
+            <option value="news">📰 خبر</option>
+            <option value="activity">📸 نشاط</option>
+            <option value="announcement">📢 إعلان</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>المصدر</label>
+          <input type="text" class="form-control" id="edit-source">
+        </div>
+        <div class="form-group">
+          <label>التاريخ</label>
+          <input type="date" class="form-control" id="edit-date">
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-primary" onclick="saveEdit()">💾 حفظ التعديلات</button>
+      <button class="btn" onclick="closeEditModal()">إلغاء</button>
+    </div>
+  </div>
+</div>
 </body>
 </html>

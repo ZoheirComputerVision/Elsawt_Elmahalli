@@ -39,6 +39,7 @@ const API = {
     reject: (id, reason) => API.post(`/admin/content/${id}/reject`, { reason }),
     generate: (id) => API.post(`/admin/content/${id}/generate`),
     removeItem: (id) => API.post(`/admin/content/${id}/delete`),
+    updateItem: (id, data) => API.post(`/admin/content/${id}/update`, data),
     collect: () => API.post('/admin/collect'),
     collectManual: (data) => API.post('/admin/collect/manual', data),
     analyze: () => API.post('/admin/analyze'),

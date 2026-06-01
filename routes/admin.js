@@ -60,6 +60,24 @@ router.post('/content/:id/delete', async (req, res) => {
   } catch (e) { res.status(500).json({ success: false, error: e.message }); }
 });
 
+router.post('/content/:id/update', async (req, res) => {
+  try {
+    const id = parseInt(req.params.id);
+    const { title, body, category, source_name, event_date } = req.body;
+    const content = db.get('processed_content', id);
+    if (!content) return res.status(404).json({ success: false, error: 'غير موجود' });
+    const updateData = {};
+    if (title !== undefined) updateData.title = title;
+    if (body !== undefined) updateData.body = body;
+    if (category !== undefined) updateData.category = category;
+    if (source_name !== undefined) updateData.source_name = source_name;
+    if (event_date !== undefined) updateData.event_date = event_date;
+    const updated = db.update('processed_content', id, updateData);
+    db.saveNow('processed_content');
+    res.json({ success: true, content: updated, message: 'تم التعديل بنجاح' });
+  } catch (e) { res.status(500).json({ success: false, error: e.message }); }
+});
+
 router.post('/content/:id/generate', async (req, res) => {
   try {
     const article = await writer.generateForContent(parseInt(req.params.id));
