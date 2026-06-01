@@ -33,7 +33,9 @@ class Cache {
 
   invalidate(pattern) {
     for (const key of this.store.keys()) {
-      if (key.startsWith(pattern)) this.store.delete(key);
+      if (key.includes(pattern) || key.startsWith(pattern)) {
+        this.store.delete(key);
+      }
     }
   }
 
