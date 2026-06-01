@@ -46,6 +46,18 @@ router.post('/content/:id/reject', async (req, res) => {
   res.json(result);
 });
 
+router.post('/content/:id/delete', async (req, res) => {
+  try {
+    const id = parseInt(req.params.id);
+    const content = db.get('processed_content', id);
+    if (!content) return res.status(404).json({ success: false, error: 'غير موجود' });
+    db.delete('processed_content', id);
+    const archived = db.findOne('archive', a => a.content_id === id);
+    if (archived) db.delete('archive', archived.id);
+    res.json({ success: true, message: 'تم الحذف نهائيًا' });
+  } catch (e) { res.status(500).json({ success: false, error: e.message }); }
+});
+
 router.post('/content/:id/generate', async (req, res) => {
   try {
     const article = await writer.generateForContent(parseInt(req.params.id));

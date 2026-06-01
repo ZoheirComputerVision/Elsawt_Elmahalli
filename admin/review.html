@@ -78,6 +78,7 @@
               ${item.status !== 'published' ? `<button class="btn btn-sm btn-success" onclick="approveItem(${item.id})">✓ قبول</button>` : ''}
               ${item.status !== 'rejected' ? `<button class="btn btn-sm btn-danger" onclick="rejectItem(${item.id})">✗ رفض</button>` : ''}
               ${item.status === 'draft' ? `<button class="btn btn-sm btn-accent" onclick="generateItem(${item.id})">🖋 توليد</button>` : ''}
+              <button class="btn btn-sm" style="background:#6b7280;color:white;" onclick="deleteItem(${item.id})">🗑 حذف</button>
             </td>
           </tr>`;
         });
@@ -102,6 +103,12 @@
     async function generateItem(id) {
       await API.admin.generate(id);
       loadContent();
+    }
+    async function deleteItem(id) {
+      if (confirm('⚠️ هل أنت متأكد من حذف هذا المحتوى نهائيًا؟')) {
+        await API.admin.delete(id);
+        loadContent();
+      }
     }
     document.addEventListener('DOMContentLoaded', () => loadContent('all'));
   </script>
