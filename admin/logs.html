@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>سجل AI | لوحة التحكم</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body class="admin-body">
+  <div class="admin-header">
+    <h1>🔧 لوحة تحكم الجريدة الذكية</h1>
+    <div class="user-info">
+      <span id="admin-user">المشرف</span>
+      <a href="/" class="btn btn-sm btn-accent">🏠 الموقع</a>
+      <button class="btn btn-sm btn-danger" onclick="logout()">🚪 خروج</button>
+    </div>
+  </div>
+  <div class="admin-nav">
+    <a href="/admin/dashboard.html">📊 لوحة القيادة</a>
+    <a href="/admin/review.html">📝 مراجعة المحتوى</a>
+    <a href="/admin/logs.html" class="active">📋 سجل AI</a>
+    <a href="/admin/settings.html">⚙️ الإعدادات</a>
+  </div>
+  <div class="admin-content">
+    <div class="admin-card">
+      <div class="admin-card-header">
+        <span>📋 سجل قرارات الذكاء الاصطناعي</span>
+        <span id="log-count" style="background:#e5e7eb;padding:2px 12px;border-radius:12px;font-size:0.8rem;">0</span>
+      </div>
+      <div class="admin-card-body" id="log-list">
+        <div class="loading">جاري التحميل...</div>
+      </div>
+    </div>
+    <div class="admin-card">
+      <div class="admin-card-header">
+        <span>📊 إحصائيات AI</span>
+      </div>
+      <div class="admin-card-body" id="ai-stats"></div>
+    </div>
+  </div>
+  <script src="/js/api.js"></script>
+  <script>
+    function checkAuth() { if (!localStorage.getItem('admin_token')) window.location.href = '/admin'; }
+    checkAuth();
+    document.getElementById('admin-user').textContent = localStorage.getItem('admin_user') || 'Zoheir IT Solutions';
+    function logout() { localStorage.removeItem('admin_token'); localStorage.removeItem('admin_user'); window.location.href = '/admin'; }
+
+    async function loadLogs() {
+      try {
+        const logs = await API.admin.getLogs({ limit: 200 });
+        document.getElementById('log-count').textContent = logs.total;
+
+        if (!logs.items.length) {
+          document.getElementById('log-list').innerHTML = '<p style="color:#888;text-align:center;padding:30px;">لا توجد قرارات بعد</p>';
+          return;
+        }
+
+        let html = `<table class="table">
+          <tr><th>#</th><th>المحتوى</th><th>نوع القرار</th><th>الثقة</th><th>مراجعة بشرية</th><th>التاريخ</th></tr>`;
+        logs.items.forEach(log => {
+          const decisionTypes = {
+            'classification': '🔍 تصنيف',
+            'content_generation': '🖋 توليد محتوى',
+            'auto_publish': '📰 نشر تلقائي',
+            'pending_review': '⏳ إحالة للمراجعة',
+            'manual_approve': '✅ موافقة يدوية',
+            'rejected': '❌ رفض',
+          };
+          html += `<tr>
+            <td>${log.id}</td>
+            <td>${(log.title||'غير معروف').substring(0,35)}</td>
+            <td>${decisionTypes[log.decision_type]||log.decision_type}</td>
+            <td>${log.confidence ? Math.round(log.confidence*100)+'%' : '-'}</td>
+            <td>${log.human_reviewed ? '👤 نعم' : '🤖 لا'}</td>
+            <td>${log.created_at}</td>
+          </tr>`;
+        });
+        html += '</table>';
+        document.getElementById('log-list').innerHTML = html;
+      } catch (e) {
+        document.getElementById('log-list').innerHTML = `<div class="alert alert-danger">⚠️ ${e.message}</div>`;
+      }
+    }
+
+    async function loadAiStats() {
+      try {
+        const stats = await API.admin.dashboard();
+        document.getElementById('ai-stats').innerHTML = `
+          <div class="stats-bar" style="grid-template-columns:repeat(auto-fit,minmax(150px,1fr));">
+            <div class="stat-card"><div class="number">${stats.total_ai_decisions||0}</div><div class="label">🤖 إجمالي القرارات</div></div>
+            <div class="stat-card"><div class="number">${stats.total_published||0}</div><div class="label">✅ نشر تلقائي</div></div>
+            <div class="stat-card"><div class="number">${stats.total_review||0}</div><div class="label">⏳ مراجعة بشرية</div></div>
+            <div class="stat-card"><div class="number">${stats.total_rejected||0}</div><div class="label">❌ رفض</div></div>
+          </div>
+          <div style="margin-top:15px;font-size:0.85rem;color:#666;">
+            🤖 هذا السجل يوثق كل قرار اتخذه الذكاء الاصطناعي.
+            يمكنك تتبع أداء النظام وتحسين دقته من خلال مراجعة هذه السجلات.
+          </div>
+        `;
+      } catch (e) {
+        document.getElementById('ai-stats').innerHTML = `<div class="alert alert-danger">⚠️ ${e.message}</div>`;
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => { loadLogs(); loadAiStats(); });
+  </script>
+</body>
+</html>

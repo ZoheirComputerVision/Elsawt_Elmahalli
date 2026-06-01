@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>الإعدادات | لوحة التحكم</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body class="admin-body">
+  <div class="admin-header">
+    <h1>🔧 لوحة تحكم الجريدة الذكية</h1>
+    <div class="user-info">
+      <span id="admin-user">المشرف</span>
+      <a href="/" class="btn btn-sm btn-accent">🏠 الموقع</a>
+      <button class="btn btn-sm btn-danger" onclick="logout()">🚪 خروج</button>
+    </div>
+  </div>
+  <div class="admin-nav">
+    <a href="/admin/dashboard.html">📊 لوحة القيادة</a>
+    <a href="/admin/review.html">📝 مراجعة المحتوى</a>
+    <a href="/admin/logs.html">📋 سجل AI</a>
+    <a href="/admin/settings.html" class="active">⚙️ الإعدادات</a>
+  </div>
+  <div class="admin-content">
+    <div id="settings-message"></div>
+
+    <div class="admin-card">
+      <div class="admin-card-header">☢️ إعدادات الأمان (Safety Layer)</div>
+      <div class="admin-card-body">
+        <div style="margin-bottom:20px;">
+          <label style="display:flex;align-items:center;gap:10px;cursor:pointer;padding:15px;background:#fef2f2;border-radius:8px;border:1px solid #fecaca;">
+            <input type="checkbox" id="stop-auto" onchange="toggleSetting('stop_auto_publish', this.checked)">
+            <div>
+              <strong style="color:#991b1b;">🔴 إيقاف النشر التلقائي بالكامل</strong>
+              <div style="font-size:0.85rem;color:#666;">عند تفعيل هذا الخيار، لن ينشر أي محتوى تلقائيًا. كل المحتوى سيحتاج موافقة يدوية.</div>
+            </div>
+          </label>
+        </div>
+        <div style="margin-bottom:20px;">
+          <label style="display:flex;align-items:center;gap:10px;cursor:pointer;padding:15px;background:#fefce8;border-radius:8px;border:1px solid #fde68a;">
+            <input type="checkbox" id="require-review" onchange="toggleSetting('require_human_review', this.checked)">
+            <div>
+              <strong style="color:#92400e;">⚠️ طلب مراجعة بشرية إلزامية</strong>
+              <div style="font-size:0.85rem;color:#666;">جميع المحتويات يجب أن تراجع بشريًا قبل النشر، حتى تلك ذات الثقة العالية.</div>
+            </div>
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <div class="admin-card">
+      <div class="admin-card-header">📊 إحصائيات النظام</div>
+      <div class="admin-card-body" id="sys-info"></div>
+    </div>
+
+    <div class="admin-card">
+      <div class="admin-card-header">📦 النسخ الاحتياطي</div>
+      <div class="admin-card-body">
+        <button class="btn btn-accent" onclick="exportArchive()">💾 تصدير الأرشيف (JSON)</button>
+        <div id="export-result" style="margin-top:10px;"></div>
+      </div>
+    </div>
+
+    <div class="admin-card">
+      <div class="admin-card-header">ℹ️ معلومات النظام</div>
+      <div class="admin-card-body" style="font-size:0.85rem;color:#666;">
+        <p><strong>النظام:</strong> نظام الجريدة المدرسية الذكية v1.0</p>
+        <p><strong>المدرسة:</strong> ثانوية المجاهد خليل محمد المدعو يوسف - عين كرمس تيارت</p>
+        <p><strong>الإدارة التقنية:</strong> Zoheir IT Solutions (نظام تطوعي غير رسمي)</p>
+        <p><strong>مصادر البيانات:</strong> Facebook Graph API + Web Scraping + إدخال يدوي</p>
+        <p><strong>AI Pipeline:</strong> Classifier → Fact Checker → Writer → Publisher → Archiver</p>
+        <p><strong>قاعدة البيانات:</strong> SQLite + JSON</p>
+      </div>
+    </div>
+  </div>
+  <script src="/js/api.js"></script>
+  <script>
+    function checkAuth() { if (!localStorage.getItem('admin_token')) window.location.href = '/admin'; }
+    checkAuth();
+    document.getElementById('admin-user').textContent = localStorage.getItem('admin_user') || 'Zoheir IT Solutions';
+    function logout() { localStorage.removeItem('admin_token'); localStorage.removeItem('admin_user'); window.location.href = '/admin'; }
+
+    async function loadSettings() {
+      try {
+        const settings = await API.admin.getSettings();
+        document.getElementById('stop-auto').checked = settings.stop_auto_publish === 'true';
+        document.getElementById('require-review').checked = settings.require_human_review === 'true';
+
+        document.getElementById('sys-info').innerHTML = `
+          <div class="stats-bar" style="grid-template-columns:repeat(auto-fit,minmax(150px,1fr));">
+            <div class="stat-card"><div class="label">⏱ آخر تشغيل</div><div class="number" style="font-size:1.2rem;">${settings.last_scheduler_run||'لم يعمل بعد'}</div></div>
+            <div class="stat-card"><div class="label">📅 تاريخ النشر</div><div class="number" style="font-size:1.2rem;">${settings.publish_date||'-'}</div></div>
+            <div class="stat-card"><div class="label">📊 منشور اليوم</div><div class="number" style="font-size:1.2rem;">${settings.total_published_today||'0'}</div></div>
+          </div>
+        `;
+      } catch (e) {
+        document.getElementById('settings-message').innerHTML = `<div class="alert alert-danger">⚠️ ${e.message}</div>`;
+      }
+    }
+
+    async function toggleSetting(key, value) {
+      try {
+        await API.admin.updateSetting(key, value.toString());
+        const msg = document.getElementById('settings-message');
+        msg.innerHTML = `<div class="alert alert-success">✅ تم تحديث الإعداد: ${key} = ${value}</div>`;
+        setTimeout(() => msg.innerHTML = '', 3000);
+      } catch (e) {
+        document.getElementById('settings-message').innerHTML = `<div class="alert alert-danger">⚠️ ${e.message}</div>`;
+      }
+    }
+
+    async function exportArchive() {
+      try {
+        const res = await API.admin.exportArchive();
+        document.getElementById('export-result').innerHTML = `<div class="alert alert-success">✅ تم التصدير: ${res.path}</div>`;
+      } catch (e) {
+        document.getElementById('export-result').innerHTML = `<div class="alert alert-danger">⚠️ ${e.message}</div>`;
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', loadSettings);
+  </script>
+</body>
+</html>

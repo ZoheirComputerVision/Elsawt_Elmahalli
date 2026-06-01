@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>مراجعة المحتوى | لوحة التحكم</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body class="admin-body">
+  <div class="admin-header">
+    <h1>🔧 لوحة تحكم الجريدة الذكية</h1>
+    <div class="user-info">
+      <span id="admin-user">المشرف</span>
+      <a href="/" class="btn btn-sm btn-accent">🏠 الموقع</a>
+      <button class="btn btn-sm btn-danger" onclick="logout()">🚪 خروج</button>
+    </div>
+  </div>
+  <div class="admin-nav">
+    <a href="/admin/dashboard.html">📊 لوحة القيادة</a>
+    <a href="/admin/review.html" class="active">📝 مراجعة المحتوى</a>
+    <a href="/admin/logs.html">📋 سجل AI</a>
+    <a href="/admin/settings.html">⚙️ الإعدادات</a>
+  </div>
+  <div class="admin-content">
+    <div style="display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap;">
+      <button class="btn btn-sm btn-primary" onclick="loadContent('all')">📋 الكل</button>
+      <button class="btn btn-sm btn-warning" onclick="loadContent('review')">⏳ للمراجعة</button>
+      <button class="btn btn-sm" onclick="loadContent('draft')">📝 مسودات</button>
+      <button class="btn btn-sm btn-success" onclick="loadContent('published')">✅ منشور</button>
+      <button class="btn btn-sm btn-danger" onclick="loadContent('rejected')">❌ مرفوض</button>
+    </div>
+    <div class="admin-card">
+      <div class="admin-card-header">
+        <span>📝 المحتوى</span>
+        <span id="content-count" style="background:#e5e7eb;padding:2px 12px;border-radius:12px;font-size:0.8rem;">0</span>
+      </div>
+      <div class="admin-card-body" id="content-list">
+        <div class="loading">جاري التحميل...</div>
+      </div>
+    </div>
+  </div>
+  <script src="/js/api.js"></script>
+  <script>
+    function checkAuth() { if (!localStorage.getItem('admin_token')) window.location.href = '/admin'; }
+    checkAuth();
+    document.getElementById('admin-user').textContent = localStorage.getItem('admin_user') || 'Zoheir IT Solutions';
+    function logout() { localStorage.removeItem('admin_token'); localStorage.removeItem('admin_user'); window.location.href = '/admin'; }
+
+    async function loadContent(status = 'all') {
+      const container = document.getElementById('content-list');
+      container.innerHTML = '<div class="loading">جاري التحميل...</div>';
+      try {
+        const params = status !== 'all' ? { status } : {};
+        const data = await API.admin.getContent(params);
+        document.getElementById('content-count').textContent = data.items.length;
+
+        if (!data.items.length) {
+          container.innerHTML = '<p style="color:#888;text-align:center;padding:30px;">لا توجد محتويات</p>';
+          return;
+        }
+
+        const catNames = { news: '📰 خبر', activity: '📸 نشاط', announcement: '📢 إعلان', uncategorized: '❓ غير مصنف' };
+        const stNames = { published: '✅ منشور', draft: '📝 مسودة', review: '⏳ مراجعة', rejected: '❌ مرفوض' };
+
+        let html = `<table class="table">
+          <tr><th>#</th><th>العنوان</th><th>التصنيف</th><th>الحالة</th><th>الثقة</th><th>التاريخ</th><th>الإجراءات</th></tr>`;
+
+        data.items.forEach(item => {
+          html += `<tr>
+            <td>${item.id}</td>
+            <td>${item.title.substring(0,40)}${item.title.length>40?'...':''}</td>
+            <td>${catNames[item.category]||item.category}</td>
+            <td><span class="status-badge ${item.status}">${stNames[item.status]||item.status}</span></td>
+            <td>${Math.round(item.overall_score*100)}%</td>
+            <td>${(item.event_date||item.created_at||'').substring(0,10)}</td>
+            <td style="display:flex;gap:4px;flex-wrap:wrap;">
+              <a href="/news.html?id=${item.id}" class="btn btn-sm btn-primary">عرض</a>
+              ${item.status !== 'published' ? `<button class="btn btn-sm btn-success" onclick="approveItem(${item.id})">✓ قبول</button>` : ''}
+              ${item.status !== 'rejected' ? `<button class="btn btn-sm btn-danger" onclick="rejectItem(${item.id})">✗ رفض</button>` : ''}
+              ${item.status === 'draft' ? `<button class="btn btn-sm btn-accent" onclick="generateItem(${item.id})">🖋 توليد</button>` : ''}
+            </td>
+          </tr>`;
+        });
+        html += '</table>';
+        container.innerHTML = html;
+      } catch (e) {
+        container.innerHTML = `<div class="alert alert-danger">⚠️ ${e.message}</div>`;
+      }
+    }
+
+    async function approveItem(id) {
+      await API.admin.approve(id);
+      loadContent();
+    }
+    async function rejectItem(id) {
+      const reason = prompt('سبب الرفض:');
+      if (reason !== null) {
+        await API.admin.reject(id, reason || 'مرفوض');
+        loadContent();
+      }
+    }
+    async function generateItem(id) {
+      await API.admin.generate(id);
+      loadContent();
+    }
+    document.addEventListener('DOMContentLoaded', () => loadContent('all'));
+  </script>
+</body>
+</html>

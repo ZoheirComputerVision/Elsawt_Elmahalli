@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>مكتبة الصور | ثانوية المجاهد خليل محمد</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <div class="top-bar">
+    <div class="container">
+      <span class="date">📅 <span id="current-date"></span></span>
+      <span class="ai-badge">🤖 نظام الجريدة الذكية AI</span>
+    </div>
+  </div>
+  <header class="header">
+    <div class="container">
+      <div class="logo">🖼️ <span>مكتبة الصور الذكية</span></div>
+      <div class="subtitle">ألبوم صور نشاطات وفعاليات ثانوية المجاهد خليل محمد</div>
+    </div>
+  </header>
+  <nav class="nav">
+    <div class="container">
+      <a href="/">🏠 الرئيسية</a>
+      <a href="/news.html">📰 الأخبار</a>
+      <a href="/activities.html">📸 النشاطات</a>
+      <a href="/announcements.html">📢 الإعلانات</a>
+      <a href="/media.html" class="active">🖼️ المكتبة</a>
+      <a href="/timeline.html">📅 الأرشفة الزمنية</a>
+      <a href="/archive.html">📂 الأرشيف</a>
+      <div class="nav-left"><a href="/admin" class="btn btn-sm btn-accent">🔧 لوحة التحكم</a></div>
+    </div>
+  </nav>
+  <main class="container">
+    <div class="section-title">
+      🖼️ معرض الصور
+      <span class="badge" id="media-count">0</span>
+    </div>
+    <div id="media-gallery" class="gallery">
+      <div class="loading">جاري تحميل المكتبة...</div>
+    </div>
+  </main>
+  <footer class="footer">
+    <div class="container">
+      <h3>🏫 ثانوية المجاهد خليل محمد المدعو يوسف</h3>
+      <p>عين كرمس - ولاية تيارت | الجمهورية الجزائرية الديمقراطية الشعبية</p>
+      <div class="ai-note">🤖 مكتبة الصور مدارة بتقنيات الذكاء الاصطناعي</div>
+    </div>
+  </footer>
+  <script src="/js/api.js"></script>
+  <script>
+    document.getElementById('current-date').textContent = new Date().toLocaleDateString('ar-DZ', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+
+    async function loadGallery() {
+      const container = document.getElementById('media-gallery');
+      try {
+        const data = await API.getContent({ limit: 50 });
+        const items = data.items || [];
+        document.getElementById('media-count').textContent = items.length;
+
+        if (!items.length) {
+          container.innerHTML = '<div class="alert alert-info" style="grid-column:1/-1;">📂 لا توجد صور في المكتبة بعد. سيتم إضافة الصور تلقائيًا عند توفرها.</div>';
+          return;
+        }
+
+        container.innerHTML = items.map(item => {
+          const date = item.event_date || (item.created_at || '').split('T')[0] || '';
+          const catIcons = { news: '📰', activity: '📸', announcement: '📢' };
+          return `
+            <div class="gallery-item" style="cursor:pointer;" onclick="window.location='/article/${item.id}'">
+              <div class="placeholder-icon">${catIcons[item.category] || '📄'}</div>
+              <div style="position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,0.7);color:white;padding:8px;font-size:0.8rem;text-align:center;">
+                ${item.title.substring(0, 30)}${item.title.length > 30 ? '...' : ''}
+                <div style="font-size:0.7rem;opacity:0.7;">${date}</div>
+              </div>
+            </div>
+          `;
+        }).join('');
+      } catch (e) {
+        container.innerHTML = `<div class="alert alert-danger" style="grid-column:1/-1;">⚠️ ${e.message}</div>`;
+      }
+    }
+
+    loadGallery();
+  </script>
+</body>
+</html>

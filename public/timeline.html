@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>الأرشفة الزمنية | ثانوية المجاهد خليل محمد</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <div class="top-bar">
+    <div class="container">
+      <span class="date">📅 <span id="current-date"></span></span>
+      <span class="ai-badge">🤖 Timeline AI - أرشفة ذكية زمنية</span>
+    </div>
+  </div>
+  <header class="header">
+    <div class="container">
+      <div class="logo">📅 <span>الأرشفة الزمنية الذكية</span></div>
+      <div class="subtitle">Timeline AI - استعرض الأحداث حسب السنة والشهر</div>
+    </div>
+  </header>
+  <nav class="nav">
+    <div class="container">
+      <a href="/">🏠 الرئيسية</a>
+      <a href="/news.html">📰 الأخبار</a>
+      <a href="/activities.html">📸 النشاطات</a>
+      <a href="/announcements.html">📢 الإعلانات</a>
+      <a href="/timeline.html" class="active">📅 الأرشفة الزمنية</a>
+      <a href="/archive.html">📂 الأرشيف</a>
+      <div class="nav-left"><a href="/admin" class="btn btn-sm btn-accent">🔧 لوحة التحكم</a></div>
+    </div>
+  </nav>
+  <main class="container">
+    <div id="timeline-content"></div>
+  </main>
+  <footer class="footer">
+    <div class="container">
+      <h3>🏫 ثانوية المجاهد خليل محمد المدعو يوسف</h3>
+      <p>عين كرمس - ولاية تيارت | الجمهورية الجزائرية الديمقراطية الشعبية</p>
+      <div class="ai-note">🤖 Timeline AI - نظام أرشفة زمنية ذكي يعمل تلقائيًا</div>
+    </div>
+  </footer>
+  <script src="/js/api.js"></script>
+  <script src="/js/main.js"></script>
+  <script>document.addEventListener('DOMContentLoaded', () => { setCurrentDate(); loadTimeline(); });</script>
+</body>
+</html>

@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="الأخبار - ثانوية المجاهد خليل محمد">
+  <title>الأخبار | ثانوية المجاهد خليل محمد</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <div class="top-bar">
+    <div class="container">
+      <span class="date">📅 <span id="current-date"></span></span>
+      <span class="ai-badge">🤖 نظام الجريدة الذكية AI</span>
+    </div>
+  </div>
+
+  <header class="header">
+    <div class="container">
+      <div class="logo">📰 <span>الأخبار</span></div>
+      <div class="subtitle">آخر المستجدات التربوية في ثانوية المجاهد خليل محمد</div>
+    </div>
+  </header>
+
+  <nav class="nav">
+    <div class="container">
+      <a href="/">🏠 الرئيسية</a>
+      <a href="/news.html" class="active">📰 الأخبار</a>
+      <a href="/activities.html">📸 النشاطات</a>
+      <a href="/announcements.html">📢 الإعلانات</a>
+      <a href="/timeline.html">📅 الأرشفة الزمنية</a>
+      <a href="/archive.html">📂 الأرشيف</a>
+      <div class="nav-left">
+        <a href="/admin" class="btn btn-sm btn-accent">🔧 لوحة التحكم</a>
+      </div>
+    </div>
+  </nav>
+
+  <main class="container">
+    <div class="search-box">
+      <input type="text" id="search-input" placeholder="🔍 بحث في الأخبار..." />
+      <button class="btn btn-primary" id="search-btn">بحث</button>
+    </div>
+    <div id="search-results"></div>
+    <div id="category-content"></div>
+  </main>
+
+  <footer class="footer">
+    <div class="container">
+      <h3>🏫 ثانوية المجاهد خليل محمد المدعو يوسف</h3>
+      <p>عين كرمس - ولاية تيارت | الجمهورية الجزائرية الديمقراطية الشعبية</p>
+      <div class="ai-note">🤖 هذا النظام يعمل بتقنيات الذكاء الاصطناعي</div>
+    </div>
+  </footer>
+
+  <script src="/js/api.js"></script>
+  <script src="/js/main.js"></script>
+  <script>document.addEventListener('DOMContentLoaded', () => { setCurrentDate(); loadCategoryPage('news'); initSearch(); });</script>
+</body>
+</html>
