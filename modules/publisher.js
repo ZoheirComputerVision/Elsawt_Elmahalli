@@ -132,6 +132,7 @@ class PublishingEngine {
         status: 'published',
         published_at: new Date().toISOString(),
       });
+      db.saveNow('processed_content');
       this._updateDailyCount();
       this.logDecision(contentId, 'auto_publish', check);
       this._archive(contentId, 'auto_published');
@@ -164,6 +165,7 @@ class PublishingEngine {
       reviewed_by: reviewer,
     });
 
+    db.saveNow('processed_content');
     this._updateDailyCount();
     this.logDecision(contentId, 'manual_approve', { reviewer });
     this._archive(contentId, 'manual_approved');
@@ -177,6 +179,7 @@ class PublishingEngine {
       reviewed_by: reviewer,
       rejection_reason: reason,
     });
+    db.saveNow('processed_content');
     this.logDecision(contentId, 'rejected', { reason, reviewer });
     this._archive(contentId, 'rejected');
     return { success: true, message: 'تم الرفض والأرشفة' };

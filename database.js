@@ -89,6 +89,12 @@ class JsonDB {
     }
   }
 
+  _saveNow(name) {
+    this._save(name);
+    // إلغاء أي حفظ مؤجل لهذا الجدول
+    delete this.saveQueue[name];
+  }
+
   _save(name) {
     const fp = path.join(this.dir, `${name}.json`);
     fs.writeFileSync(fp, JSON.stringify(this.tables[name] || []), 'utf-8');
@@ -205,6 +211,10 @@ class JsonDB {
     this._debouncedSave(table);
     this.cache.invalidate(table);
     return true;
+  }
+
+  saveNow(table) {
+    this._saveNow(table);
   }
 
   count(table, fn) {
