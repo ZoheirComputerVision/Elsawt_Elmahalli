@@ -28,6 +28,7 @@ class ArchiveSystem {
     const items = db.query('processed_content');
     const archived = db.query('archive');
     const logs = db.query('ai_decision_log');
+    const views = db.query('views');
     return {
       total_published: items.filter(i => i.status === 'published').length,
       total_rejected: items.filter(i => i.status === 'rejected').length,
@@ -35,6 +36,7 @@ class ArchiveSystem {
       total_drafts: items.filter(i => i.status === 'draft').length,
       total_review: items.filter(i => i.status === 'review').length,
       total_ai_decisions: logs.length,
+      total_views: views.length,
       by_category: {
         news: items.filter(i => i.category === 'news' && i.status === 'published').length,
         activity: items.filter(i => i.category === 'activity' && i.status === 'published').length,

@@ -159,6 +159,7 @@ async function loadStats() {
       <div class="stat-card"><div class="number">${stats.by_category?.activity || 0}</div><div class="label">📸 نشاطات</div></div>
       <div class="stat-card"><div class="number">${stats.by_category?.announcement || 0}</div><div class="label">📢 إعلانات</div></div>
       <div class="stat-card"><div class="number">${stats.total_ai_decisions || 0}</div><div class="label">🤖 قرارات AI</div></div>
+      <div class="stat-card"><div class="number">${stats.total_views || 0}</div><div class="label">👁 مشاهدات</div></div>
     `;
   } catch (e) { /* silent */ }
 }
