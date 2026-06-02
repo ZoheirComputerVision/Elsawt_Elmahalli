@@ -137,12 +137,14 @@ router.post('/analyze', async (req, res) => {
 
 router.post('/publish', async (req, res) => {
   try {
-    const drafts = db.query('processed_content', c => c.status === 'draft' && c.overall_score >= 0.8).slice(0, 5);
+    const candidates = db.query('processed_content', c => c.status !== 'published' && c.status !== 'rejected').slice(0, 10);
     const results = [];
-    for (const draft of drafts) {
-      await writer.generateForContent(draft.id);
-      const result = await publisher.publish(draft.id);
-      results.push({ id: draft.id, ...result });
+    for (const item of candidates) {
+      if (!item.writer_version) {
+        await writer.generateForContent(item.id);
+      }
+      const result = await publisher.publish(item.id);
+      results.push({ id: item.id, ...result, current_status: item.status });
     }
     res.json({ success: true, processed: results.length, results });
   } catch (e) { res.status(500).json({ success: false, error: e.message }); }

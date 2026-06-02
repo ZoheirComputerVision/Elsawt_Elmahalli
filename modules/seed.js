@@ -31,6 +31,7 @@ async function seedIfEmpty() {
   }
   console.log(`[Seed] تم نشر ${drafts.length} عنصر تلقائيًا`);
 
+  ['processed_content', 'raw_data', 'ai_decision_log', 'archive', 'admin_actions'].forEach(t => { try { db.saveNow(t); } catch {} });
   const stats = require('./archiver').getStats();
   console.log(`[Seed] ✓ اكتملت التهيئة: ${stats.total_published} منشور، ${stats.total_review} للمراجعة، ${stats.total_ai_decisions} قرار AI`);
 }

@@ -183,7 +183,7 @@ class JsonDB {
     const id = this._nextId(table);
     const record = { id, ...data, created_at: new Date().toISOString() };
     this.tables[table].push(record);
-    this._debouncedSave(table);
+    this._saveNow(table);
     this.cache.invalidate(table);
     return record;
   }
@@ -193,7 +193,7 @@ class JsonDB {
     const idx = arr.findIndex(r => r.id === id);
     if (idx === -1) return null;
     arr[idx] = { ...arr[idx], ...data, updated_at: new Date().toISOString() };
-    this._debouncedSave(table);
+    this._saveNow(table);
     this.cache.invalidate(table);
     return arr[idx];
   }
@@ -203,7 +203,7 @@ class JsonDB {
     const existing = matchFn ? arr.find(matchFn) : null;
     if (existing) {
       Object.assign(existing, data, { updated_at: new Date().toISOString() });
-      this._debouncedSave(table);
+      this._saveNow(table);
       this.cache.invalidate(table);
       return existing;
     }
@@ -215,7 +215,7 @@ class JsonDB {
     const idx = arr.findIndex(r => r.id === id);
     if (idx === -1) return false;
     arr.splice(idx, 1);
-    this._debouncedSave(table);
+    this._saveNow(table);
     this.cache.invalidate(table);
     return true;
   }
