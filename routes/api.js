@@ -21,6 +21,10 @@ router.get('/content', (req, res) => {
   const total = items.length;
   items = items.slice(parseInt(offset), parseInt(offset) + parseInt(limit));
 
+  const viewCounts = {};
+  db.query('views').forEach(v => { viewCounts[v.content_id] = (viewCounts[v.content_id] || 0) + 1; });
+  items = items.map(item => ({ ...item, view_count: viewCounts[item.id] || 0 }));
+
   res.json({ items, total, limit: parseInt(limit), offset: parseInt(offset) });
 });
 
@@ -28,7 +32,21 @@ router.get('/content/:id', (req, res) => {
   const item = db.get('processed_content', parseInt(req.params.id));
   if (!item) return res.status(404).json({ error: 'غير موجود' });
   const media = db.where('media', { content_id: item.id });
-  res.json({ ...item, media });
+  const viewCount = db.count('views', v => v.content_id === item.id);
+  res.json({ ...item, media, view_count: viewCount });
+});
+
+router.post('/content/:id/view', (req, res) => {
+  const id = parseInt(req.params.id);
+  const content = db.get('processed_content', id);
+  if (!content) return res.status(404).json({ error: 'غير موجود' });
+  const ip = req.headers['x-forwarded-for']?.split(',')[0]?.trim() || req.ip || req.socket.remoteAddress;
+  const existing = db.findOne('views', v => v.content_id === id && v.ip === ip);
+  if (!existing) {
+    db.insert('views', { content_id: id, ip });
+  }
+  const total = db.count('views', v => v.content_id === id);
+  res.json({ content_id: id, view_count: total });
 });
 
 router.get('/timeline', (req, res) => res.json(archive.buildTimeline()));

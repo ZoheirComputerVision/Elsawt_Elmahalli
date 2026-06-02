@@ -73,6 +73,7 @@ class JsonDB {
       ai_decision_log: this._load('ai_decision_log'),
       admin_actions: this._load('admin_actions'),
       settings: this._load('settings'),
+      views: this._load('views'),
     };
     this._seedDefaults();
     this.initialized = true;

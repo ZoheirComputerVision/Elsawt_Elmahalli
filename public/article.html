@@ -78,6 +78,7 @@
                 <span>📅 ${date}</span>
                 <span>📡 المصدر: ${item.source_name || 'غير محدد'}</span>
                 ${item.overall_score ? `<span>🎯 الثقة: ${Math.round(item.overall_score * 100)}%</span>` : ''}
+                <span>👁 <span id="view-count">${item.view_count || 0}</span> مشاهدة</span>
               </div>
               <div style="font-size:1.1rem;line-height:2;color:#2a2a3e;">
                 ${bodyHtml}
@@ -91,6 +92,7 @@
           </div>
         `;
         document.title = `${item.title} | ثانوية المجاهد خليل محمد`;
+        API.trackView(id).then(r => { document.getElementById('view-count').textContent = r.view_count; }).catch(() => {});
       } catch (e) {
         document.getElementById('article-content').innerHTML = `<div class="alert alert-danger">⚠️ فشل تحميل المقال: ${e.message}</div>`;
       }

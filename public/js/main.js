@@ -52,6 +52,7 @@ function createCard(item, featured = false) {
           <span>📡 ${item.source_name || 'غير محدد'}</span>
           <span>🎯 ${Math.round((item.overall_score || 0) * 100)}% ثقة</span>
           ${item.is_ai_generated ? '<span>🧠 AI</span>' : ''}
+          <span>👁 ${item.view_count || 0} مشاهدة</span>
         </div>
       </div>
     `;
@@ -71,6 +72,7 @@ function createCard(item, featured = false) {
           <span>📅 ${date}</span>
           ${item.is_ai_generated ? '<span class="ai-tag">🧠 AI</span>' : ''}
           <span>🎯 ${Math.round((item.overall_score || 0) * 100)}%</span>
+          <span>👁 ${item.view_count || 0}</span>
         </div>
       </div>
     </div>
