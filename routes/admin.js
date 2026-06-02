@@ -52,10 +52,8 @@ router.post('/content/:id/delete', async (req, res) => {
     const content = db.get('processed_content', id);
     if (!content) return res.status(404).json({ success: false, error: 'غير موجود' });
     db.delete('processed_content', id);
-    db.saveNow('processed_content');
     const archived = db.findOne('archive', a => a.content_id === id);
     if (archived) db.delete('archive', archived.id);
-    db.saveNow('archive');
     res.json({ success: true, message: 'تم الحذف نهائيًا' });
   } catch (e) { res.status(500).json({ success: false, error: e.message }); }
 });

@@ -90,9 +90,13 @@ class JsonDB {
   }
 
   _saveNow(name) {
-    this._save(name);
-    // إلغاء أي حفظ مؤجل لهذا الجدول
-    delete this.saveQueue[name];
+    try {
+      this._save(name);
+      delete this.saveQueue[name];
+      console.log(`[DB] حفظ فوري: ${name}`);
+    } catch (e) {
+      console.error(`[DB] فشل الحفظ الفوري ${name}:`, e.message);
+    }
   }
 
   _save(name) {
