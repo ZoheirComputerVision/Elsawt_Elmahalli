@@ -89,6 +89,11 @@
             <label>التاريخ</label>
             <input type="date" class="form-control" id="m-date">
           </div>
+          <div class="form-group">
+            <label>الصورة (اختياري)</label>
+            <input type="file" class="form-control" id="m-image" accept="image/*" onchange="previewImage(event)">
+            <div id="m-image-preview" style="margin-top:5px;max-width:200px;"></div>
+          </div>
         </form>
       </div>
       <div class="modal-footer">
@@ -239,6 +244,16 @@
       loadDashboard();
     }
 
+    function previewImage(e) {
+      const file = e.target.files[0];
+      const preview = document.getElementById('m-image-preview');
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = (ev) => { preview.innerHTML = `<img src="${ev.target.result}" style="max-width:200px;border-radius:8px;border:1px solid #ddd;">`; };
+        reader.readAsDataURL(file);
+      } else { preview.innerHTML = ''; }
+    }
+
     function openManualModal() { document.getElementById('manual-modal').classList.add('active'); }
     function closeModal(id) { document.getElementById(id).classList.remove('active'); }
 
@@ -251,10 +266,20 @@
         event_date: document.getElementById('m-date').value,
       };
       if (!data.title || !data.body) { alert('العنوان والمحتوى مطلوبان'); return; }
-      await API.admin.collectManual(data);
-      closeModal('manual-modal');
-      document.getElementById('action-result').innerHTML = '<div class="alert alert-success">✅ تم إرسال المحتوى للمعالجة</div>';
-      setTimeout(() => { document.getElementById('action-result').innerHTML = ''; loadDashboard(); }, 1000);
+      const fileInput = document.getElementById('m-image');
+      if (fileInput.files.length > 0) {
+        data.image_data = await new Promise(resolve => {
+          const r = new FileReader();
+          r.onload = () => resolve(r.result);
+          r.readAsDataURL(fileInput.files[0]);
+        });
+      }
+      try {
+        await API.admin.collectManual(data);
+        closeModal('manual-modal');
+        document.getElementById('action-result').innerHTML = '<div class="alert alert-success">✅ تم إرسال المحتوى للمعالجة</div>';
+        setTimeout(() => { document.getElementById('action-result').innerHTML = ''; loadDashboard(); }, 1000);
+      } catch (e) { document.getElementById('action-result').innerHTML = `<div class="alert alert-danger">${e.message}</div>`; }
     }
 
     document.addEventListener('DOMContentLoaded', loadDashboard);

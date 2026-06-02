@@ -1,6 +1,9 @@
 const express = require('express');
 const router = express.Router();
+const fs = require('fs');
+const path = require('path');
 const db = require('../database');
+const config = require('../config');
 const collector = require('../modules/collector');
 const analyzer = require('../modules/analyzer');
 const writer = require('../modules/writer');
@@ -98,9 +101,21 @@ router.post('/collect', async (req, res) => {
 
 router.post('/collect/manual', async (req, res) => {
   try {
-    const { title, body, category, source, event_date } = req.body;
+    const { title, body, category, source, event_date, image_data } = req.body;
     if (!title || !body) return res.status(400).json({ success: false, error: 'العنوان والمحتوى مطلوبان' });
     const data = { title, body, source: source || 'إداري', category: category || 'uncategorized', event_date: event_date || new Date().toISOString().split('T')[0], source_url: '' };
+    if (image_data) {
+      const matches = image_data.match(/^data:image\/(\w+);base64,(.+)$/);
+      if (matches) {
+        const ext = matches[1] === 'jpeg' ? 'jpg' : matches[1];
+        const buffer = Buffer.from(matches[2], 'base64');
+        const filename = `manual_${Date.now()}_${Math.random().toString(36).slice(2, 8)}.${ext}`;
+        const imagePath = path.join(config.PUBLIC_DIR, 'images', filename);
+        fs.writeFileSync(imagePath, buffer);
+        data.image_url = `/images/${filename}`;
+        console.log(`[Admin] تم حفظ الصورة: ${data.image_url}`);
+      }
+    }
     const result = await collector.collectManual(data);
     const rawRows = db.findOne('raw_data', r => r.content_hash === result.hash);
     if (rawRows) await analyzer.analyzeRawData(rawRows.id);

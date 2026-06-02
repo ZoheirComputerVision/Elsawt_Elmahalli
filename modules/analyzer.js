@@ -297,6 +297,7 @@ class ContentAnalyzer {
       source_url: data.source_url || '',
       source_name: data.source || '',
       event_date: data.event_date || null,
+      image_url: data.image_url || '',
       is_ai_generated: 1,
       writer_version: null,
     });
