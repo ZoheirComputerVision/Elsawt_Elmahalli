@@ -161,22 +161,28 @@
     }
 
     async function approveItem(id) {
-      await API.admin.approve(id);
-      loadDashboard();
+      try {
+        await API.admin.approve(id);
+        loadDashboard();
+      } catch (e) { document.getElementById('action-result').innerHTML = `<div class="alert alert-danger">${e.message}</div>`; }
     }
 
     async function rejectItem(id) {
       const reason = prompt('سبب الرفض:');
       if (reason !== null) {
-        await API.admin.reject(id, reason || 'مرفوض');
-        loadDashboard();
+        try {
+          await API.admin.reject(id, reason || 'مرفوض');
+          loadDashboard();
+        } catch (e) { document.getElementById('action-result').innerHTML = `<div class="alert alert-danger">${e.message}</div>`; }
       }
     }
 
     async function deleteItem(id) {
       if (confirm('⚠️ هل أنت متأكد من حذف هذا المحتوى نهائيًا؟')) {
-        await API.admin.removeItem(id);
-        loadDashboard();
+        try {
+          await API.admin.removeItem(id);
+          loadDashboard();
+        } catch (e) { document.getElementById('action-result').innerHTML = `<div class="alert alert-danger">${e.message}</div>`; }
       }
     }
 
@@ -204,9 +210,11 @@
         source_name: document.getElementById('edit-source').value,
         event_date: document.getElementById('edit-date').value,
       };
-      await API.admin.updateItem(editingId, data);
-      closeEditModal();
-      loadDashboard();
+      try {
+        await API.admin.updateItem(editingId, data);
+        closeEditModal();
+        loadDashboard();
+      } catch (e) { document.getElementById('action-result').innerHTML = `<div class="alert alert-danger">${e.message}</div>`; }
     }
 
     async function runCollector() {

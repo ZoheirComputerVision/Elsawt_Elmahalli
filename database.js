@@ -100,10 +100,13 @@ class JsonDB {
   }
 
   _save(name) {
-    const fp = path.join(this.dir, `${name}.json`);
-    fs.writeFileSync(fp, JSON.stringify(this.tables[name] || []), 'utf-8');
-    // إبطال الكاش المتعلق بهذا الجدول
-    this.cache.invalidate(`query:${name}`);
+    try {
+      const fp = path.join(this.dir, `${name}.json`);
+      fs.writeFileSync(fp, JSON.stringify(this.tables[name] || []), 'utf-8');
+      this.cache.invalidate(`query:${name}`);
+    } catch (e) {
+      console.error(`[DB] فشل كتابة ${name}.json:`, e.message);
+    }
   }
 
   _debouncedSave(name) {

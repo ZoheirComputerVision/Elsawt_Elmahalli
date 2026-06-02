@@ -91,24 +91,32 @@
     }
 
     async function approveItem(id) {
-      await API.admin.approve(id);
-      loadContent();
+      try {
+        await API.admin.approve(id);
+        loadContent();
+      } catch (e) { alert('❌ ' + e.message); }
     }
     async function rejectItem(id) {
       const reason = prompt('سبب الرفض:');
       if (reason !== null) {
-        await API.admin.reject(id, reason || 'مرفوض');
-        loadContent();
+        try {
+          await API.admin.reject(id, reason || 'مرفوض');
+          loadContent();
+        } catch (e) { alert('❌ ' + e.message); }
       }
     }
     async function generateItem(id) {
-      await API.admin.generate(id);
-      loadContent();
+      try {
+        await API.admin.generate(id);
+        loadContent();
+      } catch (e) { alert('❌ ' + e.message); }
     }
     async function deleteItem(id) {
       if (confirm('⚠️ هل أنت متأكد من حذف هذا المحتوى نهائيًا؟')) {
-        await API.admin.removeItem(id);
-        loadContent();
+        try {
+          await API.admin.removeItem(id);
+          loadContent();
+        } catch (e) { alert('❌ ' + e.message); }
       }
     }
 
@@ -136,9 +144,11 @@
         source_name: document.getElementById('edit-source').value,
         event_date: document.getElementById('edit-date').value,
       };
-      await API.admin.updateItem(editingId, data);
-      closeEditModal();
-      loadContent();
+      try {
+        await API.admin.updateItem(editingId, data);
+        closeEditModal();
+        loadContent();
+      } catch (e) { alert('❌ ' + e.message); }
     }
     document.addEventListener('DOMContentLoaded', () => loadContent('all'));
   </script>

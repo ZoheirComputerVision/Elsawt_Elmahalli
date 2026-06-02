@@ -36,14 +36,18 @@ router.get('/content/:id', (req, res) => {
 });
 
 router.post('/content/:id/approve', async (req, res) => {
-  const result = await publisher.approveManual(parseInt(req.params.id));
-  res.json(result);
+  try {
+    const result = await publisher.approveManual(parseInt(req.params.id));
+    res.json(result);
+  } catch (e) { res.status(500).json({ success: false, error: e.message }); }
 });
 
 router.post('/content/:id/reject', async (req, res) => {
-  const { reason } = req.body;
-  const result = await publisher.reject(parseInt(req.params.id), reason || 'مرفوض من المشرف');
-  res.json(result);
+  try {
+    const { reason } = req.body;
+    const result = await publisher.reject(parseInt(req.params.id), reason || 'مرفوض من المشرف');
+    res.json(result);
+  } catch (e) { res.status(500).json({ success: false, error: e.message }); }
 });
 
 router.post('/content/:id/delete', async (req, res) => {
@@ -52,8 +56,10 @@ router.post('/content/:id/delete', async (req, res) => {
     const content = db.get('processed_content', id);
     if (!content) return res.status(404).json({ success: false, error: 'غير موجود' });
     db.delete('processed_content', id);
+    db.saveNow('processed_content');
     const archived = db.findOne('archive', a => a.content_id === id);
     if (archived) db.delete('archive', archived.id);
+    db.saveNow('archive');
     res.json({ success: true, message: 'تم الحذف نهائيًا' });
   } catch (e) { res.status(500).json({ success: false, error: e.message }); }
 });
