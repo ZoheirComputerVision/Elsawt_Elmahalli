@@ -92,7 +92,8 @@
 
     async function approveItem(id) {
       try {
-        await API.admin.approve(id);
+        const result = await API.admin.approve(id);
+        if (!result.success) { alert('❌ ' + result.error); return; }
         loadContent();
       } catch (e) { alert('❌ ' + e.message); }
     }
@@ -100,7 +101,8 @@
       const reason = prompt('سبب الرفض:');
       if (reason !== null) {
         try {
-          await API.admin.reject(id, reason || 'مرفوض');
+          const result = await API.admin.reject(id, reason || 'مرفوض');
+          if (!result.success) { alert('❌ ' + result.error); return; }
           loadContent();
         } catch (e) { alert('❌ ' + e.message); }
       }

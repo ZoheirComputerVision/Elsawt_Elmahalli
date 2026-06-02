@@ -110,8 +110,9 @@ router.post('/collect/manual', async (req, res) => {
         const ext = matches[1] === 'jpeg' ? 'jpg' : matches[1];
         const buffer = Buffer.from(matches[2], 'base64');
         const filename = `manual_${Date.now()}_${Math.random().toString(36).slice(2, 8)}.${ext}`;
-        const imagePath = path.join(config.PUBLIC_DIR, 'images', filename);
-        fs.writeFileSync(imagePath, buffer);
+        const imagesDir = path.join(config.PUBLIC_DIR, 'images');
+        if (!fs.existsSync(imagesDir)) fs.mkdirSync(imagesDir, { recursive: true });
+        fs.writeFileSync(path.join(imagesDir, filename), buffer);
         data.image_url = `/images/${filename}`;
         console.log(`[Admin] تم حفظ الصورة: ${data.image_url}`);
       }

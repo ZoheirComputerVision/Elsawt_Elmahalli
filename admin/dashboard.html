@@ -167,7 +167,8 @@
 
     async function approveItem(id) {
       try {
-        await API.admin.approve(id);
+        const result = await API.admin.approve(id);
+        if (!result.success) { document.getElementById('action-result').innerHTML = `<div class="alert alert-danger">${result.error}</div>`; return; }
         loadDashboard();
       } catch (e) { document.getElementById('action-result').innerHTML = `<div class="alert alert-danger">${e.message}</div>`; }
     }
@@ -176,7 +177,8 @@
       const reason = prompt('سبب الرفض:');
       if (reason !== null) {
         try {
-          await API.admin.reject(id, reason || 'مرفوض');
+          const result = await API.admin.reject(id, reason || 'مرفوض');
+          if (!result.success) { document.getElementById('action-result').innerHTML = `<div class="alert alert-danger">${result.error}</div>`; return; }
           loadDashboard();
         } catch (e) { document.getElementById('action-result').innerHTML = `<div class="alert alert-danger">${e.message}</div>`; }
       }
