@@ -69,7 +69,6 @@ school-news-ai/
 | 2026-06-05 | إصلاح القائمة المنسدلة للشاشات الضيقة + RTL: إضافة Click Toggle via JS، ضبط positioning لعدم تجاوز الشاشة | `public/css/style.css`, `public/js/main.js` |
 | 2026-06-05 | **إصلاح القائمة للجوال نهائياً**: position:fixed + touch-action + scroll listener | `public/css/style.css`, `public/js/main.js` |
 | 2026-06-05 | **ميزة الرد على فيسبوك**: مشاركة/تعليق المقالات على صفحة الثانوية في فيسبوك تلقائياً أو يدوياً | `modules/fb_reply.js` (جديد), `config.js`, `database.js`, `routes/admin.js`, `modules/publisher.js`, `public/js/api.js` |
-| 2026-06-05 | **واجهة إدارة فيسبوك**: إضافة أزرار مشاركة وتعليق فيسبوك في لوحة التحكم مع إعدادات وإحصائيات | `admin/settings.html`, `admin/review.html`, `admin/dashboard.html` |
 
 ## إعدادات فيسبوك (جديدة)
 | المفتاح | القيمة الافتراضية | الوصف |
@@ -85,5 +84,4 @@ school-news-ai/
 ## النواقص / ملاحظات
 - Facebook Graph API يتطلب رمز وصول حقيقي (`fb_page_access_token`) ليتم النشر الفعلي — حالياً يعمل في وضع المحاكاة (Simulation Mode)
 - رمز الوصول يحتاج صلاحية `pages_manage_posts` أو `pages_read_engagement`
-- تمت إضافة واجهة إدارة كاملة للفيسبوك: إعدادات (settings.html)، أزرار مشاركة/تعليق (review.html)، إحصائيات (dashboard.html)، سجل ردود (جميع الصفحات)
-- يفضّل مراجعة إعدادات فيسبوك بعد الحصول على الرمز الحقيقي عبر صفحة الإعدادات
+- يفضّل مراجعة إعدادات فيسبوك بعد الحصول على الرمز الحقيقي
