@@ -56,8 +56,5 @@ const API = {
     getTimeline: () => API.get('/admin/archive/timeline'),
     getSources: () => API.get('/admin/sources'),
     runCollector: () => API.post('/admin/scheduler/run-collector'),
-    fbComment: (id, message) => API.post(`/admin/content/${id}/fb-comment`, { message }),
-    fbShare: (id, message) => API.post(`/admin/content/${id}/fb-share`, { message }),
-    getFbReplies: (contentId) => API.get(`/admin/fb-replies${contentId ? `?content_id=${contentId}` : ''}`),
   },
 };

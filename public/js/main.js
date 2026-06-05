@@ -5,7 +5,6 @@ document.addEventListener('DOMContentLoaded', () => {
   loadTimeline();
   loadSidebar();
   setupAutoRefresh();
-  setupMobileDropdown();
 });
 
 function setCurrentDate() {
@@ -316,56 +315,4 @@ function initSearch() {
   });
 
   input.addEventListener('keypress', (e) => { if (e.key === 'Enter') btn.click(); });
-}
-
-function setupMobileDropdown() {
-  document.querySelectorAll('.nav-dropdown').forEach(dropdown => {
-    const trigger = dropdown.querySelector('.nav-dropdown-trigger');
-    if (!trigger) return;
-    trigger.addEventListener('click', (e) => {
-      e.preventDefault();
-      const isOpen = dropdown.classList.contains('open');
-      document.querySelectorAll('.nav-dropdown.open').forEach(d => {
-        d.classList.remove('open');
-        const m = d.querySelector('.nav-dropdown-menu');
-        if (m) m.style.top = '';
-      });
-      if (!isOpen) {
-        dropdown.classList.add('open');
-        const menu = dropdown.querySelector('.nav-dropdown-menu');
-        if (menu && window.innerWidth <= 900) {
-          const nav = document.querySelector('.nav');
-          menu.style.top = nav.getBoundingClientRect().bottom + 'px';
-        }
-      }
-    });
-  });
-  document.addEventListener('click', (e) => {
-    if (!e.target.closest('.nav-dropdown')) {
-      document.querySelectorAll('.nav-dropdown.open').forEach(d => {
-        d.classList.remove('open');
-        const menu = d.querySelector('.nav-dropdown-menu');
-        if (menu) menu.style.top = '';
-      });
-    }
-  });
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') {
-      document.querySelectorAll('.nav-dropdown.open').forEach(d => {
-        d.classList.remove('open');
-        const menu = d.querySelector('.nav-dropdown-menu');
-        if (menu) menu.style.top = '';
-      });
-    }
-  });
-  window.addEventListener('scroll', () => {
-    if (window.innerWidth <= 900) {
-      const openDropdown = document.querySelector('.nav-dropdown.open');
-      if (!openDropdown) return;
-      const menu = openDropdown.querySelector('.nav-dropdown-menu');
-      if (!menu) return;
-      const nav = document.querySelector('.nav');
-      menu.style.top = nav.getBoundingClientRect().bottom + 'px';
-    }
-  }, { passive: true });
 }

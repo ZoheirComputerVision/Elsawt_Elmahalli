@@ -6,7 +6,6 @@ const analyzer = require('../modules/analyzer');
 const writer = require('../modules/writer');
 const publisher = require('../modules/publisher');
 const archive = require('../modules/archiver');
-const fbReply = require('../modules/fb_reply');
 
 router.post('/auth', (req, res) => {
   const { username, password } = req.body;
@@ -177,29 +176,6 @@ router.post('/scheduler/run-collector', async (req, res) => {
     await s.runCollector();
     res.json({ success: true });
   } catch (e) { res.status(500).json({ error: e.message }); }
-});
-
-router.post('/content/:id/fb-comment', async (req, res) => {
-  try {
-    const { message } = req.body;
-    const result = await fbReply.postComment(parseInt(req.params.id), message);
-    res.json(result);
-  } catch (e) { res.status(500).json({ success: false, error: e.message }); }
-});
-
-router.post('/content/:id/fb-share', async (req, res) => {
-  try {
-    const { message } = req.body;
-    const result = await fbReply.shareArticle(parseInt(req.params.id), message);
-    res.json(result);
-  } catch (e) { res.status(500).json({ success: false, error: e.message }); }
-});
-
-router.get('/fb-replies', (req, res) => {
-  const { content_id } = req.query;
-  const replies = fbReply.getReplyHistory(content_id ? parseInt(content_id) : null);
-  const stats = fbReply.getReplyStats();
-  res.json({ replies, stats });
 });
 
 module.exports = router;
