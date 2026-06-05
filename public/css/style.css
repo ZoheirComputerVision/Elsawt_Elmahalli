@@ -163,6 +163,21 @@ a:hover { color: var(--accent); }
   padding-right: 22px;
 }
 
+/* ── Nav Dropdown Sections & Dividers ── */
+.nav-dropdown-divider {
+  height: 1px;
+  background: var(--border);
+  margin: 4px 12px;
+}
+.nav-dropdown-section {
+  padding: 8px 16px 4px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--accent);
+  cursor: default;
+  letter-spacing: 0.5px;
+}
+
 /* ── Container ── */
 .container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
 
