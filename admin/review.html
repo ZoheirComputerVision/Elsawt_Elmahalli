@@ -38,6 +38,16 @@
         <div class="loading">جاري التحميل...</div>
       </div>
     </div>
+
+    <div class="admin-card">
+      <div class="admin-card-header">
+        <span>📱 سجل فيسبوك</span>
+        <span id="fb-count" style="background:#1877f2;color:white;padding:2px 12px;border-radius:12px;font-size:0.8rem;">0</span>
+      </div>
+      <div class="admin-card-body" id="fb-replies-list">
+        <div class="loading">جاري التحميل...</div>
+      </div>
+    </div>
   </div>
   <script src="/js/api.js"></script>
   <script>
@@ -73,13 +83,15 @@
             <td><span class="status-badge ${item.status}">${stNames[item.status]||item.status}</span></td>
             <td>${Math.round(item.overall_score*100)}%</td>
             <td>${(item.event_date||item.created_at||'').substring(0,10)}</td>
-            <td style="display:flex;gap:4px;flex-wrap:wrap;">
+              <td style="display:flex;gap:4px;flex-wrap:wrap;">
               <a href="/article/${item.id}" class="btn btn-sm btn-primary">عرض</a>
               ${item.status !== 'published' ? `<button class="btn btn-sm btn-success" onclick="approveItem(${item.id})">✓ قبول</button>` : ''}
               ${item.status !== 'rejected' ? `<button class="btn btn-sm btn-danger" onclick="rejectItem(${item.id})">✗ رفض</button>` : ''}
               ${item.status === 'draft' ? `<button class="btn btn-sm btn-accent" onclick="generateItem(${item.id})">🖋 توليد</button>` : ''}
               <button class="btn btn-sm" style="background:#2563eb;color:white;" onclick="openEditModal(${item.id})">✏️ تعديل</button>
               <button class="btn btn-sm" style="background:#6b7280;color:white;" onclick="deleteItem(${item.id})">🗑 حذف</button>
+              ${item.status === 'published' ? `<button class="btn btn-sm" style="background:#1877f2;color:white;" onclick="fbShareItem(${item.id})">📤 فيسبوك</button>` : ''}
+              ${item.status === 'published' ? `<button class="btn btn-sm" style="background:#42b72a;color:white;" onclick="fbCommentItem(${item.id})">💬 تعليق</button>` : ''}
             </td>
           </tr>`;
         });
@@ -97,29 +109,25 @@
         loadContent();
       } catch (e) { alert('❌ ' + e.message); }
     }
-    async function rejectItem(id) {
-      const reason = prompt('سبب الرفض:');
-      if (reason !== null) {
-        try {
-          const result = await API.admin.reject(id, reason || 'مرفوض');
-          if (!result.success) { alert('❌ ' + result.error); return; }
-          loadContent();
-        } catch (e) { alert('❌ ' + e.message); }
-      }
-    }
-    async function generateItem(id) {
+
+    async function fbShareItem(id) {
+      const msg = prompt('رسالة المشاركة على فيسبوك (اختياري - اترك فارغاً للافتراضي):');
+      if (msg === null) return;
       try {
-        await API.admin.generate(id);
-        loadContent();
+        const result = await API.admin.fbShare(id, msg || '');
+        alert(result.simulated ? '🧪 محاكاة: ' + result.message : result.message);
+        if (!result.success) alert('❌ ' + (result.error||'فشل'));
       } catch (e) { alert('❌ ' + e.message); }
     }
-    async function deleteItem(id) {
-      if (confirm('⚠️ هل أنت متأكد من حذف هذا المحتوى نهائيًا؟')) {
-        try {
-          await API.admin.removeItem(id);
-          loadContent();
-        } catch (e) { alert('❌ ' + e.message); }
-      }
+
+    async function fbCommentItem(id) {
+      const msg = prompt('نص التعليق على فيسبوك:');
+      if (!msg) { alert('⚠️ يجب إدخال نص التعليق'); return; }
+      try {
+        const result = await API.admin.fbComment(id, msg);
+        alert(result.simulated ? '🧪 محاكاة: ' + result.message : result.message);
+        if (!result.success) alert('❌ ' + (result.error||'فشل'));
+      } catch (e) { alert('❌ ' + e.message); }
     }
 
     let editingId = null;
@@ -152,7 +160,31 @@
         loadContent();
       } catch (e) { alert('❌ ' + e.message); }
     }
-    document.addEventListener('DOMContentLoaded', () => loadContent('all'));
+    async function loadFbReplies() {
+      try {
+        const data = await API.admin.getFbReplies();
+        const replies = data.replies || [];
+        document.getElementById('fb-count').textContent = replies.length;
+        const container = document.getElementById('fb-replies-list');
+        if (!replies.length) {
+          container.innerHTML = '<p style="color:#888;text-align:center;padding:20px;">لا توجد ردود على فيسبوك بعد</p>';
+          return;
+        }
+        let html = '<table class="table"><tr><th>#</th><th>النوع</th><th>الحالة</th><th>التاريخ</th></tr>';
+        replies.slice(0, 100).forEach(r => {
+          const typeIcon = r.reply_type === 'share' ? '📤' : '💬';
+          const statusIcon = r.status === 'success' ? '✅' : '❌';
+          const sim = r.response_data && r.response_data.includes('simulated') ? '🧪' : '';
+          html += `<tr><td>${r.content_id||'-'}</td><td>${typeIcon} ${r.reply_type}</td><td>${statusIcon} ${r.status} ${sim}</td><td>${(r.created_at||'').substring(0,19)}</td></tr>`;
+        });
+        html += '</table>';
+        container.innerHTML = html;
+      } catch (e) {
+        document.getElementById('fb-replies-list').innerHTML = `<div class="alert alert-danger">⚠️ ${e.message}</div>`;
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => { loadContent('all'); loadFbReplies(); });
   </script>
 </head>
 <body>

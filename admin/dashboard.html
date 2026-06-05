@@ -43,6 +43,7 @@
         <button class="btn btn-warning" onclick="runAnalysis()">🧠 تحليل</button>
         <button class="btn btn-success" onclick="runPublish()">📰 نشر تلقائي</button>
         <button class="btn btn-accent" onclick="openManualModal()">✍️ إدخال يدوي</button>
+        <button class="btn btn-sm" style="background:#1877f2;color:white;" onclick="fbPublishAll()">📱 نشر + فيسبوك</button>
       </div>
       <div id="action-result" style="margin-top:10px;padding:0 20px 20px;"></div>
     </div>
@@ -115,6 +116,8 @@
     async function loadDashboard() {
       try {
         const stats = await API.admin.dashboard();
+        const fbData = await API.admin.getFbReplies();
+        const fbStats = fbData.stats || {};
         document.getElementById('admin-stats').innerHTML = `
           <div class="admin-stat"><div class="num">${stats.total_published||0}</div><div class="lbl">📰 منشور</div></div>
           <div class="admin-stat"><div class="num">${stats.total_review||0}</div><div class="lbl">⏳ للمراجعة</div></div>
@@ -122,6 +125,7 @@
           <div class="admin-stat"><div class="num">${stats.total_rejected||0}</div><div class="lbl">❌ مرفوض</div></div>
           <div class="admin-stat"><div class="num">${stats.total_ai_decisions||0}</div><div class="lbl">🤖 قرارات AI</div></div>
           <div class="admin-stat"><div class="num">${stats.total_archived||0}</div><div class="lbl">📦 مؤرشف</div></div>
+          <div class="admin-stat"><div class="num">${fbStats.total||0}</div><div class="lbl">📱 فيسبوك</div></div>
         `;
 
         const review = await API.admin.getContent({ status: 'review' });
@@ -244,6 +248,29 @@
       const msg = res.results.map(r => `#${r.id}: ${r.message}`).join('<br>');
       document.getElementById('action-result').innerHTML = `<div class="alert alert-success">✅${msg}</div>`;
       loadDashboard();
+    }
+
+    async function fbPublishAll() {
+      document.getElementById('action-result').innerHTML = '<div class="alert alert-info">📱 جاري النشر والمشاركة على فيسبوك...</div>';
+      try {
+        const res = await API.admin.publish();
+        let msg = '';
+        for (const r of res.results) {
+          msg += `#${r.id}: ${r.message}<br>`;
+          if (r.success) {
+            try {
+              const fb = await API.admin.fbShare(r.id, '');
+              msg += `&nbsp;&nbsp;📱 فيسبوك: ${fb.message}<br>`;
+            } catch (fbErr) {
+              msg += `&nbsp;&nbsp;❌ فيسبوك: ${fbErr.message}<br>`;
+            }
+          }
+        }
+        document.getElementById('action-result').innerHTML = `<div class="alert alert-success">✅${msg}</div>`;
+        loadDashboard();
+      } catch (e) {
+        document.getElementById('action-result').innerHTML = `<div class="alert alert-danger">❌ ${e.message}</div>`;
+      }
     }
 
     function previewImage(e) {
