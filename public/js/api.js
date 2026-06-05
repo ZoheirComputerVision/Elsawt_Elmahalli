@@ -13,7 +13,11 @@ const API = {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data),
     });
-    if (!res.ok) throw new Error(`API Error: ${res.status}`);
+    if (!res.ok) {
+      let msg = `API Error: ${res.status}`;
+      try { const err = await res.json(); if (err.error) msg = err.error; } catch {}
+      throw new Error(msg);
+    }
     return res.json();
   },
 

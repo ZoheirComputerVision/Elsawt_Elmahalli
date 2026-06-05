@@ -40,6 +40,7 @@ function createCard(item, featured = false) {
     const isOfficial = item.source_name && ['وزارة', 'إدارة', 'مديرية'].some(s => item.source_name.includes(s));
     return `
       <div class="hero-card ${isOfficial ? 'hero-official' : ''}">
+        ${item.image_data ? `<div style="margin-bottom:12px;"><img src="${item.image_data}" alt="${item.title}" style="width:100%;max-height:300px;object-fit:cover;border-radius:12px;border:1px solid #e5e7eb;"></div>` : item.image_url ? `<div style="margin-bottom:12px;"><img src="${item.image_url}" alt="${item.title}" style="width:100%;max-height:300px;object-fit:cover;border-radius:12px;border:1px solid #e5e7eb;"></div>` : ''}
         <div style="display:flex;gap:8px;align-items:center;margin-bottom:12px;flex-wrap:wrap;">
           <span class="hero-category">${catNames[item.category] || 'خبر'}</span>
           ${sourceBadge(item)}
@@ -61,6 +62,7 @@ function createCard(item, featured = false) {
   return `
     <div class="card ${item.importance === 'high' ? 'card-highlight' : ''}">
       <div class="card-body">
+        ${item.image_data ? `<div style="margin-bottom:10px;"><img src="${item.image_data}" alt="${item.title}" style="width:100%;max-height:180px;object-fit:cover;border-radius:8px;border:1px solid #e5e7eb;"></div>` : item.image_url ? `<div style="margin-bottom:10px;"><img src="${item.image_url}" alt="${item.title}" style="width:100%;max-height:180px;object-fit:cover;border-radius:8px;border:1px solid #e5e7eb;"></div>` : ''}
         <div style="display:flex;gap:6px;align-items:center;margin-bottom:8px;flex-wrap:wrap;">
           <span class="card-category ${item.category}">${catNames[item.category] || 'غير مصنف'}</span>
           ${sourceBadge(item)}

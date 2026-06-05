@@ -256,8 +256,13 @@
       } else { preview.innerHTML = ''; }
     }
 
-    function openManualModal() { document.getElementById('manual-modal').classList.add('active'); }
+    function openManualModal() { resetManualForm(); document.getElementById('manual-modal').classList.add('active'); }
     function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+
+    function resetManualForm() {
+      document.getElementById('manual-form').reset();
+      document.getElementById('m-image-preview').innerHTML = '';
+    }
 
     async function submitManual() {
       const data = {
@@ -270,15 +275,22 @@
       if (!data.title || !data.body) { alert('العنوان والمحتوى مطلوبان'); return; }
       const fileInput = document.getElementById('m-image');
       if (fileInput.files.length > 0) {
-        data.image_data = await new Promise(resolve => {
-          const r = new FileReader();
-          r.onload = () => resolve(r.result);
-          r.readAsDataURL(fileInput.files[0]);
-        });
+        try {
+          data.image_data = await new Promise((resolve, reject) => {
+            const r = new FileReader();
+            r.onload = () => resolve(r.result);
+            r.onerror = () => reject(new Error('فشل قراءة الملف'));
+            r.readAsDataURL(fileInput.files[0]);
+          });
+        } catch (e) {
+          document.getElementById('action-result').innerHTML = `<div class="alert alert-danger">${e.message}</div>`;
+          return;
+        }
       }
       try {
         await API.admin.collectManual(data);
         closeModal('manual-modal');
+        resetManualForm();
         document.getElementById('action-result').innerHTML = '<div class="alert alert-success">✅ تم إرسال المحتوى للمعالجة</div>';
         setTimeout(() => { document.getElementById('action-result').innerHTML = ''; loadDashboard(); }, 1000);
       } catch (e) { document.getElementById('action-result').innerHTML = `<div class="alert alert-danger">${e.message}</div>`; }
