@@ -74,8 +74,10 @@ class JsonDB {
       admin_actions: this._load('admin_actions'),
       settings: this._load('settings'),
       views: this._load('views'),
+      fb_replies: this._load('fb_replies'),
     };
     this._seedDefaults();
+    this._ensureNewSettings();
     this.initialized = true;
     console.log(`[DB] تهيئة قاعدة البيانات: ${Object.values(this.tables).reduce((a, t) => a + t.length, 0)} سجل في ${Date.now() - start}ms`);
   }
@@ -140,7 +142,25 @@ class JsonDB {
         { key: 'last_scheduler_run', value: 'never', updated_at: new Date().toISOString() },
         { key: 'total_published_today', value: '0', updated_at: new Date().toISOString() },
         { key: 'publish_date', value: new Date().toISOString().split('T')[0], updated_at: new Date().toISOString() },
+        { key: 'fb_page_access_token', value: '', updated_at: new Date().toISOString() },
+        { key: 'fb_auto_reply', value: 'false', updated_at: new Date().toISOString() },
       ];
+      this._save('settings');
+    }
+  }
+
+  _ensureNewSettings() {
+    const defaults = [
+      { key: 'fb_page_access_token', value: '' },
+      { key: 'fb_auto_reply', value: 'false' },
+    ];
+    const existingKeys = new Set(this.tables.settings.map(s => s.key));
+    for (const def of defaults) {
+      if (!existingKeys.has(def.key)) {
+        this.tables.settings.push({ ...def, updated_at: new Date().toISOString() });
+      }
+    }
+    if (defaults.some(d => !existingKeys.has(d.key))) {
       this._save('settings');
     }
   }

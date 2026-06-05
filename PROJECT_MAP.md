@@ -20,6 +20,7 @@ school-news-ai/
 │   ├── writer.js             # كتابة AI
 │   ├── scheduler.js          # جدولة المهام
 │   ├── archiver.js           # الأرشفة
+│   ├── fb_reply.js           # الرد على فيسبوك (مشاركة/تعليق)
 │   └── seed.js               # بيانات افتراضية
 ├── routes/
 │   ├── api.js                # API endpoints
@@ -65,6 +66,22 @@ school-news-ai/
 |---------|---------|-----------------|
 | 2026-06-05 | إضافة قسم "فضاءات وخدمات رقمية" مع قائمة منسدلة تحتوي على فضاء الأولياء وفضاء الأساتذة | `public/css/style.css`, `public/*.html` (8 صفحات) |
 | 2026-06-05 | توسعة قائمة "فضاءات وخدمات رقمية": إضافة أقسام المسابقات، التعليم عن بعد، التسجيل في إمتحان (5 روابط جديدة) + إصلاح ثغرة `rel="noopener noreferrer"` | `public/css/style.css`, `public/*.html` (8 صفحات) |
+| 2026-06-05 | إصلاح القائمة المنسدلة للشاشات الضيقة + RTL: إضافة Click Toggle via JS، ضبط positioning لعدم تجاوز الشاشة | `public/css/style.css`, `public/js/main.js` |
+| 2026-06-05 | **إصلاح القائمة للجوال نهائياً**: position:fixed + touch-action + scroll listener | `public/css/style.css`, `public/js/main.js` |
+| 2026-06-05 | **ميزة الرد على فيسبوك**: مشاركة/تعليق المقالات على صفحة الثانوية في فيسبوك تلقائياً أو يدوياً | `modules/fb_reply.js` (جديد), `config.js`, `database.js`, `routes/admin.js`, `modules/publisher.js`, `public/js/api.js` |
+
+## إعدادات فيسبوك (جديدة)
+| المفتاح | القيمة الافتراضية | الوصف |
+|---------|-------------------|-------|
+| `fb_page_access_token` | `''` | رمز وصول API لصفحة فيسبوك (من Graph API) |
+| `fb_auto_reply` | `'false'` | تفعيل المشاركة/الرد التلقائي على فيسبوك بعد نشر مقال |
+
+## قاعدة بيانات الردود على فيسبوك
+| الجدول | الوصف |
+|--------|-------|
+| `fb_replies` | سجل جميع الردود والمشاركات على فيسبوك (content_id, reply_type, status, response_data) |
 
 ## النواقص / ملاحظات
-- لا توجد نواقص معروفة
+- Facebook Graph API يتطلب رمز وصول حقيقي (`fb_page_access_token`) ليتم النشر الفعلي — حالياً يعمل في وضع المحاكاة (Simulation Mode)
+- رمز الوصول يحتاج صلاحية `pages_manage_posts` أو `pages_read_engagement`
+- يفضّل مراجعة إعدادات فيسبوك بعد الحصول على الرمز الحقيقي

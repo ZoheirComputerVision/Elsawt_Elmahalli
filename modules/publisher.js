@@ -1,4 +1,5 @@
 const db = require('../database');
+const fbReply = require('./fb_reply');
 
 const MAX_PUBLISH_PER_DAY = 15;
 
@@ -136,6 +137,7 @@ class PublishingEngine {
       this._updateDailyCount();
       this.logDecision(contentId, 'auto_publish', check);
       this._archive(contentId, 'auto_published');
+      fbReply.autoReplyAfterPublish(contentId);
       return { success: true, method: 'auto', message: 'نشر تلقائي ✓' };
     }
 
@@ -169,6 +171,7 @@ class PublishingEngine {
     this._updateDailyCount();
     this.logDecision(contentId, 'manual_approve', { reviewer });
     this._archive(contentId, 'manual_approved');
+    fbReply.autoReplyAfterPublish(contentId);
     return { success: true, method: 'manual', message: 'تم النشر بعد المراجعة البشرية ✓' };
   }
 

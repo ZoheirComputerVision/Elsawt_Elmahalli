@@ -17,6 +17,8 @@ module.exports = {
     MAX_DRAFT_AGE_HOURS: 72,
     COLLECTOR_INTERVAL_MIN: 30,
     FACEBOOK_PAGE: 'Mujahid56khallil.Mohammed26SecondarySchool.2023',
+    FB_PAGE_ACCESS_TOKEN: '',
+    FB_API_VERSION: '18.0',
     MINISTRY_URL: 'https://www.education.gov.dz/',
   },
 
