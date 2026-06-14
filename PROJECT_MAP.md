@@ -63,7 +63,7 @@
 - [x] Admin panel (dashboard, review, logs, settings)
 - [x] Cron scheduler (auto collect/analyze/publish)
 - [x] Security: helmet + CORS + admin auth
-- [x] تطوير محلي 100% - بدون GitHub أو استضافة عن بعد
+- [x] مستضاف على GitHub: `github.com/ZoheirComputerVision/Elsawt_Elmahalli`
 
 ## ORPHANS & PENDING
 | البند | الحالة | الأولوية |
