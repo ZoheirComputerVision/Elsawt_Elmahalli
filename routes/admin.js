@@ -1,4 +1,6 @@
 const express = require('express');
+const fs = require('fs');
+const path = require('path');
 const router = express.Router();
 const db = require('../database');
 const collector = require('../modules/collector');
@@ -101,7 +103,21 @@ router.post('/collect/manual', async (req, res) => {
     const { title, body, category, source, event_date, image_data } = req.body;
     if (!title || !body) return res.status(400).json({ success: false, error: 'العنوان والمحتوى مطلوبان' });
     const data = { title, body, source: source || 'إداري', category: category || 'uncategorized', event_date: event_date || new Date().toISOString().split('T')[0], source_url: '' };
-    if (image_data) data.image_data = image_data;
+    if (image_data && typeof image_data === 'string' && image_data.startsWith('data:')) {
+      const matches = image_data.match(/^data:([^;]+);base64,(.+)$/);
+      if (matches) {
+        const ext = matches[1].split('/')[1] || 'jpg';
+        const buffer = Buffer.from(matches[2], 'base64');
+        const filename = `img_${Date.now()}_${Math.random().toString(36).slice(2, 8)}.${ext}`;
+        const filepath = path.join(__dirname, '..', 'public', 'uploads', filename);
+        fs.writeFileSync(filepath, buffer);
+        data.image_data = `/uploads/${filename}`;
+      } else {
+        data.image_data = image_data;
+      }
+    } else if (image_data) {
+      data.image_data = image_data;
+    }
     const result = await collector.collectManual(data);
     const rawRows = db.findOne('raw_data', r => r.content_hash === result.hash);
     if (rawRows) await analyzer.analyzeRawData(rawRows.id);

@@ -1,18 +1,18 @@
 const db = require('../database');
 
 const FOOTER_AI = '\n\n—\n🖋 تم إنتاج هذا المحتوى بمساعدة تقنيات الذكاء الاصطناعي. يخضع هذا المحتوى للمراجعة الآلية والبشرية قبل وبعد النشر.';
-const FOOTER_OFFICIAL = '\n\n—\n📝 محتوى رسمي معتمد من إدارة ثانوية المجاهد خليل محمد.';
-const COPYRIGHT = `\n© ${new Date().getFullYear()} ثانوية المجاهد خليل محمد المدعو يوسف - عين كرمس. جميع الحقوق محفوظة.`;
+const FOOTER_OFFICIAL = '\n\n—\n📝 محتوى رسمي معتمد من مصادر رسمية.';
+const COPYRIGHT = `\n© ${new Date().getFullYear()} الصوت المحلي - نشرية جهوية للإعلام العام. جميع الحقوق محفوظة.`;
 
 class NewsWriter {
   _buildLead(data) {
     const date = data.event_date ? `في ${data.event_date}، ` : '';
     const source = data.source_name ? `حسب ما ورد عن ${data.source_name}، ` : '';
-    const school = 'بثانوية المجاهد خليل محمد - عين كرمس (تيارت)';
+    const school = 'بولاية تيارت';
 
-    if (data.category === 'news') return `${date}${source}علمت الجريدة المدرسية أن ${school} ${data.body.slice(0, 60)}...`;
-    if (data.category === 'announcement') return `${source}صدر عن إدارة ${school} الإعلان التالي:`;
-    return `${date}في إطار النشاطات التربوية، نظمت ${school} `;
+    if (data.category === 'news') return `${date}${source}علمت نشرية الصوت المحلي أن ${school} ${data.body.slice(0, 60)}...`;
+    if (data.category === 'announcement') return `${source}صدر الإعلان التالي:`;
+    return `${date}في إطار النشاطات الجهوية، ${school} `;
   }
 
   generateArticle(content) {
@@ -43,7 +43,7 @@ ${lead}
 
 ${details ? `تفاصيل إضافية:\n${details}` : ''}
 
-يُشار إلى أن هذه المعلومات وردت من المصادر المتاحة وتمت معالجتها آليًا لنشرها في الجريدة المدرسية الذكية لثانوية المجاهد خليل محمد.${FOOTER_AI}${COPYRIGHT}`;
+يُشار إلى أن هذه المعلومات وردت من المصادر المتاحة وتمت معالجتها آليًا لنشرها في نشرية الصوت المحلي.${FOOTER_AI}${COPYRIGHT}`;
   }
 
   activityTemplate(data) {
@@ -54,9 +54,9 @@ ${details ? `تفاصيل إضافية:\n${details}` : ''}
 
 ${meta}
 
-في إطار النشاطات التربوية والثقافية التي تنظمها ثانوية المجاهد خليل محمد - عين كرمس تيارت، وتجسيدًا لبرنامجها السنوي للأنشطة، ${data.body || ''}
+في إطار النشاطات الجهوية والبرامج المسطرة من طرف مصالح ولاية تيارت، وتجسيدًا للبرنامج المسطر، ${data.body || ''}
 
-تهدف هذه النشاطات إلى صقل مواهب التلاميذ وتنمية مهاراتهم المعرفية والاجتماعية، وتعزيز روح المواطنة والانتماء لديهم.${FOOTER_AI}${COPYRIGHT}`;
+تهدف هذه النشاطات إلى تنشيط الحركة الثقافية والاجتماعية والاقتصادية بالمنطقة، وتعزيز التنمية المحلية وخدمة مواطني الولاية.${FOOTER_AI}${COPYRIGHT}`;
   }
 
   announcementTemplate(data) {
@@ -67,12 +67,12 @@ ${meta}
 
 ${meta}
 
-إدارة ثانوية المجاهد خليل محمد - عين كرمس تيارت
+المصدر: ${data.source_name || 'مصدر رسمي'}
 
 ${data.body || ''}
 
 🔹 على جميع المعنيين التقيد بالشروط والآجال المحددة.
-🔹 للمزيد من المعلومات، يرجى التوجه إلى إدارة الثانوية أو الاتصال بها خلال أوقات العمل الرسمية.${FOOTER_OFFICIAL}${COPYRIGHT}`;
+🔹 للمزيد من المعلومات، يرجى التوجه إلى المصدر المختص أو الاتصال به خلال أوقات العمل الرسمية.${FOOTER_OFFICIAL}${COPYRIGHT}`;
   }
 
   async generateForContent(contentId) {

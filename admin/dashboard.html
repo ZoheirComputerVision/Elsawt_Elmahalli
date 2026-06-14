@@ -4,11 +4,11 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>لوحة التحكم | Zoheir IT Solutions</title>
-  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="../css/style.css">
 </head>
 <body class="admin-body">
   <div class="admin-header">
-    <h1>🔧 لوحة تحكم الجريدة الذكية</h1>
+    <h1>🔧 لوحة تحكم الصوت المحلي</h1>
     <div class="user-info">
       <span id="admin-user">المشرف</span>
       <a href="/" class="btn btn-sm btn-accent">🏠 الموقع</a>
@@ -83,7 +83,7 @@
           </div>
           <div class="form-group">
             <label>المصدر</label>
-            <input type="text" class="form-control" id="m-source" value="إدارة الثانوية">
+            <input type="text" class="form-control" id="m-source" value="مديرية ولاية تيارت">
           </div>
           <div class="form-group">
             <label>التاريخ</label>
@@ -103,7 +103,7 @@
     </div>
   </div>
 
-  <script src="/js/api.js"></script>
+  <script src="../js/api.js"></script>
   <script>
     function checkAuth() { if (!localStorage.getItem('admin_token')) window.location.href = '/admin'; }
     checkAuth();
@@ -247,11 +247,15 @@
     }
 
     function previewImage(e) {
+      clearModalError();
       const file = e.target.files[0];
       const preview = document.getElementById('m-image-preview');
       if (file) {
+        const maxSize = 5 * 1024 * 1024;
+        if (file.size > maxSize) { showModalError('حجم الصورة كبير جداً. الحد الأقصى 5 ميغابايت'); preview.innerHTML = ''; return; }
         const reader = new FileReader();
         reader.onload = (ev) => { preview.innerHTML = `<img src="${ev.target.result}" style="max-width:200px;border-radius:8px;border:1px solid #ddd;">`; };
+        reader.onerror = () => { showModalError('فشل قراءة الصورة للمعاينة'); };
         reader.readAsDataURL(file);
       } else { preview.innerHTML = ''; }
     }
@@ -262,9 +266,25 @@
     function resetManualForm() {
       document.getElementById('manual-form').reset();
       document.getElementById('m-image-preview').innerHTML = '';
+      clearModalError();
     }
 
+    function showModalError(msg) {
+      const errDiv = document.getElementById('m-error') || (() => {
+        const d = document.createElement('div');
+        d.id = 'm-error';
+        d.style.cssText = 'margin-top:10px;padding:10px;border-radius:8px;background:#fef2f2;color:#dc2626;border:1px solid #fecaca;font-size:0.9rem;';
+        document.querySelector('#manual-modal .modal-body').appendChild(d);
+        return d;
+      })();
+      errDiv.innerHTML = '⚠️ ' + msg;
+    }
+    function clearModalError() {
+      const errDiv = document.getElementById('m-error');
+      if (errDiv) errDiv.innerHTML = '';
+    }
     async function submitManual() {
+      clearModalError();
       const data = {
         title: document.getElementById('m-title').value,
         body: document.getElementById('m-body').value,
@@ -272,9 +292,11 @@
         source: document.getElementById('m-source').value,
         event_date: document.getElementById('m-date').value,
       };
-      if (!data.title || !data.body) { alert('العنوان والمحتوى مطلوبان'); return; }
+      if (!data.title || !data.body) { showModalError('العنوان والمحتوى مطلوبان'); return; }
       const fileInput = document.getElementById('m-image');
       if (fileInput.files.length > 0) {
+        const maxSize = 5 * 1024 * 1024;
+        if (fileInput.files[0].size > maxSize) { showModalError('حجم الصورة كبير جداً. الحد الأقصى 5 ميغابايت'); return; }
         try {
           data.image_data = await new Promise((resolve, reject) => {
             const r = new FileReader();
@@ -283,17 +305,22 @@
             r.readAsDataURL(fileInput.files[0]);
           });
         } catch (e) {
-          document.getElementById('action-result').innerHTML = `<div class="alert alert-danger">${e.message}</div>`;
+          showModalError(e.message || 'فشل قراءة الصورة');
           return;
         }
       }
+      const btn = document.querySelector('#manual-modal .btn-primary');
+      if (btn) { btn.disabled = true; btn.textContent = '⏳ جاري الحفظ...'; }
       try {
         await API.admin.collectManual(data);
         closeModal('manual-modal');
         resetManualForm();
         document.getElementById('action-result').innerHTML = '<div class="alert alert-success">✅ تم إرسال المحتوى للمعالجة</div>';
         setTimeout(() => { document.getElementById('action-result').innerHTML = ''; loadDashboard(); }, 1000);
-      } catch (e) { document.getElementById('action-result').innerHTML = `<div class="alert alert-danger">${e.message}</div>`; }
+      } catch (e) {
+        if (btn) { btn.disabled = false; btn.textContent = '💾 حفظ وإرسال للمعالجة'; }
+        showModalError(e.message || 'فشل الاتصال بالخادم');
+      }
     }
 
     document.addEventListener('DOMContentLoaded', loadDashboard);

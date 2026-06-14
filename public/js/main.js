@@ -15,7 +15,7 @@ function setCurrentDate() {
 }
 
 function sourceBadge(item) {
-  const officialSources = ['وزارة التربية الوطنية', 'وزارة التربية', 'مديرية التربية', 'إدارة الثانوية', 'إداري'];
+  const officialSources = ['ولاية', 'مديرية', 'محافظة', 'وزارة', 'مصالح', 'بلدية'];
   const isOfficial = officialSources.some(s => (item.source_name || '').includes(s));
   if (isOfficial) return '<span class="source-badge official">📜 رسمي</span>';
 
@@ -25,7 +25,7 @@ function sourceBadge(item) {
 }
 
 function importanceBadge(item) {
-  if (item.importance === 'high') return ' <span class="imp-badge high">⭐ هام</span>';
+    if (item.importance === 'high') return ' <span class="imp-badge high">⭐ هام</span>';
   if (item.importance === 'low') return ' <span class="imp-badge low">📄 عادي</span>';
   return '';
 }
@@ -37,7 +37,7 @@ function createCard(item, featured = false) {
   const cleanBody = bodyText.replace(/^[📰📸📢]\s*/, '').replace(/🗓.*?\n/, '');
 
   if (featured) {
-    const isOfficial = item.source_name && ['وزارة', 'إدارة', 'مديرية'].some(s => item.source_name.includes(s));
+    const isOfficial = item.source_name && ['ولاية', 'مديرية', 'محافظة', 'وزارة', 'مصالح'].some(s => item.source_name.includes(s));
     return `
       <div class="hero-card ${isOfficial ? 'hero-official' : ''}">
         ${item.image_data ? `<div style="margin-bottom:12px;"><img src="${item.image_data}" alt="${item.title}" style="width:100%;max-height:300px;object-fit:cover;border-radius:12px;border:1px solid #e5e7eb;"></div>` : item.image_url ? `<div style="margin-bottom:12px;"><img src="${item.image_url}" alt="${item.title}" style="width:100%;max-height:300px;object-fit:cover;border-radius:12px;border:1px solid #e5e7eb;"></div>` : ''}
@@ -106,7 +106,7 @@ async function loadContent() {
 
     // الأخبار الرسمية أولاً
     const officialNews = (news.items || []).filter(n =>
-      n.importance === 'high' || (n.source_name && ['وزارة', 'إدارة', 'مديرية'].some(s => n.source_name.includes(s)))
+      n.importance === 'high' || (n.source_name && ['ولاية', 'مديرية', 'محافظة', 'وزارة', 'مصالح'].some(s => n.source_name.includes(s)))
     );
     const normalNews = (news.items || []).filter(n => !officialNews.includes(n));
 
@@ -128,7 +128,7 @@ async function loadContent() {
 
     // النشاطات
     if ((activities.items || []).length > 0) {
-      html += '<h3 class="section-title">📸 النشاطات المدرسية</h3>';
+      html += '<h3 class="section-title">📸 النشاطات الجهوية</h3>';
       html += '<div class="news-grid">';
       activities.items.slice(0, 4).forEach(item => { html += createCard(item); });
       html += '</div>';
@@ -192,8 +192,8 @@ async function loadSidebar() {
       <div>
         <h3>🔗 المصادر الرسمية</h3>
         <ul>
-          <li><a href="https://www.education.gov.dz/" target="_blank">🌐 وزارة التربية الوطنية</a></li>
-          <li><a href="https://www.facebook.com/Mujahid56khallil.Mohammed26SecondarySchool.2023" target="_blank">📘 صفحة الثانوية</a></li>
+          <li><a href="https://www.wilaya-tiaret.dz/" target="_blank">🏛 ولاية تيارت</a></li>
+          <li><a href="https://www.interieur.gov.dz/" target="_blank">📜 وزارة الداخلية</a></li>
         </ul>
       </div>
       <div>

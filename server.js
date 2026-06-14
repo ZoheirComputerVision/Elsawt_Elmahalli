@@ -41,7 +41,7 @@ app.listen(config.PORT, async () => {
   console.log(`  ${config.SCHOOL_NAME}`);
   console.log(`  ${config.SCHOOL_SUB}`);
   console.log(`  ───────────────────────────────────────`);
-  console.log(`  نظام الجريدة المدرسية الذكية`);
+  console.log(`  نظام النشرية الجهوية الذكية`);
   console.log(`  مدعوم بالذكاء الاصطناعي`);
   console.log(`  إدارة تقنية: ${config.ADMIN_TEAM}`);
   console.log(`━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`);

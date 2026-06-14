@@ -7,8 +7,8 @@ module.exports = {
   PUBLIC_DIR: path.join(__dirname, 'public'),
   ADMIN_DIR: path.join(__dirname, 'admin'),
 
-  SCHOOL_NAME: 'ثانوية المجاهد خليل محمد المدعو يوسف',
-  SCHOOL_SUB: 'عين كرمس - تيارت',
+  SCHOOL_NAME: 'الصوت المحلي',
+  SCHOOL_SUB: 'نشرية جهوية للإعلام العام - ولاية تيارت',
   ADMIN_TEAM: 'Zoheir IT Solutions',
 
   AI: {
@@ -16,8 +16,8 @@ module.exports = {
     REVIEW_THRESHOLD: 0.5,
     MAX_DRAFT_AGE_HOURS: 72,
     COLLECTOR_INTERVAL_MIN: 30,
-    FACEBOOK_PAGE: 'Mujahid56khallil.Mohammed26SecondarySchool.2023',
-    MINISTRY_URL: 'https://www.education.gov.dz/',
+    FACEBOOK_PAGE: 'TiaretNewsOfficial',
+    MINISTRY_URL: 'https://www.wilaya-tiaret.dz/',
   },
 
   SAFETY: {

@@ -1,14 +1,29 @@
 const API = {
   base: '/api',
 
+  async _fetch(url, options = {}) {
+    const timeout = options.timeout || 30000;
+    const controller = new AbortController();
+    const id = setTimeout(() => controller.abort(), timeout);
+    try {
+      const res = await fetch(url, { ...options, signal: controller.signal });
+      clearTimeout(id);
+      return res;
+    } catch (e) {
+      clearTimeout(id);
+      if (e.name === 'AbortError') throw new Error('انتهت مهلة الطلب');
+      throw e;
+    }
+  },
+
   async get(endpoint) {
-    const res = await fetch(this.base + endpoint);
+    const res = await this._fetch(this.base + endpoint);
     if (!res.ok) throw new Error(`API Error: ${res.status}`);
     return res.json();
   },
 
   async post(endpoint, data) {
-    const res = await fetch(this.base + endpoint, {
+    const res = await this._fetch(this.base + endpoint, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data),

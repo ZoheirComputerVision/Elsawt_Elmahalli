@@ -126,12 +126,12 @@ class ContentAnalyzer {
       reasons.push('مصدر فيسبوك');
     }
 
-    // التحقق من اسم الثانوية (وجود المرجع الأساسي يزيد الثقة)
-    const schoolRefs = ['المجاهد خليل محمد', 'عين كرمس', 'تيارت', 'ثانوية'];
-    const refCount = schoolRefs.filter(r => (data.body || '').includes(r)).length;
+    // التحقق من المرجع الجهوي (وجود مرجع منطقة تيارت يزيد الثقة)
+    const regionalRefs = ['تيارت', 'ولاية', 'مديرية', 'بلدية', 'ولاية تيارت'];
+    const refCount = regionalRefs.filter(r => (data.body || '').includes(r)).length;
     if (refCount >= 2) {
       score += 0.15;
-      reasons.push('يحتوي مراجع المؤسسة');
+      reasons.push('يحتوي مراجع جهوية');
     }
 
     // التحقق من التاريخ
@@ -145,7 +145,7 @@ class ContentAnalyzer {
       }
       if (d < schoolStart) {
         score -= 0.3;
-        reasons.push('تاريخ قبل افتتاح الثانوية');
+        reasons.push('تاريخ قديم جداً');
       }
     }
 
@@ -206,11 +206,11 @@ class ContentAnalyzer {
 
   _getSourceTrust(sourceName) {
     const trustMap = {
-      'وزارة التربية الوطنية': 0.95,
-      'وزارة التربية': 0.95,
-      'مديرية التربية': 0.85,
-      'إدارة الثانوية': 0.90,
-      'صفحة الفيسبوك الرسمية': 0.70,
+      'ولاية تيارت': 0.95,
+      'مديرية': 0.85,
+      'محافظة': 0.85,
+      'الصوت المحلي': 0.90,
+      'صفحة فيسبوك': 0.70,
     };
     for (const [key, trust] of Object.entries(trustMap)) {
       if ((sourceName || '').includes(key)) return trust;

@@ -4,11 +4,11 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>الإعدادات | لوحة التحكم</title>
-  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="../css/style.css">
 </head>
 <body class="admin-body">
   <div class="admin-header">
-    <h1>🔧 لوحة تحكم الجريدة الذكية</h1>
+    <h1>🔧 لوحة تحكم الصوت المحلي</h1>
     <div class="user-info">
       <span id="admin-user">المشرف</span>
       <a href="/" class="btn btn-sm btn-accent">🏠 الموقع</a>
@@ -64,16 +64,16 @@
     <div class="admin-card">
       <div class="admin-card-header">ℹ️ معلومات النظام</div>
       <div class="admin-card-body" style="font-size:0.85rem;color:#666;">
-        <p><strong>النظام:</strong> نظام الجريدة المدرسية الذكية v1.0</p>
-        <p><strong>المدرسة:</strong> ثانوية المجاهد خليل محمد المدعو يوسف - عين كرمس تيارت</p>
-        <p><strong>الإدارة التقنية:</strong> Zoheir IT Solutions (نظام تطوعي غير رسمي)</p>
-        <p><strong>مصادر البيانات:</strong> Facebook Graph API + Web Scraping + إدخال يدوي</p>
+        <p><strong>النظام:</strong> الصوت المحلي - نشرية جهوية ذكية v1.0</p>
+        <p><strong>الجهة:</strong> ولاية تيارت | الجمهورية الجزائرية الديمقراطية الشعبية</p>
+        <p><strong>الإدارة التقنية:</strong> Zoheir IT Solutions (نظام تطوعي للإعلام الجهوي)</p>
+        <p><strong>مصادر البيانات:</strong> المصادر الرسمية للولاية + إدخال يدوي</p>
         <p><strong>AI Pipeline:</strong> Classifier → Fact Checker → Writer → Publisher → Archiver</p>
         <p><strong>قاعدة البيانات:</strong> SQLite + JSON</p>
       </div>
     </div>
   </div>
-  <script src="/js/api.js"></script>
+  <script src="../js/api.js"></script>
   <script>
     function checkAuth() { if (!localStorage.getItem('admin_token')) window.location.href = '/admin'; }
     checkAuth();

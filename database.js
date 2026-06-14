@@ -91,23 +91,14 @@ class JsonDB {
   }
 
   _saveNow(name) {
-    try {
-      this._save(name);
-      delete this.saveQueue[name];
-      console.log(`[DB] حفظ فوري: ${name}`);
-    } catch (e) {
-      console.error(`[DB] فشل الحفظ الفوري ${name}:`, e.message);
-    }
+    this._save(name);
+    delete this.saveQueue[name];
   }
 
   _save(name) {
-    try {
-      const fp = path.join(this.dir, `${name}.json`);
-      fs.writeFileSync(fp, JSON.stringify(this.tables[name] || []), 'utf-8');
-      this.cache.invalidate(`query:${name}`);
-    } catch (e) {
-      console.error(`[DB] فشل كتابة ${name}.json:`, e.message);
-    }
+    const fp = path.join(this.dir, `${name}.json`);
+    fs.writeFileSync(fp, JSON.stringify(this.tables[name] || []), 'utf-8');
+    this.cache.invalidate(`query:${name}`);
   }
 
   _debouncedSave(name) {
@@ -126,9 +117,9 @@ class JsonDB {
   _seedDefaults() {
     if (this.tables.sources.length === 0) {
       this.tables.sources = [
-        { id: 1, name: 'صفحة الفيسبوك الرسمية', url: `https://www.facebook.com/${config.AI.FACEBOOK_PAGE}`, type: 'facebook', is_active: 1, trust_score: 0.75, last_scraped: null, created_at: new Date().toISOString() },
-        { id: 2, name: 'وزارة التربية الوطنية', url: config.AI.MINISTRY_URL, type: 'web', is_active: 1, trust_score: 0.9, last_scraped: null, created_at: new Date().toISOString() },
-        { id: 3, name: 'إدخال يدوي - إدارة الثانوية', url: '', type: 'manual', is_active: 1, trust_score: 1.0, last_scraped: null, created_at: new Date().toISOString() },
+        { id: 1, name: 'صفحة أخبار تيارت الرسمية', url: `https://www.facebook.com/${config.AI.FACEBOOK_PAGE}`, type: 'regional', is_active: 1, trust_score: 0.75, last_scraped: null, created_at: new Date().toISOString() },
+        { id: 2, name: 'موقع ولاية تيارت', url: config.AI.MINISTRY_URL, type: 'official', is_active: 1, trust_score: 0.9, last_scraped: null, created_at: new Date().toISOString() },
+        { id: 3, name: 'إدخال يدوي - الصوت المحلي', url: '', type: 'manual', is_active: 1, trust_score: 1.0, last_scraped: null, created_at: new Date().toISOString() },
       ];
       this._save('sources');
     }

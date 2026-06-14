@@ -1,7 +1,7 @@
 {
-  "name": "school-news-ai",
+  "name": "al-sawt-al-mahalli",
   "version": "1.0.0",
-  "description": "نظام جريدة مدرسية ذكية - ثانوية المجاهد خليل محمد",
+  "description": "الصوت المحلي - نشرية جهوية للإعلام العام - ولاية تيارت",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",

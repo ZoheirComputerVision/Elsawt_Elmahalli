@@ -1,71 +1,229 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="الجريدة المدرسية الذكية - ثانوية المجاهد خليل محمد - عين كرمس تيارت">
-  <meta data-auto-refresh="120000">
-  <title>نشاطات ثانوية المجاهد خليل محمد | الجريدة الذكية</title>
-  <link rel="stylesheet" href="/css/style.css">
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏫</text></svg>">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>الصوت المحلي | النشرية الجهوية للإعلام العام - تيارت</title>
+<style>
+:root{--primary:#1a3a5c;--primary-dark:#0f2440;--primary-light:#2c5f8a;--accent:#c8a951;--accent-light:#e8d48b;--gold:#b8860b;--text:#1a1a2e;--text-light:#4a4a5a;--bg:#f4f1ea;--bg-card:#fff;--border:#d4c9b0;--success:#2d7d46;--danger:#b83a3a;--warning:#d4a017;--shadow:0 2px 12px rgba(0,0,0,.08);--shadow-lg:0 4px 24px rgba(0,0,0,.12);--radius:8px;--transition:all .3s ease}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{font-family:Tajawal,'Noto Naskh Arabic',sans-serif;background:var(--bg);color:var(--text);line-height:1.8;direction:rtl}
+a{color:var(--primary-light);text-decoration:none;transition:var(--transition)}
+a:hover{color:var(--accent)}
+.top-bar{background:var(--primary-dark);color:#ccc;font-size:.8rem;padding:6px 0;border-bottom:3px solid var(--accent)}
+.top-bar .container{display:flex;justify-content:space-between;align-items:center;max-width:1200px;margin:0 auto;padding:0 20px}
+.top-bar .date{color:var(--accent-light);font-weight:500}
+.top-bar .ai-badge{background:var(--accent);color:var(--primary-dark);padding:2px 12px;border-radius:12px;font-size:.7rem;font-weight:700}
+.header{background:linear-gradient(135deg,var(--primary),var(--primary-dark));color:#fff;padding:30px 0 20px;border-bottom:4px solid var(--accent);position:relative;overflow:hidden}
+.header::before{content:'';position:absolute;top:0;left:0;right:0;bottom:0;background:url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")}
+.header .container{max-width:1200px;margin:0 auto;padding:0 20px;position:relative;z-index:1;text-align:center}
+.header .logo{font-family:'Noto Kufi Arabic',sans-serif;font-size:2.2rem;font-weight:800;color:#fff;margin-bottom:5px}
+.header .logo span{color:var(--accent)}
+.header .subtitle{font-size:1rem;color:var(--accent-light);font-weight:400;opacity:.9}
+.header .school-type{font-size:.85rem;color:#aaa;margin-top:5px}
+.nav{background:#fff;border-bottom:2px solid var(--border);position:sticky;top:0;z-index:100;box-shadow:var(--shadow)}
+.nav .container{max-width:1200px;margin:0 auto;display:flex;align-items:center;padding:0 10px}
+.nav a{padding:12px 18px;font-size:.9rem;font-weight:500;color:var(--text);border-bottom:3px solid transparent;transition:var(--transition);white-space:nowrap}
+.nav a:hover,.nav a.active{color:var(--primary);border-bottom-color:var(--accent);background:rgba(200,169,81,.08)}
+.nav .nav-left{margin-right:auto;display:flex;align-items:center;gap:10px}
+.nav .nav-left a{font-size:.8rem;padding:8px 12px}
+.nav-dropdown{position:relative;display:inline-flex}
+.nav-dropdown-trigger{padding:12px 18px;font-size:.9rem;font-weight:500;color:var(--text);border-bottom:3px solid transparent;transition:var(--transition);white-space:nowrap;cursor:pointer;display:flex;align-items:center;gap:4px}
+.nav-dropdown:hover .nav-dropdown-trigger{color:var(--primary);border-bottom-color:var(--accent);background:rgba(200,169,81,.08)}
+.nav-dropdown-menu{position:absolute;top:100%;right:0;background:#fff;min-width:200px;border:1px solid var(--border);border-radius:0 0 var(--radius) var(--radius);box-shadow:var(--shadow-lg);opacity:0;pointer-events:none;transition:var(--transition);z-index:200}
+.nav-dropdown:hover .nav-dropdown-menu{opacity:1;pointer-events:all}
+.nav-dropdown-menu a{display:block;padding:10px 16px;font-size:.85rem;color:var(--text);border-bottom:1px solid #f0eadb;transition:var(--transition);white-space:nowrap}
+.nav-dropdown-menu a:last-child{border-bottom:none}
+.nav-dropdown-menu a:hover{background:rgba(200,169,81,.08);color:var(--primary);padding-right:22px}
+.container{max-width:1200px;margin:0 auto;padding:0 20px}
+.stats-bar{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:15px;margin:25px 0}
+.stat-card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:20px;text-align:center;transition:var(--transition)}
+.stat-card:hover{box-shadow:var(--shadow)}
+.stat-card .number{font-family:'Noto Kufi Arabic',sans-serif;font-size:2rem;font-weight:800;color:var(--primary)}
+.stat-card .label{font-size:.85rem;color:var(--text-light);margin-top:5px}
+.content-grid{display:grid;grid-template-columns:2fr 1fr;gap:30px;margin:30px 0}
+.hero{margin:30px 0;border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow-lg)}
+.hero-card{background:linear-gradient(135deg,var(--primary),var(--primary-light));color:#fff;padding:40px;min-height:350px;display:flex;flex-direction:column;justify-content:flex-end;position:relative}
+.hero-card .hero-category{display:inline-block;background:var(--accent);color:var(--primary-dark);padding:4px 16px;border-radius:20px;font-size:.8rem;font-weight:700;margin-bottom:15px;width:fit-content}
+.hero-card h2{font-size:2rem;font-weight:700;margin-bottom:10px;line-height:1.4}
+.hero-card p{font-size:1rem;opacity:.9;max-width:700px;line-height:1.7}
+.hero-card .hero-meta{display:flex;gap:20px;margin-top:15px;font-size:.85rem;opacity:.8}
+.hero-meta span{background:rgba(255,255,255,.1);padding:2px 10px;border-radius:12px;font-size:.8rem}
+.card{background:var(--bg-card);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow);transition:var(--transition);border:1px solid var(--border)}
+.card:hover{box-shadow:var(--shadow-lg);transform:translateY(-2px)}
+.card-body{padding:20px}
+.card-category{display:inline-block;font-size:.75rem;font-weight:700;padding:3px 12px;border-radius:12px;margin-bottom:10px;text-transform:uppercase}
+.card-category.news{background:#dbeafe;color:#1e40af}
+.card-category.activity{background:#dcfce7;color:#166534}
+.card-category.announcement{background:#fef3c7;color:#92400e}
+.card h3{font-size:1.15rem;font-weight:700;margin-bottom:8px;line-height:1.5}
+.card h3 a{color:var(--text)}
+.card h3 a:hover{color:var(--primary-light)}
+.card p{font-size:.9rem;color:var(--text-light);line-height:1.7}
+.card-meta{display:flex;gap:15px;margin-top:12px;font-size:.8rem;color:#888}
+.card-meta .ai-tag{background:#eef2ff;color:#4338ca;padding:1px 8px;border-radius:8px;font-size:.7rem}
+.news-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:20px;margin:20px 0}
+.section-title{font-family:'Noto Kufi Arabic',sans-serif;font-size:1.4rem;font-weight:700;color:var(--primary);margin:30px 0 20px;padding-bottom:10px;border-bottom:3px solid var(--accent);display:flex;align-items:center;gap:10px}
+.section-title .badge{background:var(--primary);color:#fff;font-size:.8rem;padding:2px 12px;border-radius:12px;font-weight:400}
+.sidebar>div{background:var(--bg-card);border-radius:var(--radius);padding:20px;margin-bottom:20px;border:1px solid var(--border)}
+.sidebar h3{font-family:'Noto Kufi Arabic',sans-serif;font-size:1rem;font-weight:700;color:var(--primary);margin-bottom:15px;padding-bottom:8px;border-bottom:2px solid var(--accent)}
+.sidebar ul{list-style:none}
+.sidebar li{padding:8px 0;border-bottom:1px solid #f0eadb}
+.sidebar li:last-child{border-bottom:none}
+.sidebar li a{font-size:.9rem;display:block}
+.sidebar li .date{font-size:.75rem;color:#999}
+.footer{background:var(--primary-dark);color:#aaa;padding:30px 0;margin-top:50px;border-top:4px solid var(--accent);text-align:center}
+.footer .container{max-width:1200px;margin:0 auto;padding:0 20px}
+.footer h3{color:#fff;font-size:1.1rem;margin-bottom:5px}
+.footer p{font-size:.85rem}
+.footer .ai-note{margin-top:15px;font-size:.8rem;color:var(--accent-light)}
+.footer .powered{margin-top:8px;font-size:.75rem;color:#666}
+.source-badge,.imp-badge{display:inline-block;padding:2px 10px;border-radius:10px;font-size:.7rem;font-weight:700}
+.source-badge.official{background:#dcfce7;color:#166534;border:1px solid #bbf7d0}
+.source-badge.social{background:#dbeafe;color:#1e40af;border:1px solid #bfdbfe}
+.source-badge.auto{background:#f3f4f6;color:#6b7280;border:1px solid #e5e7eb}
+.imp-badge.high{background:#fef3c7;color:#92400e;border:1px solid #fde68a;animation:pulse-glow 2s ease-in-out infinite}
+.imp-badge.low{background:#f9fafb;color:#9ca3af;border:1px solid #e5e7eb}
+@keyframes pulse-glow{0%,100%{box-shadow:0 0 0 0 rgba(251,191,36,.4)}50%{box-shadow:0 0 0 6px rgba(251,191,36,0)}}
+.hero-official{background:linear-gradient(135deg,#064e3b,#065f46)!important;border:2px solid #fbbf24!important;position:relative}
+.hero-official::after{content:'📜 مصدر رسمي';position:absolute;top:10px;left:10px;background:#fbbf24;color:#064e3b;padding:4px 14px;border-radius:20px;font-size:.75rem;font-weight:700}
+.card-highlight{border-right:4px solid #fbbf24!important;background:linear-gradient(to left,#fffbeb,#fff)!important}
+.card-highlight .card-category{background:#fef3c7!important;color:#92400e!important}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:10px 24px;border-radius:var(--radius);font-family:Tajawal,sans-serif;font-size:.9rem;font-weight:600;border:none;cursor:pointer;transition:var(--transition)}
+.btn-primary{background:var(--primary);color:#fff}
+.btn-primary:hover{background:var(--primary-dark)}
+.btn-accent{background:var(--accent);color:var(--primary-dark)}
+.btn-accent:hover{background:var(--accent-light)}
+.btn-sm{padding:6px 14px;font-size:.8rem}
+.alert{padding:12px 18px;border-radius:var(--radius);margin-bottom:15px;font-size:.9rem;display:flex;align-items:center;gap:10px}
+.alert-info{background:#dbeafe;color:#1e40af;border:1px solid #bfdbfe}
+@media(max-width:900px){.content-grid{grid-template-columns:1fr}.header .logo{font-size:1.5rem}.hero-card{padding:25px;min-height:250px}.hero-card h2{font-size:1.4rem}.nav{overflow-x:auto}.nav .container{flex-wrap:nowrap}.nav a{padding:10px 12px;font-size:.8rem}.news-grid{grid-template-columns:1fr}.stats-bar{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:600px){.top-bar .container{flex-direction:column;gap:5px}.header .logo{font-size:1.2rem}.header .subtitle{font-size:.85rem}.hero-card{padding:20px;min-height:200px}.hero-card h2{font-size:1.1rem}.news-grid{grid-template-columns:1fr}.stats-bar{grid-template-columns:1fr}}
+</style>
 </head>
 <body>
-  <div class="top-bar">
-    <div class="container">
-      <span class="date">📅 <span id="current-date"></span></span>
-      <span class="ai-badge">🤖 نظام الجريدة الذكية AI</span>
-    </div>
-  </div>
+<div class="top-bar"><div class="container">
+<span class="date">📅 <span id="cdate"></span></span>
+<span class="ai-badge">🤖 نظام النشرية الذكي AI</span>
+</div></div>
 
-  <header class="header">
-    <div class="container">
-      <div class="logo">نشاطات <span>ثانوية المجاهد خليل محمد</span></div>
-      <div class="subtitle">المدعو يوسف - عين كرمس ولاية تيارت</div>
-      <div class="school-type">🇩🇿 وزارة التربية الوطنية | مديرية التربية لولاية تيارت</div>
-    </div>
-  </header>
+<header class="header"><div class="container">
+<div class="logo"><span>الصوت المحلي</span></div>
+<div class="subtitle">نشرية جهوية للإعلام العام - ولاية تيارت</div>
+<div class="school-type">🇩🇿 الجمهورية الجزائرية الديمقراطية الشعبية | وزارة الداخلية والجماعات المحلية</div>
+</div></header>
 
-  <nav class="nav">
-    <div class="container">
-      <a href="/" class="active">🏠 الرئيسية</a>
-      <div class="nav-dropdown">
-        <a class="nav-dropdown-trigger">🌐 فضاءات وخدمات رقمية ▾</a>
-        <div class="nav-dropdown-menu">
-          <a href="https://awlyaa.education.dz/" target="_blank">👤 فضاء الأولياء</a>
-          <a href="https://ostad.education.dz/auth" target="_blank">👨‍🏫 فضاء الأساتذة</a>
-          <a href="https://bac.onec.dz/" target="_blank">🎓 التسجيل في شهادة البكالوريا</a>
-        </div>
-      </div>
-      <a href="/news.html">📰 الأخبار</a>
-      <a href="/activities.html">📸 النشاطات</a>
-      <a href="/announcements.html">📢 الإعلانات</a>
-      <a href="/timeline.html">📅 الأرشفة الزمنية</a>
-      <a href="/archive.html">📂 الأرشيف</a>
-      <div class="nav-left">
-        <a href="/admin" class="btn btn-sm btn-accent">🔧 لوحة التحكم</a>
-      </div>
-    </div>
-  </nav>
+<nav class="nav"><div class="container">
+<a href="index.html" class="active">🏠 الرئيسية</a>
+<div class="nav-dropdown">
+<a class="nav-dropdown-trigger">🌐 خدمات وإعلانات ▾</a>
+<div class="nav-dropdown-menu">
+<a href="https://www.wilaya-tiaret.dz/" target="_blank">🏛 ولاية تيارت</a>
+<a href="https://www.interieur.gov.dz/" target="_blank">📜 وزارة الداخلية</a>
+</div></div>
+<a href="news.html">📰 الأخبار</a>
+<a href="activities.html">📸 النشاطات</a>
+<a href="announcements.html">📢 الإعلانات</a>
+<a href="timeline.html">📅 الأرشفة الزمنية</a>
+<a href="archive.html">📂 الأرشيف</a>
+</div></nav>
 
-  <main class="container">
-    <div id="stats-bar" class="stats-bar"></div>
-    <div id="content-grid"></div>
-  </main>
+<main class="container">
+<div id="stats" class="stats-bar"></div>
+<div id="main-content"></div>
+</main>
 
-  <footer class="footer">
-    <div class="container">
-      <h3>🏫 ثانوية المجاهد خليل محمد المدعو يوسف</h3>
-      <p>عين كرمس - ولاية تيارت | الجمهورية الجزائرية الديمقراطية الشعبية</p>
-      <div class="ai-note">
-        🤖 هذا النظام يعمل بتقنيات الذكاء الاصطناعي | جميع المنشورات تمر عبر طبقة تحقق آلية
-      </div>
-      <div class="powered">
-        إدارة تقنية: Zoheir IT Solutions | نظام تطوعي غير رسمي
-      </div>
-    </div>
-  </footer>
+<footer class="footer"><div class="container">
+<h3>📡 الصوت المحلي</h3>
+<p>نشرية جهوية للإعلام العام - ولاية تيارت | الجمهورية الجزائرية الديمقراطية الشعبية</p>
+<div class="ai-note">🤖 هذا النظام يعمل بتقنيات الذكاء الاصطناعي | جميع المنشورات تمر عبر طبقة تحقق آلية</div>
+<div class="powered">إدارة تقنية: Zoheir IT Solutions | نظام تطوعي للإعلام الجهوي</div>
+</div></footer>
 
-  <script src="/js/api.js"></script>
-  <script src="/js/main.js"></script>
+<script>
+const DEMO_ITEMS = [
+  {id:1,title:'افتتاح مشروع تهيئة الطريق الوطني رقم 14 الرابط بين تيارت وتسمسيلت',body:'أشرفت السلطات الولائية لتيارت على افتتاح أشغال تهيئة الطريق الوطني رقم 14 الرابط بين ولايتي تيارت وتسمسيلت. المشروع الذي تبلغ ميزانيته أكثر من 2 مليار دينار جزائري سيساهم في تسهيل حركة المرور وتقليل حوادث السير.',category:'news',source:'مديرية الأشغال العمومية',date:'2026-06-10',score:0.92,importance:'high'},
+  {id:2,title:'إعلان عن فتح باب الترشح للمجلس الشعبي البلدي لبلديات ولاية تيارت',body:'تعلن مديرية الإدارة المحلية لولاية تيارت عن فتح باب الترشح لعضوية المجالس الشعبية البلدية. على الراغبين في الترشح تقديم ملفاتهم لدى بلدياتهم الأصلية.',category:'announcement',source:'مديرية الإدارة المحلية',date:'2026-06-12',score:0.88,importance:'high'},
+  {id:3,title:'حملة التشجير الكبرى: غرس أكثر من 5000 شتلة في مختلف بلديات تيارت',body:'أطلقت محافظة الغابات لولاية تيارت حملة تشجير كبرى بمناسبة اليوم العالمي للبيئة، حيث تم غرس أكثر من 5000 شتلة من مختلف الأصناف عبر بلديات الولاية.',category:'activity',source:'محافظة الغابات',date:'2026-06-05',score:0.85,importance:'high'},
+  {id:4,title:'زيارة ميدانية لمتحف المجاهد بولاية تيارت لترسيخ الهوية الوطنية',body:'في إطار ترسيخ الهوية الوطنية والوعي التاريخي، نظّمت مديرية المجاهدين لولاية تيارت زيارة ميدانية لمتحف المجاهد لفائدة طلاب المؤسسات التربوية والجامعية.',category:'activity',source:'مديرية المجاهدين',date:'2026-06-08',score:0.82,importance:'normal'},
+  {id:5,title:'إعلان عن انطلاق الموسم الفلاحي الجديد: توزيع الأسمدة والبذور المدعمة',body:'تعلن مديرية المصالح الفلاحية لولاية تيارت عن انطلاق الموسم الفلاحي الجديد وتوزيع الأسمدة والبذور المدعمة على الفلاحين.',category:'announcement',source:'مديرية المصالح الفلاحية',date:'2026-06-15',score:0.75,importance:'normal'},
+  {id:6,title:'لقاء تشاوري حول تحسين الخدمات الصحية في مستشفيات تيارت',body:'عقدت مديرية الصحة والسكان لولاية تيارت لقاءً تشاورياً مع ممثلي المجتمع المدني ونقابات الصحة لمناقشة سبل تحسين الخدمات الصحية.',category:'activity',source:'مديرية الصحة',date:'2026-06-03',score:0.78,importance:'normal'},
+  {id:7,title:'انطلاق الموسم السياحي الصيفي: تنشيط الحركة السياحية بمنطقة تيارت',body:'انطلقت فعاليات الموسم السياحي الصيفي بولاية تيارت، حيث تم تنظيم عدة برامج تنشيطية في المناطق السياحية.',category:'news',source:'مديرية السياحة',date:'2026-06-01',score:0.72,importance:'normal'},
+  {id:8,title:'حفل تكريم المتفوقين في المسابقات الثقافية والعلمية على مستوى ولاية تيارت',body:'أقامت مديرية الثقافة والفنون لولاية تيارت حفلًا لتكريم المتفوقين في مختلف المسابقات الثقافية والعلمية على مستوى الولاية.',category:'activity',source:'مديرية الثقافة',date:'2026-06-07',score:0.7,importance:'low'}
+];
+
+const catNames = {news:'📰 خبر',activity:'📸 نشاط',announcement:'📢 إعلان',uncategorized:'غير مصنف'};
+
+function badge(item) {
+  const off = ['ولاية','مديرية','محافظة','وزارة','مصالح'].some(s => (item.source||'').includes(s));
+  if (off) return '<span class="source-badge official">📜 رسمي</span>';
+  return '<span class="source-badge auto">🤖 تلقائي</span>';
+}
+
+function impBadge(item) {
+  if (item.importance === 'high') return ' <span class="imp-badge high">⭐ هام</span>';
+  if (item.importance === 'low') return ' <span class="imp-badge low">📄 عادي</span>';
+  return '';
+}
+
+function card(item, feat) {
+  if (feat) {
+    return '<div class="hero-card hero-official"><div style="display:flex;gap:8px;align-items:center;margin-bottom:12px;flex-wrap:wrap;"><span class="hero-category">'+catNames[item.category]+'</span>'+badge(item)+(item.importance==='high'?'<span class="hero-category" style="background:#fed7aa;color:#9a3412;">⭐ هام</span>':'')+'</div><h2>'+item.title+'</h2><p>'+(item.body||'').substring(0,200)+'...</p><div class="hero-meta"><span>📅 '+item.date+'</span><span>📡 '+item.source+'</span><span>🎯 '+Math.round(item.score*100)+'% ثقة</span><span>🧠 AI</span></div></div>';
+  }
+  return '<div class="card'+(item.importance==='high'?' card-highlight':'')+'"><div class="card-body"><div style="display:flex;gap:6px;align-items:center;margin-bottom:8px;flex-wrap:wrap;"><span class="card-category '+item.category+'">'+catNames[item.category]+'</span>'+badge(item)+impBadge(item)+'</div><h3>'+item.title+'</h3><p>'+(item.body||'').substring(0,150)+'...</p><div class="card-meta"><span>📅 '+item.date+'</span><span class="ai-tag">🧠 AI</span><span>🎯 '+Math.round(item.score*100)+'%</span></div></div></div>';
+}
+
+const now = new Date();
+document.getElementById('cdate').textContent = now.toLocaleDateString('ar-DZ',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+
+document.getElementById('stats').innerHTML =
+  '<div class="stat-card"><div class="number">'+DEMO_ITEMS.length+'</div><div class="label">📰 منشورات</div></div>'+
+  '<div class="stat-card"><div class="number">'+DEMO_ITEMS.filter(i=>i.category==='news').length+'</div><div class="label">📰 أخبار</div></div>'+
+  '<div class="stat-card"><div class="number">'+DEMO_ITEMS.filter(i=>i.category==='activity').length+'</div><div class="label">📸 نشاطات</div></div>'+
+  '<div class="stat-card"><div class="number">'+DEMO_ITEMS.filter(i=>i.category==='announcement').length+'</div><div class="label">📢 إعلانات</div></div>'+
+  '<div class="stat-card"><div class="number">'+DEMO_ITEMS.length+'</div><div class="label">🤖 قرارات AI</div></div>';
+
+const hero = DEMO_ITEMS[0];
+let html = '<div class="content-grid"><div class="main-content">';
+html += '<div class="hero">'+card(hero,true)+'</div>';
+const official = DEMO_ITEMS.filter(i => i.importance==='high');
+const normal = DEMO_ITEMS.filter(i => i.importance!=='high' && i!==hero);
+if (official.length>0) {
+  html += '<h3 class="section-title">📜 أخبار رسمية <span class="badge">'+official.length+'</span></h3><div class="news-grid">';
+  official.forEach(i => { html += card(i); });
+  html += '</div>';
+}
+const news = DEMO_ITEMS.filter(i=>i.category==='news').slice(0,3);
+if (news.length>0) {
+  html += '<h3 class="section-title">📰 آخر الأخبار</h3><div class="news-grid">';
+  news.forEach(i => { html += card(i); });
+  html += '</div>';
+}
+html += '</div><div class="sidebar"><div><h3>📂 التصنيفات</h3><ul>';
+['news','activity','announcement'].forEach(c => {
+  const count = DEMO_ITEMS.filter(i=>i.category===c).length;
+  html += '<li>'+catNames[c]+' ('+count+')</li>';
+});
+html += '</ul></div><div><h3>🕐 آخر المنشورات</h3><ul>';
+DEMO_ITEMS.slice(0,8).forEach(i => {
+  html += '<li>'+i.title+'<div class="date">'+i.date+(i.importance==='high'?' ⭐':'')+'</div></li>';
+});
+html += '</ul></div><div><h3>🔗 المصادر الرسمية</h3><ul><li>🏛 <a href="https://www.wilaya-tiaret.dz/" target="_blank">ولاية تيارت</a></li><li>📜 <a href="https://www.interieur.gov.dz/" target="_blank">وزارة الداخلية</a></li></ul></div></div></div>';
+
+const activities = DEMO_ITEMS.filter(i=>i.category==='activity');
+if (activities.length>0) {
+  html += '<h3 class="section-title">📸 النشاطات الجهوية</h3><div class="news-grid">';
+  activities.slice(0,4).forEach(i => { html += card(i); });
+  html += '</div>';
+}
+const anns = DEMO_ITEMS.filter(i=>i.category==='announcement'&&i.importance==='high');
+if (anns.length>0) {
+  html += '<h3 class="section-title">📢 إعلانات هامة</h3><div class="news-grid">';
+  anns.slice(0,3).forEach(i => { html += card(i); });
+  html += '</div>';
+}
+document.getElementById('main-content').innerHTML = html;
+</script>
 </body>
 </html>

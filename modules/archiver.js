@@ -49,6 +49,7 @@ class ArchiveSystem {
     const data = {
       exported_at: new Date().toISOString(),
       school: config.SCHOOL_NAME,
+      publication: 'الصوت المحلي - نشرية جهوية للإعلام العام',
       content: db.orderBy(db.query('processed_content'), 'created_at', 'desc'),
       archive: db.orderBy(db.query('archive'), 'archived_at', 'desc'),
       decisions: db.orderBy(db.query('ai_decision_log'), 'created_at', 'desc'),

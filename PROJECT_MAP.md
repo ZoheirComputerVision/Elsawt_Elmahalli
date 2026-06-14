@@ -1,4 +1,4 @@
-# school-news-ai — نظام جريدة مدرسية ذكية
+# الصوت المحلي — نشرية جهوية للإعلام العام
 
 ## TECH_STACK
 | الطبقة | التقنية | الإصدار |
@@ -14,31 +14,30 @@
 ```
 [Boot] → server.js → mount routes → init modules → start cron
                           ↓
-               JSON DB ← collector (30min)
+                JSON DB ← collector (30min)
                           ↓
-               analyzer (15min) → classification + fact-check
+                analyzer (15min) → classification + fact-check
                           ↓
-               writer → AI article generation
+                writer → AI article generation
                           ↓
-               publisher (10min) → quality check → publish/archive
+                publisher (10min) → quality check → publish/archive
                           ↓
-               public/ ← static HTML + client-side JS
-               admin/  ← dashboard + review + logs + settings
+                public/ ← static HTML + client-side JS
+                admin/  ← dashboard + review + logs + settings
 ```
 
 ## ROUTES
 | المسار | الوظيفة |
 |--------|---------|
 | `GET /` | الصفحة الرئيسية |
-| `GET /news.html` | الأخبار |
+| `GET /news.html` | الأخبار الجهوية |
 | `GET /activities.html` | النشاطات |
-| `GET /announcements.html` | الإعلانات |
+| `GET /announcements.html` | الإعلانات الرسمية |
 | `GET /article/:id` | عرض مقال |
 | `GET /media.html` | المكتبة |
 | `GET /archive.html` | الأرشيف الكامل |
 | `GET /timeline.html` | الأرشفة الزمنية |
 | `GET /admin` | لوحة التحكم (تسجيل الدخول) |
-| `GET /admin/*` | صفحات الإدارة |
 | `GET /api/content` | محتوى (JSON) |
 | `GET /api/stats` | إحصائيات النظام |
 | `GET /api/search` | بحث في المحتوى |
@@ -47,10 +46,9 @@
 ## PUBLIC PAGES NAVIGATION
 جميع صفحات HTML العامة تحتوي على شريط تنقل موحد يتضمن:
 - 🏠 الرئيسية
-- 🌐 **فضاءات وخدمات رقمية** (قائمة منسدلة):
-  - 👤 فضاء الأولياء → `awlyaa.education.dz`
-  - 👨‍🏫 فضاء الأساتذة → `ostad.education.dz/auth`
-  - 🎓 التسجيل في شهادة البكالوريا → `bac.onec.dz/` *(أضيف حديثاً)*
+- 🌐 **خدمات وإعلانات** (قائمة منسدلة):
+  - 🏛 ولاية تيارت → `wilaya-tiaret.dz`
+  - 📜 وزارة الداخلية → `interieur.gov.dz`
 - 📰 الأخبار
 - 📸 النشاطات
 - 📢 الإعلانات
@@ -65,11 +63,13 @@
 - [x] Admin panel (dashboard, review, logs, settings)
 - [x] Cron scheduler (auto collect/analyze/publish)
 - [x] Security: helmet + CORS + admin auth
+- [x] تطوير محلي 100% - بدون GitHub أو استضافة عن بعد
 
 ## ORPHANS & PENDING
 | البند | الحالة | الأولوية |
 |-------|--------|----------|
 | قاعدة بيانات SQLite جاهزة (غير مستعملة) | قائمة | منخفضة |
 | اختبارات (unit/integration) | غير موجودة | متوسطة |
-| i18n (فرنسية/إنجليزية) | غير موجودة | منخفضة |
-| HTTPS/SSL | غير مضبوط | عالية |
+| HTTPS/SSL | غير مضبوط | منخفضة |
+| لا CSRF protection | موجود مسبقاً | عالية |
+| لا Rate Limiting | موجود مسبقاً | متوسطة |
