@@ -173,21 +173,6 @@ async function loadSidebar() {
           `).join('')}
         </ul>
       </div>
-      <div>
-        <h3>🔗 المصادر الرسمية</h3>
-        <ul>
-          <li><a href="https://www.wilaya-tiaret.dz/" target="_blank">🏛 ولاية تيارت</a></li>
-          <li><a href="https://www.interieur.gov.dz/" target="_blank">📜 وزارة الداخلية</a></li>
-        </ul>
-      </div>
-      <div>
-        <h3>🤖 معلومات النظام</h3>
-        <ul>
-          <li style="font-size:0.8rem;color:#888;">يتم جمع البيانات وتحليلها آليًا</li>
-          <li style="font-size:0.8rem;color:#888;">جميع المنشورات تمر عبر التحقق</li>
-          <li style="font-size:0.8rem;color:#888;">آخر تحديث: ${new Date().toLocaleTimeString('ar-DZ')}</li>
-        </ul>
-      </div>
     `;
   } catch (e) { /* silent */ }
 }
