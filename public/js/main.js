@@ -102,8 +102,9 @@ async function loadContent() {
     const catPromises = CATEGORY_ORDER.map(cat => API.getContent({ category: cat, limit: 4 }));
     const [recent, ...catResults] = await Promise.all([API.getRecent(), ...catPromises]);
 
-    let html = '<div class="content-grid">';
-    html += '<div class="main-content">';
+    let html = '<div class="main-content">';
+    html += '<div class="content-grid">';
+    html += '<div class="hero-area">';
 
     // Hero: أهم خبر
     const heroItem = recent[0];
@@ -125,6 +126,7 @@ async function loadContent() {
       html += '</div>';
     });
 
+    html += '</div>';
     container.innerHTML = html;
     loadSidebar();
   } catch (e) {

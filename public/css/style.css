@@ -193,7 +193,6 @@ a:hover { color: var(--accent); }
 
 /* ── Hero Section ── */
 .hero {
-  margin: 30px 0;
   position: relative;
   border-radius: var(--radius);
   overflow: hidden;
