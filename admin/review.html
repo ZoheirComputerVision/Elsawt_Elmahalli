@@ -46,26 +46,68 @@
     document.getElementById('admin-user').textContent = localStorage.getItem('admin_user') || 'Zoheir IT Solutions';
     function logout() { localStorage.removeItem('admin_token'); localStorage.removeItem('admin_user'); window.location.href = '/admin'; }
 
+    let sortState = { field: '', dir: 1 };
+    function sortDir(field) { return sortState.field === field ? (sortState.dir > 0 ? '▲' : '▼') : ''; }
+    function sortByField(field) {
+      if (sortState.field === field) sortState.dir *= -1;
+      else { sortState.field = field; sortState.dir = 1; }
+      renderContent();
+    }
+    function sortByCategory() { sortByField('category'); }
+    function sortByDate() { sortByField('date'); }
+
+    let cachedData = null;
+    let currentStatus = 'all';
+
     async function loadContent(status = 'all') {
+      currentStatus = status;
       const container = document.getElementById('content-list');
       container.innerHTML = '<div class="loading">جاري التحميل...</div>';
       try {
         const params = status !== 'all' ? { status } : {};
         const data = await API.admin.getContent(params);
+        cachedData = data.items;
         document.getElementById('content-count').textContent = data.items.length;
+        renderContent();
+      } catch (e) {
+        container.innerHTML = `<div class="alert alert-danger">⚠️ ${e.message}</div>`;
+      }
+    }
 
-        if (!data.items.length) {
-          container.innerHTML = '<p style="color:#888;text-align:center;padding:30px;">لا توجد محتويات</p>';
-          return;
-        }
+    function renderContent() {
+      const container = document.getElementById('content-list');
+      let items = [...(cachedData || [])];
 
-        const catNames = { news: '📰 خبر', activity: '📸 نشاط', announcement: '📢 إعلان', uncategorized: '❓ غير مصنف' };
-        const stNames = { published: '✅ منشور', draft: '📝 مسودة', review: '⏳ مراجعة', rejected: '❌ مرفوض' };
+      if (!items.length) {
+        container.innerHTML = '<p style="color:#888;text-align:center;padding:30px;">لا توجد محتويات</p>';
+        return;
+      }
+
+      if (sortState.field === 'category') {
+        items.sort((a, b) => {
+          const ca = a.category || ''; const cb = b.category || '';
+          return sortState.dir * ca.localeCompare(cb, 'ar');
+        });
+      } else if (sortState.field === 'date') {
+        items.sort((a, b) => {
+          const da = a.event_date || a.created_at || '';
+          const db = b.event_date || b.created_at || '';
+          return sortState.dir * da.localeCompare(db);
+        });
+      }
+
+      const catNames = {
+        'الوطن': '🇩🇿 الوطن', 'اقتصاد': '💰 اقتصاد', 'رياضة': '⚽ رياضة',
+        'العالم': '🌍 العالم', 'مجتمع': '👥 مجتمع', 'اسلاميات': '🕌 اسلاميات',
+        'تكنولوجيا': '💻 تكنولوجيا',
+        news: '📰 خبر', activity: '📸 نشاط', announcement: '📢 إعلان', uncategorized: '❓ غير مصنف',
+      };
+      const stNames = { published: '✅ منشور', draft: '📝 مسودة', review: '⏳ مراجعة', rejected: '❌ مرفوض' };
 
         let html = `<table class="table">
-          <tr><th>#</th><th>العنوان</th><th>التصنيف</th><th>الحالة</th><th>الثقة</th><th>التاريخ</th><th>الإجراءات</th></tr>`;
+          <tr><th>#</th><th>العنوان</th><th onclick="sortByCategory()" style="cursor:pointer">التصنيف ${sortDir('category')}</th><th>الحالة</th><th>الثقة</th><th onclick="sortByDate()" style="cursor:pointer">التاريخ ${sortDir('date')}</th><th>الإجراءات</th></tr>`;
 
-        data.items.forEach(item => {
+        items.forEach(item => {
           html += `<tr>
             <td>${item.id}</td>
             <td>${item.title.substring(0,40)}${item.title.length>40?'...':''}</td>
@@ -175,9 +217,13 @@
         <div class="form-group">
           <label>التصنيف</label>
           <select class="form-control" id="edit-category">
-            <option value="news">📰 خبر</option>
-            <option value="activity">📸 نشاط</option>
-            <option value="announcement">📢 إعلان</option>
+            <option value="الوطن">🇩🇿 الوطن</option>
+            <option value="اقتصاد">💰 اقتصاد</option>
+            <option value="رياضة">⚽ رياضة</option>
+            <option value="العالم">🌍 العالم</option>
+            <option value="مجتمع">👥 مجتمع</option>
+            <option value="اسلاميات">🕌 اسلاميات</option>
+            <option value="تكنولوجيا">💻 تكنولوجيا</option>
           </select>
         </div>
         <div class="form-group">
