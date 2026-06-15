@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: sout-mahalli
+    env: node
+    branch: main
+    buildCommand: npm install
+    startCommand: node server.js
+    plan: free
+    envVars:
+      - key: NODE_VERSION
+        value: 18

@@ -16,7 +16,7 @@ module.exports = {
     REVIEW_THRESHOLD: 0.5,
     MAX_DRAFT_AGE_HOURS: 72,
     COLLECTOR_INTERVAL_MIN: 30,
-    FACEBOOK_PAGE: 'boukanoun.abdeldjebbar',
+    FACEBOOK_PAGE: 'boukanoun.center.avenir',
     MINISTRY_URL: 'https://www.wilaya-tiaret.dz/',
   },
 
