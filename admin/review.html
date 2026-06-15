@@ -133,9 +133,6 @@
         });
         html += '</table>';
         container.innerHTML = html;
-      } catch (e) {
-        container.innerHTML = `<div class="alert alert-danger">⚠️ ${e.message}</div>`;
-      }
     }
 
     async function approveItem(id) {
