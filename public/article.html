@@ -100,7 +100,6 @@
         <div>✉️ eMail:</div>
       </div>
     </div>
-    <div class="ad-space">مساحة إشهارية</div>
   </div></footer>
   <script>var WD={tiaret:{t:21,i:'🌤'},tissemsilt:{t:23,i:'⛅'},medea:{t:19,i:'🌥'},djelfa:{t:17,i:'⛅'},laghouat:{t:25,i:'☀️'},saida:{t:22,i:'🌤'},mascara:{t:24,i:'☀️'},relizane:{t:26,i:'☀️'}};function updW(){var w=WD[document.getElementById('wc').value];document.getElementById('wt').textContent=w.t+'°';document.getElementById('wi').textContent=w.i}function subNewsletter(){var e=document.getElementById('nl-email');var v=e.value.trim();if(!v||!v.includes('@')){alert('📧 الرجاء إدخال بريد إلكتروني صحيح');return}if(location.protocol==='file:'){localStorage.setItem('nl_'+Date.now(),v);e.value='';alert('✅ تم الاشتراك في النشرة البريدية بنجاح');return}var b=document.querySelector('base').href;fetch(b+'api/subscribe',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:v})}).then(function(r){return r.json()}).then(function(d){alert(d.message||d.error);if(!d.error)e.value=''}).catch(function(){alert('✅ تم الاشتراك في النشرة البريدية بنجاح');localStorage.setItem('nl_'+Date.now(),v);e.value=''})}</script>
   <script src="js/i18n.js"></script>

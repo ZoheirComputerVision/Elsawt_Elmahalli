@@ -102,7 +102,6 @@
         <div>✉️ eMail:</div>
       </div>
     </div>
-    <div class="ad-space">مساحة إشهارية</div>
   </div></footer>
   <script>function subNewsletter(){var e=document.getElementById('nl-email');var v=e.value.trim();if(!v||!v.includes('@')){alert('📧 الرجاء إدخال بريد إلكتروني صحيح');return}if(location.protocol==='file:'){localStorage.setItem('nl_'+Date.now(),v);e.value='';alert('✅ تم الاشتراك في النشرة البريدية بنجاح');return}var b=document.querySelector('base').href;fetch(b+'api/subscribe',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:v})}).then(function(r){return r.json()}).then(function(d){alert(d.message||d.error);if(!d.error)e.value=''}).catch(function(){alert('✅ تم الاشتراك في النشرة البريدية بنجاح');localStorage.setItem('nl_'+Date.now(),v);e.value=''})}</script>
   <script src="js/i18n.js"></script>
