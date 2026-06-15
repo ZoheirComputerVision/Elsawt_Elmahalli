@@ -62,15 +62,21 @@
     async function loadContent(status = 'all') {
       currentStatus = status;
       const container = document.getElementById('content-list');
-      container.innerHTML = '<div class="loading">جاري التحميل...</div>';
+      container.innerHTML = '<div class="loading">📡 جاري التحميل... <span style="font-size:0.8rem;color:#888;">(قد يستغرق 30-60 ثانية في أول مرة)</span></div>';
+      // مهلة أمان 45 ثانية
+      const timeoutId = setTimeout(() => {
+        container.innerHTML = '<div class="alert alert-danger">⚠️ استغرق الطلب وقتاً طويلاً. <button class="btn btn-sm" onclick="loadContent(\'' + status + '\')">🔄 إعادة المحاولة</button></div>';
+      }, 45000);
       try {
         const params = status !== 'all' ? { status } : {};
         const data = await API.admin.getContent(params);
+        clearTimeout(timeoutId);
         cachedData = data.items;
         document.getElementById('content-count').textContent = data.items.length;
         renderContent();
       } catch (e) {
-        container.innerHTML = `<div class="alert alert-danger">⚠️ ${e.message}</div>`;
+        clearTimeout(timeoutId);
+        container.innerHTML = `<div class="alert alert-danger">⚠️ ${e.message} <button class="btn btn-sm" onclick="loadContent('${status}')">🔄 إعادة المحاولة</button></div>`;
       }
     }
 
@@ -86,7 +92,7 @@
       if (sortState.field === 'category') {
         items.sort((a, b) => {
           const ca = a.category || ''; const cb = b.category || '';
-          return sortState.dir * ca.localeCompare(cb, 'ar');
+          return sortState.dir * ca.localeCompare(cb);
         });
       } else if (sortState.field === 'date') {
         items.sort((a, b) => {
