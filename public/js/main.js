@@ -30,8 +30,17 @@ function importanceBadge(item) {
   return '';
 }
 
+const CAT_ICONS = {
+  'الوطن': '🇩🇿', 'اقتصاد': '💰', 'رياضة': '⚽', 'العالم': '🌍',
+  'مجتمع': '👥', 'اسلاميات': '🕌', 'تكنولوجيا': '💻',
+};
+
 function createCard(item, featured = false) {
-  const catNames = { news: 'خبر', activity: 'نشاط', announcement: 'إعلان', uncategorized: 'غير مصنف' };
+  const catNames = {
+    'الوطن': 'الوطن', 'اقتصاد': 'اقتصاد', 'رياضة': 'رياضة', 'العالم': 'العالم',
+    'مجتمع': 'مجتمع', 'اسلاميات': 'اسلاميات', 'تكنولوجيا': 'تكنولوجيا',
+    news: 'خبر', activity: 'نشاط', announcement: 'إعلان', uncategorized: 'غير مصنف',
+  };
   const date = item.event_date || (item.published_at ? item.published_at.split('T')[0] : (item.created_at ? item.created_at.split('T')[0] : '')) || '';
   const bodyText = item.body || '';
   const cleanBody = bodyText.replace(/^[📰📸📢]\s*/, '').replace(/🗓.*?\n/, '');
@@ -81,6 +90,8 @@ function createCard(item, featured = false) {
   `;
 }
 
+const CATEGORY_ORDER = ['الوطن', 'اقتصاد', 'رياضة', 'العالم', 'مجتمع', 'اسلاميات', 'تكنولوجيا'];
+
 async function loadContent() {
   const container = document.getElementById('content-grid');
   if (!container) return;
@@ -88,60 +99,32 @@ async function loadContent() {
   try {
     container.innerHTML = '<div class="loading">📡 جاري تحميل المحتوى...</div>';
 
-    const [recent, news, activities, announcements] = await Promise.all([
-      API.getRecent(),
-      API.getContent({ category: 'news', limit: 6 }),
-      API.getContent({ category: 'activity', limit: 4 }),
-      API.getContent({ category: 'announcement', limit: 4 }),
-    ]);
+    // جلب المقالات الحديثة لكل تصنيف
+    const catPromises = CATEGORY_ORDER.map(cat => API.getContent({ category: cat, limit: 4 }));
+    const [recent, ...catResults] = await Promise.all([API.getRecent(), ...catPromises]);
 
     let html = '<div class="content-grid">';
     html += '<div class="main-content">';
 
-    // Hero: أهم خبر (أول منشور أو الأعلى أهمية)
+    // Hero: أهم خبر
     const heroItem = recent[0];
     if (heroItem) {
       html += '<div class="hero">' + createCard(heroItem, true) + '</div>';
     }
 
-    // الأخبار الرسمية أولاً
-    const officialNews = (news.items || []).filter(n =>
-      n.importance === 'high' || (n.source_name && ['ولاية', 'مديرية', 'محافظة', 'وزارة', 'مصالح'].some(s => n.source_name.includes(s)))
-    );
-    const normalNews = (news.items || []).filter(n => !officialNews.includes(n));
-
-    if (officialNews.length > 0) {
-      html += '<h3 class="section-title">📜 أخبار رسمية <span class="badge">' + officialNews.length + '</span></h3>';
-      html += '<div class="news-grid">';
-      officialNews.slice(0, 3).forEach(item => { html += createCard(item); });
-      html += '</div>';
-    }
-
-    if (normalNews.length > 0) {
-      html += '<h3 class="section-title">📰 آخر الأخبار</h3>';
-      html += '<div class="news-grid">';
-      normalNews.slice(0, 3).forEach(item => { html += createCard(item); });
-      html += '</div>';
-    }
-
     html += '</div><div class="sidebar" id="sidebar"></div></div>';
 
-    // النشاطات
-    if ((activities.items || []).length > 0) {
-      html += '<h3 class="section-title">📸 النشاطات الجهوية</h3>';
+    // أقسام التصنيفات حسب الأولوية
+    CATEGORY_ORDER.forEach((cat, idx) => {
+      const data = catResults[idx];
+      const items = (data.items || []).slice(0, 4);
+      if (items.length === 0) return;
+      const icon = CAT_ICONS[cat] || '📰';
+      html += `<h3 class="section-title">${icon} ${cat} <span class="badge">${items.length}</span></h3>`;
       html += '<div class="news-grid">';
-      activities.items.slice(0, 4).forEach(item => { html += createCard(item); });
+      items.forEach(item => { html += createCard(item); });
       html += '</div>';
-    }
-
-    // الإعلانات المهمة
-    const importantAnn = (announcements.items || []).filter(a => a.importance === 'high' || a.overall_score >= 0.7);
-    if (importantAnn.length > 0) {
-      html += '<h3 class="section-title">📢 إعلانات هامة</h3>';
-      html += '<div class="news-grid">';
-      importantAnn.slice(0, 3).forEach(item => { html += createCard(item); });
-      html += '</div>';
-    }
+    });
 
     container.innerHTML = html;
     loadSidebar();
@@ -171,13 +154,31 @@ async function loadSidebar() {
   if (!sidebar) return;
   try {
     const [recent, categories] = await Promise.all([API.getRecent(), API.getCategories()]);
-    const catNames = { news: 'أخبار', activity: 'نشاطات', announcement: 'إعلانات' };
+    const catNames = {
+      'الوطن': 'الوطن', 'اقتصاد': 'اقتصاد', 'رياضة': 'رياضة', 'العالم': 'العالم',
+      'مجتمع': 'مجتمع', 'اسلاميات': 'اسلاميات', 'تكنولوجيا': 'تكنولوجيا',
+      news: 'أخبار', activity: 'نشاطات', announcement: 'إعلانات',
+    };
+    const catIcons = {
+      'الوطن': '🇩🇿', 'اقتصاد': '💰', 'رياضة': '⚽', 'العالم': '🌍',
+      'مجتمع': '👥', 'اسلاميات': '🕌', 'تكنولوجيا': '💻', news: '📰', activity: '📸', announcement: '📢',
+    };
+
+    // ترتيب التصنيفات حسب CATEGORY_ORDER أولاً
+    const sortedCats = [...(categories || [])].sort((a, b) => {
+      const ia = CATEGORY_ORDER.indexOf(a.category);
+      const ib = CATEGORY_ORDER.indexOf(b.category);
+      if (ia !== -1 && ib !== -1) return ia - ib;
+      if (ia !== -1) return -1;
+      if (ib !== -1) return 1;
+      return 0;
+    });
 
     sidebar.innerHTML = `
       <div>
         <h3>📂 التصنيفات</h3>
         <ul>
-          ${(categories || []).map(c => `<li><a href="/${c.category === 'news' ? 'news' : c.category === 'activity' ? 'activities' : 'announcements'}.html">${catNames[c.category] || c.category} (${c.count})</a></li>`).join('')}
+          ${sortedCats.map(c => `<li><a href="#">${catIcons[c.category] || '📰'} ${catNames[c.category] || c.category} (${c.count})</a></li>`).join('')}
         </ul>
       </div>
       <div>
