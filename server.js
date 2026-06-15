@@ -3,10 +3,21 @@ const cors = require('cors');
 const helmet = require('helmet');
 const morgan = require('morgan');
 const path = require('path');
+const fs = require('fs');
 const config = require('./config');
 const apiRoutes = require('./routes/api');
 const adminRoutes = require('./routes/admin');
 const scheduler = require('./modules/scheduler');
+
+// مسح البيانات إذا طلب ذلك (لمزامنة Render مع المحلي)
+if (process.env.CLEAR_DATA === 'true') {
+  const dataDir = config.DATA_DIR;
+  if (fs.existsSync(dataDir)) {
+    const files = fs.readdirSync(dataDir).filter(f => f.endsWith('.json'));
+    files.forEach(f => fs.writeFileSync(path.join(dataDir, f), '[]', 'utf-8'));
+    console.log(`[Clear] تم مسح ${files.length} ملف بيانات`);
+  }
+}
 
 const app = express();
 
