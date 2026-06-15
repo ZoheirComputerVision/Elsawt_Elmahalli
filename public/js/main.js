@@ -1,7 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
   setCurrentDate();
   loadContent();
-  loadStats();
   loadTimeline();
   loadSidebar();
   setupAutoRefresh();
@@ -131,22 +130,6 @@ async function loadContent() {
   } catch (e) {
     container.innerHTML = `<div class="alert alert-danger">⚠️ تعذر تحميل المحتوى: ${e.message}</div>`;
   }
-}
-
-async function loadStats() {
-  const container = document.getElementById('stats-bar');
-  if (!container) return;
-  try {
-    const stats = await API.getStats();
-    container.innerHTML = `
-      <div class="stat-card"><div class="number">${stats.total_published || 0}</div><div class="label">📰 منشورات</div></div>
-      <div class="stat-card"><div class="number">${stats.by_category?.news || 0}</div><div class="label">📰 أخبار</div></div>
-      <div class="stat-card"><div class="number">${stats.by_category?.activity || 0}</div><div class="label">📸 نشاطات</div></div>
-      <div class="stat-card"><div class="number">${stats.by_category?.announcement || 0}</div><div class="label">📢 إعلانات</div></div>
-      <div class="stat-card"><div class="number">${stats.total_ai_decisions || 0}</div><div class="label">🤖 قرارات AI</div></div>
-      <div class="stat-card"><div class="number">${stats.total_views || 0}</div><div class="label">👁 مشاهدات</div></div>
-    `;
-  } catch (e) { /* silent */ }
 }
 
 async function loadSidebar() {
