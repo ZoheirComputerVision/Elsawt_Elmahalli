@@ -178,7 +178,7 @@ async function loadSidebar() {
       <div>
         <h3>📂 التصنيفات</h3>
         <ul>
-          ${sortedCats.map(c => `<li><a href="#">${catIcons[c.category] || '📰'} ${catNames[c.category] || c.category} (${c.count})</a></li>`).join('')}
+          ${sortedCats.map(c => `<li><a href="news.html?cat=${encodeURIComponent(c.category)}">${catIcons[c.category] || '📰'} ${catNames[c.category] || c.category} (${c.count})</a></li>`).join('')}
         </ul>
       </div>
       <div>
@@ -253,7 +253,12 @@ async function loadTimeline() {
 async function loadCategoryPage(category) {
   const container = document.getElementById('category-content');
   if (!container) return;
-  const catNames = { news: '📰 الأخبار', activity: '📸 النشاطات', announcement: '📢 الإعلانات' };
+  const catNames = {
+    'الوطن': '🇩🇿 الوطن', 'اقتصاد': '💰 اقتصاد', 'رياضة': '⚽ رياضة',
+    'العالم': '🌍 العالم', 'مجتمع': '👥 مجتمع', 'اسلاميات': '🕌 اسلاميات',
+    'تكنولوجيا': '💻 تكنولوجيا',
+    news: '📰 الأخبار', activity: '📸 النشاطات', announcement: '📢 الإعلانات'
+  };
   try {
     container.innerHTML = '<div class="loading">جاري التحميل...</div>';
     const data = await API.getContent({ category, limit: 50 });

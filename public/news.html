@@ -49,18 +49,18 @@
           <a href="archive.html">📂 الأرشيف</a>
         </div>
       </div>
-      <a href="#">🇩🇿 الوطن</a>
-      <a href="#">💰 اقتصاد</a>
-      <a href="#">⚽ رياضة</a>
-      <a href="#">🌍 العالم</a>
+      <a href="javascript:void(0)" onclick="loadCategoryPage('الوطن');return false">🇩🇿 الوطن</a>
+      <a href="javascript:void(0)" onclick="loadCategoryPage('اقتصاد');return false">💰 اقتصاد</a>
+      <a href="javascript:void(0)" onclick="loadCategoryPage('رياضة');return false">⚽ رياضة</a>
+      <a href="javascript:void(0)" onclick="loadCategoryPage('العالم');return false">🌍 العالم</a>
       <div class="nav-dropdown">
         <a class="nav-dropdown-trigger">👥 مجتمع ▾</a>
         <div class="nav-dropdown-menu">
-          <a href="#">👥 مجتمع</a>
-          <a href="#">🕌 اسلاميات</a>
+          <a href="javascript:void(0)" onclick="loadCategoryPage('مجتمع');return false">👥 مجتمع</a>
+          <a href="javascript:void(0)" onclick="loadCategoryPage('اسلاميات');return false">🕌 اسلاميات</a>
         </div>
       </div>
-      <a href="#">💻 تكنولوجيا</a>
+      <a href="javascript:void(0)" onclick="loadCategoryPage('تكنولوجيا');return false">💻 تكنولوجيا</a>
       <a href="subscribe.html" style="background:var(--accent);color:var(--primary-dark);padding:8px 14px;border-radius:6px;font-weight:700;margin-right:5px">🔔 اشتراك</a>
     </div>
   </nav>
@@ -122,6 +122,14 @@
   <script src="js/i18n.js"></script>
   <script src="js/api.js"></script>
   <script src="js/main.js"></script>
-  <script>document.addEventListener('DOMContentLoaded', () => { setCurrentDate(); loadCategoryPage('news'); initSearch(); });</script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      setCurrentDate();
+      const params = new URLSearchParams(window.location.search);
+      const cat = params.get('cat') || 'news';
+      loadCategoryPage(cat);
+      initSearch();
+    });
+  </script>
 </body>
 </html>
