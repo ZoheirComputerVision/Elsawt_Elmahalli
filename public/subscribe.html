@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <script>(function(){var b=document.createElement('base');b.href=location.protocol==='file:'?location.pathname.substring(0,location.pathname.lastIndexOf('/')+1):'/';document.head.insertBefore(b,document.head.firstChild)})();</script>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>الاشتراكات | الصوت المحلي - تيارت</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@700;800&family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+<style>
+.sub-hero{background:linear-gradient(135deg,var(--primary),var(--primary-dark));color:#fff;padding:50px 0;text-align:center;margin-bottom:40px;border-bottom:4px solid var(--accent)}
+.sub-hero h1{font-family:Cairo,sans-serif;font-size:2rem;font-weight:800;margin-bottom:10px}
+.sub-hero p{color:var(--accent-light);font-size:1rem;opacity:.9}
+.sub-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:25px;margin:30px 0}
+.sub-card{background:var(--bg-card);border:2px solid var(--border);border-radius:var(--radius);padding:30px;text-align:center;transition:var(--transition);position:relative}
+.sub-card:hover{box-shadow:var(--shadow-lg);transform:translateY(-3px);border-color:var(--accent)}
+.sub-card.featured{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent)}
+.sub-card .badge{position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:var(--accent);color:var(--primary-dark);padding:4px 20px;border-radius:20px;font-size:.75rem;font-weight:700}
+.sub-card h3{font-family:Cairo,sans-serif;font-size:1.4rem;font-weight:700;color:var(--primary);margin-bottom:5px}
+.sub-card .price{font-family:Cairo,sans-serif;font-size:2.2rem;font-weight:800;color:var(--primary);margin:15px 0}
+.sub-card .price small{font-size:1rem;font-weight:400;color:#888}
+.sub-card ul{list-style:none;padding:0;margin:20px 0;text-align:right}
+.sub-card li{padding:8px 0;border-bottom:1px solid #f0eadb;font-size:.88rem;color:var(--text-light)}
+.sub-card li::before{content:'✓';color:var(--success);font-weight:700;margin-left:8px}
+.sub-card li:last-child{border-bottom:none}
+.sub-card .btn{width:100%;margin-top:10px;padding:12px;font-size:1rem}
+.sub-info{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:30px;margin:30px 0}
+.sub-info h3{font-family:Cairo,sans-serif;font-size:1.1rem;font-weight:700;color:var(--primary);margin-bottom:15px;padding-bottom:8px;border-bottom:2px solid var(--accent)}
+.sub-info p{font-size:.9rem;color:var(--text-light);line-height:1.8}
+.sub-contact{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:20px;margin:20px 0}
+.sub-contact div{text-align:center;padding:15px;background:#f9f7f2;border-radius:var(--radius)}
+.sub-contact .icon{font-size:1.5rem;margin-bottom:5px}
+.sub-contact .title{font-weight:700;color:var(--primary);font-size:.9rem}
+.sub-contact .val{color:var(--text-light);font-size:.85rem;margin-top:3px}
+@media(max-width:600px){.sub-hero{padding:30px 0}.sub-hero h1{font-size:1.5rem}.sub-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<div class="top-bar"><div class="container">
+<span class="top-left">
+      <button class="lang-btn" id="lang-btn" onclick="toggleLangUI()">Français</button>
+  <span class="weather-widget"><span id="wi">🌤</span> <span id="wt">21°</span>
+  <select id="wc" onchange="updW()">
+    <option value="tiaret">تيارت</option><option value="tissemsilt">تسمسيلت</option><option value="medea">المدية</option><option value="djelfa">الجلفة</option><option value="laghouat">الأغواط</option><option value="saida">سعيدة</option><option value="mascara">معسكر</option><option value="relizane">غليزان</option>
+  </select></span>
+</span>
+<span class="date">📅 <span id="cdate"></span></span>
+</div></div>
+
+<header class="header"><div class="container">
+<div class="logo-wrapper">
+<div class="logo-mark">
+<svg width="40" height="40" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
+  <path d="M8 20h3" stroke="#d4a843" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+  <path d="M13 15v10" stroke="#d4a843" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+  <path d="M18 11v18" stroke="#d4a843" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+  <path d="M23 7v26" stroke="#d4a843" stroke-width="2.8" stroke-linecap="round" fill="none"/>
+  <path d="M28 13v14" stroke="#d4a843" stroke-width="2" stroke-linecap="round" fill="none" opacity=".7"/>
+  <path d="M32 17v6" stroke="#d4a843" stroke-width="1.5" stroke-linecap="round" fill="none" opacity=".5"/>
+</svg>
+</div>
+<div class="logo-text">
+<div class="logo"><span class="logo-accent">الصوت</span> المحلي</div>
+<div class="subtitle">نشرية جهوية للإعلام العام و التنمية المحلية</div>
+<div class="tagline">إهمام محلي...التزام وطني</div>
+</div>
+</div>
+</div></header>
+
+<nav class="nav"><div class="container">
+<a href="index.html">🏠 الرئيسية</a>
+<div class="nav-dropdown">
+<a class="nav-dropdown-trigger">🌐 خدمات وإعلانات ▾</a>
+<div class="nav-dropdown-menu">
+<a href="https://www.wilaya-tiaret.dz/" target="_blank">🏛 ولاية تيارت</a>
+<a href="https://www.interieur.gov.dz/" target="_blank">📜 وزارة الداخلية</a>
+</div></div>
+<a href="news.html">📰 الأخبار</a>
+<a href="activities.html">📸 النشاطات</a>
+<a href="announcements.html">📢 الإعلانات</a>
+<a href="timeline.html">📅 الأرشفة الزمنية</a>
+<a href="archive.html">📂 الأرشيف</a>
+<a href="subscribe.html" style="background:var(--accent);color:var(--primary-dark);padding:8px 14px;border-radius:6px;font-weight:700;margin-right:5px">🔔 اشتراك</a>
+</div></nav>
+
+<div class="sub-hero">
+<div class="container">
+<h1>🎯 اختر اشتراكك وادعم صحيفة حرة وملتزمة</h1>
+<p>احصل على جميع محتويات ومزايا الصوت المحلي على جميع شاشاتك</p>
+</div>
+</div>
+
+<div class="container">
+
+<div class="sub-grid">
+
+<div class="sub-card">
+<h3>📰 العادي</h3>
+<div class="price">800 <small>دج</small></div>
+<p style="color:#888;font-size:.85rem;margin-bottom:10px">لمدة 3 أشهر</p>
+<ul>
+<li>النسخة الرقمية</li>
+<li>كل محتوياتك بدون إعلانات</li>
+<li>مزايا نادي المشتركين</li>
+<li>جميع المقالات المميزة</li>
+<li>الملاحق الرقمية</li>
+<li>جميع الإصدارات الرقمية و الأرشيف</li>
+</ul>
+<a href="contact.html" class="btn btn-accent">اشتراك</a>
+</div>
+
+<div class="sub-card featured">
+<div class="badge">عرض ترويجي</div>
+<h3>⭐ الممتاز</h3>
+<div class="price">899 <small>دج</small></div>
+<p style="color:#888;font-size:.85rem;margin-bottom:10px"><s style="color:#aaa">1,000 دج</s> لمدة 3 أشهر</p>
+<ul>
+<li>النسخة الرقمية</li>
+<li>كل محتوياتك بدون إعلانات</li>
+<li>مزايا نادي المشتركين</li>
+<li>جميع المقالات المميزة</li>
+<li>الملاحق الرقمية</li>
+<li>جميع الإصدارات الرقمية و الأرشيف</li>
+</ul>
+<a href="contact.html" class="btn btn-primary">اشتراك</a>
+</div>
+
+<div class="sub-card">
+<div class="badge">أفضل صفقة</div>
+<h3>🏆 الممتاز+</h3>
+<div class="price">1,200 <small>دج</small></div>
+<p style="color:#888;font-size:.85rem;margin-bottom:10px">لمدة 3 أشهر</p>
+<ul>
+<li>النسخة الرقمية</li>
+<li>كل محتوياتك بدون إعلانات</li>
+<li>مزايا نادي المشتركين</li>
+<li>جميع المقالات المميزة</li>
+<li>الملاحق الرقمية</li>
+<li>جميع الإصدارات الرقمية و الأرشيف</li>
+</ul>
+<a href="contact.html" class="btn btn-accent">اشتراك</a>
+</div>
+
+</div>
+
+<div class="sub-info">
+<h3>🏢 إشتراك المؤسسات</h3>
+<p>للإدارات والمؤسسات، استفد من سعر تفضيلي. تواصل معنا عبر البريد الإلكتروني : <a href="mailto:contact@sout-mahalli.dz" style="color:var(--primary-light)">contact@sout-mahalli.dz</a></p>
+</div>
+
+<div class="sub-info">
+<h3>🔐 الدفع الآمن</h3>
+<p>يمكنك دفع اشتراكك بأمان باستخدام البطاقة البنكية بفضل نظام الأمان CIB الذي يتضمن عملية تشفير بتقنية SSL.</p>
+<div class="sub-contact">
+<div>
+<div class="icon">📞</div>
+<div class="title">خدمة الاشتراكات</div>
+<div class="val">+213(0)0557 20 00 06</div>
+</div>
+<div>
+<div class="icon">✉️</div>
+<div class="title">البريد الإلكتروني</div>
+<div class="val">contact@sout-mahalli.dz</div>
+</div>
+<div>
+<div class="icon">🏛</div>
+<div class="title">المقر</div>
+<div class="val">Cité Avenir, Tiaret, Algeria, 14000</div>
+</div>
+</div>
+</div>
+
+<div class="sub-info" style="font-size:.78rem;color:#888;line-height:1.8">
+<p>المعلومات المجمعة أعلاه مخصصة لمنصة الصوت المحلي لضمان إنشاء وإدارة حسابك، بالإضافة إلى الاشتراكات والخدمات الأخرى المشترك فيها. تحصل على حق الوصول إلى وتصحيح بياناتك الشخصية، بالإضافة إلى طلب حذفها في حدود القانون. للحصول على معرفة كافية حول حقوقك بالإضافة إلى ممارساتنا في معالجة وحماية البيانات الشخصية، ندعوك للاطلاع على <a href="privacy.html" style="color:var(--primary-light)">سياسة الخصوصية</a> الخاصة بنا.</p>
+</div>
+
+</div>
+
+<footer class="footer"><div class="container">
+<div class="footer-row">
+  <div class="footer-row-right">
+    <div class="footer-brand">📡 <span>الصوت</span> المحلي</div>
+    <div class="footer-desc">يومية جزائرية مستقلة - صدرت عام 2026</div>
+  </div>
+  <div class="footer-row-left">
+    <div class="newsletter">
+      <input type="email" id="nl-email" placeholder="📧 البريد الإلكتروني">
+      <button onclick="subNewsletter()">اشتراك</button>
+      <div class="note">بإشتراكك معنا ستتمكن من الحصول على آخر الأخبار التي سيتم نشرها في الموقع</div>
+    </div>
+  </div>
+</div>
+<div class="footer-row" style="justify-content:space-between">
+<div class="footer-links">
+<a href="terms.html">الأحكام والشروط</a><span class="sep">|</span>
+<a href="privacy.html">سياسة الخصوصية</a><span class="sep">|</span>
+<a href="advertising.html">الإشهار</a><span class="sep">|</span>
+<a href="contact.html">اتصل بنا</a><span class="sep">|</span>
+<a href="about.html">من نحن</a>
+</div>
+<div class="footer-social">
+<span class="label">تابعونا على :</span>
+<a href="https://facebook.com/boukanoun.abdeldjebbar" target="_blank" rel="noopener">📘 فيسبوك</a>
+<a href="https://twitter.com/SoutElMahalli" target="_blank" rel="noopener">🐦 تويتر</a>
+<a href="https://youtube.com/@SoutElMahalli" target="_blank" rel="noopener">▶️ يوتيوب</a>
+<a href="https://t.me/SoutElMahalli" target="_blank" rel="noopener">✈️ تلغرام</a>
+<a href="https://instagram.com/sout_el_mahalli" target="_blank" rel="noopener">📸 إنستغرام</a>
+</div>
+</div>
+<div class="footer-row">
+  <div class="footer-copy">
+    جميع الحقوق محفوظة © 2026 الصوت المحلي
+    <div class="dev">تصميم وتطوير Zoheir IT Solutions - Ain kermes/Tiaret</div>
+  </div>
+  <div class="footer-contact">
+    <div>📞 Tel: +213(0)0557 20 00 06</div>
+    <div>✉️ eMail:</div>
+  </div>
+</div>
+<div class="ad-space">مساحة إشهارية</div>
+</div></footer>
+
+<script src="js/i18n.js"></script>
+<script>
+var WD={tiaret:{t:21,i:'🌤'},tissemsilt:{t:23,i:'⛅'},medea:{t:19,i:'🌥'},djelfa:{t:17,i:'⛅'},laghouat:{t:25,i:'☀️'},saida:{t:22,i:'🌤'},mascara:{t:24,i:'☀️'},relizane:{t:26,i:'☀️'}};function updW(){var w=WD[document.getElementById('wc').value];document.getElementById('wt').textContent=w.t+'°';document.getElementById('wi').textContent=w.i}
+function subNewsletter(){var e=document.getElementById('nl-email');var v=e.value.trim();if(!v||!v.includes('@')){alert('📧 الرجاء إدخال بريد إلكتروني صحيح');return}if(location.protocol==='file:'){localStorage.setItem('nl_'+Date.now(),v);e.value='';alert('✅ تم الاشتراك في النشرة البريدية بنجاح');return}var b=document.querySelector('base').href;fetch(b+'api/subscribe',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:v})}).then(function(r){return r.json()}).then(function(d){alert(d.message||d.error);if(!d.error)e.value=''}).catch(function(){alert('✅ تم الاشتراك في النشرة البريدية بنجاح');localStorage.setItem('nl_'+Date.now(),v);e.value=''})}
+(function(){var d=new Date();document.getElementById('cdate').textContent=d.toLocaleDateString('ar-SA',{weekday:'long',calendar:'islamic'})+' '+d.toLocaleDateString('ar-SA',{day:'numeric',month:'long',calendar:'islamic'})+' '+d.toLocaleDateString('ar-SA',{year:'numeric',calendar:'islamic'})+' الموافق ل '+d.toLocaleDateString('ar-DZ',{day:'numeric',month:'long',year:'numeric'})})();
+</script>
+</body>
+</html>
+

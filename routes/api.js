@@ -75,4 +75,21 @@ router.get('/recent', (req, res) => {
   res.json(items);
 });
 
+router.post('/subscribe', (req, res) => {
+  const { email } = req.body;
+  if (!email || !email.includes('@')) return res.status(400).json({ error: 'بريد إلكتروني غير صحيح' });
+  const existing = db.findOne('subscribers', s => s.email === email);
+  if (existing) return res.json({ message: 'هذا البريد مسجل مسبقاً' });
+  db.insert('subscribers', { email, ip: req.ip, active: true });
+  res.json({ message: '✅ تم الاشتراك في النشرة البريدية بنجاح' });
+});
+
+router.post('/contact', (req, res) => {
+  const { name, email, message } = req.body;
+  if (!name || !email || !message) return res.status(400).json({ error: 'جميع الحقول مطلوبة' });
+  if (!email.includes('@')) return res.status(400).json({ error: 'بريد إلكتروني غير صحيح' });
+  db.insert('contacts', { name, email, message, ip: req.ip, read: false });
+  res.json({ message: '✅ تم استلام رسالتك بنجاح، سنتواصل معك قريباً' });
+});
+
 module.exports = router;

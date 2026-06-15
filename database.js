@@ -174,6 +174,7 @@ class JsonDB {
   insert(table, data) {
     const id = this._nextId(table);
     const record = { id, ...data, created_at: new Date().toISOString() };
+    if (!this.tables[table]) this.tables[table] = [];
     this.tables[table].push(record);
     this._saveNow(table);
     this.cache.invalidate(table);

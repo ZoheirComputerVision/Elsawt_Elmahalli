@@ -1,0 +1,63 @@
+<!DOCTYPE html><html lang="ar" dir="rtl"><head><script>(function(){var b=document.createElement('base');b.href=location.protocol==='file:'?location.pathname.substring(0,location.pathname.lastIndexOf('/')+1):'/';document.head.insertBefore(b,document.head.firstChild)})();</script><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>الأحكام والشروط | الصوت المحلي</title><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Cairo:wght@700;800&family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet"><link rel="stylesheet" href="css/style.css"></head><body><div class="top-bar"><div class="container"><span class="top-left"><button class="lang-btn" id="lang-btn" onclick="toggleLangUI()">Français</button><span class="weather-widget"><span id="wi">🌤</span> <span id="wt">21°</span><select id="wc" onchange="updW()"><option value="tiaret">تيارت</option><option value="tissemsilt">تسمسيلت</option><option value="medea">المدية</option><option value="djelfa">الجلفة</option><option value="laghouat">الأغواط</option><option value="saida">سعيدة</option><option value="mascara">معسكر</option><option value="relizane">غليزان</option></select></span></span><span class="date">📅 <span id="cdate"></span></span></div></div>
+<header class="header"><div class="container"><div class="logo-wrapper"><div class="logo-mark"><svg width="40" height="40" viewBox="0 0 40 40"><path d="M8 20h3" stroke="#d4a843" stroke-width="2.5" stroke-linecap="round" fill="none"/><path d="M13 15v10" stroke="#d4a843" stroke-width="2.5" stroke-linecap="round" fill="none"/><path d="M18 11v18" stroke="#d4a843" stroke-width="2.5" stroke-linecap="round" fill="none"/><path d="M23 7v26" stroke="#d4a843" stroke-width="2.8" stroke-linecap="round" fill="none"/><path d="M28 13v14" stroke="#d4a843" stroke-width="2" stroke-linecap="round" fill="none" opacity=".7"/><path d="M32 17v6" stroke="#d4a843" stroke-width="1.5" stroke-linecap="round" fill="none" opacity=".5"/></svg></div><div class="logo-text"><div class="logo"><span class="logo-accent">الصوت</span> المحلي</div><div class="subtitle">نشرية جهوية للإعلام العام و التنمية المحلية</div><div class="tagline">إهمام محلي...التزام وطني</div></div></div></div></header>
+<nav class="nav"><div class="container"><a href="index.html">🏠 الرئيسية</a><div class="nav-dropdown"><a class="nav-dropdown-trigger">🌐 خدمات وإعلانات ▾</a><div class="nav-dropdown-menu"><a href="https://www.wilaya-tiaret.dz/" target="_blank">🏛 ولاية تيارت</a><a href="https://www.interieur.gov.dz/" target="_blank">📜 وزارة الداخلية</a></div></div><a href="news.html">📰 الأخبار</a><a href="activities.html">📸 النشاطات</a><a href="announcements.html">📢 الإعلانات</a><a href="timeline.html">📅 الأرشفة الزمنية</a><a href="archive.html">📂 الأرشيف</a><a href="subscribe.html" style="background:var(--accent);color:var(--primary-dark);padding:8px 14px;border-radius:6px;font-weight:700;margin-right:5px">🔔 اشتراك</a></div></nav>
+<div class="sub-hero" style="padding:30px 0"><div class="container"><h1 style="font-family:Cairo,sans-serif;font-size:1.6rem;font-weight:800">📜 الأحكام والشروط</h1><p style="color:var(--accent-light)">آخر تحديث: 2026</p></div></div>
+<main class="container" style="max-width:800px;padding:30px 20px;line-height:2;color:var(--text-light)">
+<h2 style="font-family:Cairo,sans-serif;color:var(--primary);font-size:1.2rem;margin-top:25px">1. قبول الشروط</h2>
+<p>باستخدامك لمنصة الصوت المحلي، فإنك توافق على هذه الأحكام والشروط. إذا كنت لا توافق على أي من هذه الشروط، يرجى عدم استخدام المنصة.</p>
+<h2 style="font-family:Cairo,sans-serif;color:var(--primary);font-size:1.2rem;margin-top:25px">2. المحتوى</h2>
+<p>جميع المواد المنشورة على المنصة محمية بموجب حقوق الملكية الفكرية. لا يجوز إعادة نشر أو توزيع المحتوى دون إذن خطي مسبق.</p>
+<h2 style="font-family:Cairo,sans-serif;color:var(--primary);font-size:1.2rem;margin-top:25px">3. المسؤولية</h2>
+<p>تبذل المنصة قصارى جهدها لضمان دقة المعلومات المنشورة، ولكنها لا تتحمل مسؤولية أي أضرار ناتجة عن استخدام المعلومات.</p>
+<h2 style="font-family:Cairo,sans-serif;color:var(--primary);font-size:1.2rem;margin-top:25px">4. التعديلات</h2>
+<p>تحتفظ المنصة بالحق في تعديل هذه الشروط في أي وقت. سيتم إخطار المستخدمين بالتغييرات الجوهرية عبر البريد الإلكتروني.</p>
+</main>
+<footer class="footer"><div class="container">
+<div class="footer-row">
+  <div class="footer-row-right">
+    <div class="footer-brand">📡 <span>الصوت</span> المحلي</div>
+    <div class="footer-desc">يومية جزائرية مستقلة - صدرت عام 2026</div>
+  </div>
+  <div class="footer-row-left">
+    <div class="newsletter">
+      <input type="email" id="nl-email" placeholder="📧 البريد الإلكتروني">
+      <button onclick="subNewsletter()">اشتراك</button>
+      <div class="note">بإشتراكك معنا ستتمكن من الحصول على آخر الأخبار التي سيتم نشرها في الموقع</div>
+    </div>
+  </div>
+</div>
+<div class="footer-row" style="justify-content:space-between">
+  <div class="footer-links">
+    <a href="terms.html">الأحكام والشروط</a><span class="sep">|</span>
+    <a href="privacy.html">سياسة الخصوصية</a><span class="sep">|</span>
+    <a href="advertising.html">الإشهار</a><span class="sep">|</span>
+    <a href="contact.html">اتصل بنا</a><span class="sep">|</span>
+    <a href="about.html">من نحن</a>
+  </div>
+  <div class="footer-social">
+    <span class="label">تابعونا على :</span>
+    <a href="https://facebook.com/boukanoun.abdeldjebbar" target="_blank" rel="noopener">📘 فيسبوك</a>
+    <a href="https://twitter.com/SoutElMahalli" target="_blank" rel="noopener">🐦 تويتر</a>
+    <a href="https://youtube.com/@SoutElMahalli" target="_blank" rel="noopener">▶️ يوتيوب</a>
+    <a href="https://t.me/SoutElMahalli" target="_blank" rel="noopener">✈️ تلغرام</a>
+    <a href="https://instagram.com/sout_el_mahalli" target="_blank" rel="noopener">📸 إنستغرام</a>
+  </div>
+</div>
+<div class="footer-row">
+  <div class="footer-copy">
+    جميع الحقوق محفوظة © 2026 الصوت المحلي
+    <div class="dev">تصميم وتطوير Zoheir IT Solutions - Ain kermes/Tiaret</div>
+  </div>
+  <div class="footer-contact">
+    <div>📞 Tel: +213(0)0557 20 00 06</div>
+    <div>✉️ eMail:</div>
+  </div>
+</div>
+<div class="ad-space">مساحة إشهارية</div>
+</div></footer>
+<script>
+var WD={tiaret:{t:21,i:'🌤'},tissemsilt:{t:23,i:'⛅'},medea:{t:19,i:'🌥'},djelfa:{t:17,i:'⛅'},laghouat:{t:25,i:'☀️'},saida:{t:22,i:'🌤'},mascara:{t:24,i:'☀️'},relizane:{t:26,i:'☀️'}};function updW(){var w=WD[document.getElementById('wc').value];document.getElementById('wt').textContent=w.t+'°';document.getElementById('wi').textContent=w.i}
+function subNewsletter(){var e=document.getElementById('nl-email');var v=e.value.trim();if(!v||!v.includes('@')){alert('📧 الرجاء إدخال بريد إلكتروني صحيح');return}if(location.protocol==='file:'){localStorage.setItem('nl_'+Date.now(),v);e.value='';alert('✅ تم الاشتراك في النشرة البريدية بنجاح');return}var b=document.querySelector('base').href;fetch(b+'api/subscribe',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:v})}).then(function(r){return r.json()}).then(function(d){alert(d.message||d.error);if(!d.error)e.value=''}).catch(function(){alert('✅ تم الاشتراك في النشرة البريدية بنجاح');localStorage.setItem('nl_'+Date.now(),v);e.value=''})}
+(function(){var d=new Date();document.getElementById('cdate').textContent=d.toLocaleDateString('ar-SA',{weekday:'long',calendar:'islamic'})+' '+d.toLocaleDateString('ar-SA',{day:'numeric',month:'long',calendar:'islamic'})+' '+d.toLocaleDateString('ar-SA',{year:'numeric',calendar:'islamic'})+' الموافق ل '+d.toLocaleDateString('ar-DZ',{day:'numeric',month:'long',year:'numeric'})})();
+</script>
+<script src="js/i18n.js"></script></body></html>

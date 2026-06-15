@@ -8,7 +8,7 @@ module.exports = {
   ADMIN_DIR: path.join(__dirname, 'admin'),
 
   SCHOOL_NAME: 'الصوت المحلي',
-  SCHOOL_SUB: 'نشرية جهوية للإعلام العام - ولاية تيارت',
+  SCHOOL_SUB: 'نشرية جهوية للإعلام العام و التنمية المحلية',
   ADMIN_TEAM: 'Zoheir IT Solutions',
 
   AI: {
@@ -16,7 +16,7 @@ module.exports = {
     REVIEW_THRESHOLD: 0.5,
     MAX_DRAFT_AGE_HOURS: 72,
     COLLECTOR_INTERVAL_MIN: 30,
-    FACEBOOK_PAGE: 'TiaretNewsOfficial',
+    FACEBOOK_PAGE: 'boukanoun.abdeldjebbar',
     MINISTRY_URL: 'https://www.wilaya-tiaret.dz/',
   },
 

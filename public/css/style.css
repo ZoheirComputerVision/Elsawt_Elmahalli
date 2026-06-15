@@ -1,3 +1,9 @@
+@font-face { font-family: 'Cairo'; font-weight: 700; font-display: swap; src: url('../fonts/Cairo-Bold.woff2') format('woff2'); }
+@font-face { font-family: 'Cairo'; font-weight: 800; font-display: swap; src: url('../fonts/Cairo-ExtraBold.woff2') format('woff2'); }
+@font-face { font-family: 'Tajawal'; font-weight: 400; font-display: swap; src: url('../fonts/Tajawal-Regular.woff2') format('woff2'); }
+@font-face { font-family: 'Tajawal'; font-weight: 500; font-display: swap; src: url('../fonts/Tajawal-Medium.woff2') format('woff2'); }
+@font-face { font-family: 'Tajawal'; font-weight: 700; font-display: swap; src: url('../fonts/Tajawal-Bold.woff2') format('woff2'); }
+
 :root {
   --primary: #1a3a5c;
   --primary-dark: #0f2440;
@@ -5,6 +11,7 @@
   --accent: #c8a951;
   --accent-light: #e8d48b;
   --gold: #b8860b;
+  --gold-rich: #d4a843;
   --text: #1a1a2e;
   --text-light: #4a4a5a;
   --bg: #f4f1ea;
@@ -72,21 +79,41 @@ a:hover { color: var(--accent); }
   position: relative; z-index: 1;
   text-align: center;
 }
+.header .logo-wrapper {
+  display: flex; align-items: center; justify-content: center;
+  gap: 14px; margin-bottom: 5px;
+}
+.header .logo-mark {
+  flex-shrink: 0;
+}
+.header .logo-mark svg {
+  display: block;
+}
+.header .logo-text {
+  display: flex; flex-direction: column; align-items: flex-start;
+}
 .header .logo {
-  font-family: 'Noto Kufi Arabic', sans-serif;
-  font-size: 2.2rem; font-weight: 800;
+  font-family: 'Cairo', 'Tajawal', sans-serif;
+  font-size: 2.5rem; font-weight: 800;
   color: white;
-  margin-bottom: 5px;
   letter-spacing: -0.5px;
 }
-.header .logo span { color: var(--accent); }
-.header .subtitle {
-  font-size: 1rem; color: var(--accent-light);
-  font-weight: 400; opacity: 0.9;
+.header .logo .logo-accent {
+  color: var(--gold-rich);
 }
-.header .school-type {
-  font-size: 0.85rem; color: #aaa;
-  margin-top: 5px;
+.header .subtitle {
+  font-size: 0.95rem; color: #e0c878;
+  font-weight: 500; opacity: 0.92;
+  font-family: 'Tajawal', 'Noto Naskh Arabic', sans-serif;
+}
+.header .tagline {
+  font-family: 'Tajawal', 'Noto Naskh Arabic', sans-serif;
+  font-size: 0.8rem;
+  color: #d4a843;
+  opacity: 0.8;
+  margin-top: 3px;
+  font-weight: 500;
+  letter-spacing: 0.3px;
 }
 
 /* ── Navigation ── */
@@ -253,7 +280,7 @@ a:hover { color: var(--accent); }
 }
 
 .section-title {
-  font-family: 'Noto Kufi Arabic', sans-serif;
+  font-family: 'Cairo', sans-serif;
   font-size: 1.4rem; font-weight: 700;
   color: var(--primary);
   margin: 30px 0 20px;
@@ -276,7 +303,7 @@ a:hover { color: var(--accent); }
   border: 1px solid var(--border);
 }
 .sidebar h3 {
-  font-family: 'Noto Kufi Arabic', sans-serif;
+  font-family: 'Cairo', sans-serif;
   font-size: 1rem; font-weight: 700;
   color: var(--primary);
   margin-bottom: 15px;
@@ -306,7 +333,7 @@ a:hover { color: var(--accent); }
 }
 .stat-card:hover { box-shadow: var(--shadow); }
 .stat-card .number {
-  font-family: 'Noto Kufi Arabic', sans-serif;
+  font-family: 'Cairo', sans-serif;
   font-size: 2rem; font-weight: 800;
   color: var(--primary);
 }
@@ -345,7 +372,7 @@ a:hover { color: var(--accent); }
 /* ── Year Sections ── */
 .year-section { margin: 30px 0; }
 .year-section h2 {
-  font-family: 'Noto Kufi Arabic', sans-serif;
+  font-family: 'Cairo', sans-serif;
   font-size: 1.8rem; color: var(--primary);
   margin-bottom: 20px;
   text-align: center;
@@ -372,14 +399,7 @@ a:hover { color: var(--accent); }
 }
 .footer h3 { color: white; font-size: 1.1rem; margin-bottom: 5px; }
 .footer p { font-size: 0.85rem; }
-.footer .ai-note {
-  margin-top: 15px; font-size: 0.8rem;
-  color: var(--accent-light);
-}
-.footer .powered {
-  margin-top: 8px; font-size: 0.75rem;
-  color: #666;
-}
+
 
 /* ── Loading ── */
 .loading {
@@ -423,7 +443,7 @@ a:hover { color: var(--accent); }
   color: white; padding: 15px 20px;
   display: flex; justify-content: space-between; align-items: center;
 }
-.admin-header h1 { font-size: 1.1rem; font-family: 'Noto Kufi Arabic', sans-serif; }
+.admin-header h1 { font-size: 1.1rem; font-family: 'Cairo', sans-serif; }
 .admin-header .user-info { display: flex; align-items: center; gap: 15px; font-size: 0.85rem; }
 .admin-nav {
   background: white;
@@ -587,7 +607,9 @@ select.form-control { cursor: pointer; }
 /* ── Responsive ── */
 @media (max-width: 900px) {
   .content-grid { grid-template-columns: 1fr; }
-  .header .logo { font-size: 1.5rem; }
+  .header .logo { font-size: 1.8rem; }
+  .header .logo-wrapper { gap: 10px; }
+  .header .logo-mark svg { width: 32px; height: 32px; }
   .hero-card { padding: 25px; min-height: 250px; }
   .hero-card h2 { font-size: 1.4rem; }
   .nav { overflow-x: auto; }
@@ -599,8 +621,11 @@ select.form-control { cursor: pointer; }
 
 @media (max-width: 600px) {
   .top-bar .container { flex-direction: column; gap: 5px; }
-  .header .logo { font-size: 1.2rem; }
-  .header .subtitle { font-size: 0.85rem; }
+  .header .logo { font-size: 1.4rem; }
+  .header .logo-wrapper { gap: 8px; }
+  .header .logo-mark svg { width: 28px; height: 28px; }
+  .header .subtitle { font-size: 0.8rem; }
+  .header .tagline { font-size: 0.65rem; }
   .hero-card { padding: 20px; min-height: 200px; }
   .hero-card h2 { font-size: 1.1rem; }
   .news-grid { grid-template-columns: 1fr; }
@@ -665,3 +690,12 @@ select.form-control { cursor: pointer; }
   border-radius: 12px;
   font-size: 0.8rem;
 }
+
+/* ── Top bar left (lang + weather) ── */
+.top-left{display:flex;align-items:center;gap:10px}
+.lang-btn{background:transparent;border:1px solid var(--accent);color:var(--accent-light);padding:1px 10px;border-radius:4px;font-family:Tajawal,sans-serif;font-size:.72rem;font-weight:700;cursor:pointer;transition:all .3s ease;white-space:nowrap}
+.lang-btn:hover{background:var(--accent);color:var(--primary-dark)}
+.weather-widget{display:inline-flex;align-items:center;gap:5px;font-size:.78rem;color:var(--accent-light);white-space:nowrap}
+.weather-widget select{background:rgba(255,255,255,.1);color:#fff;border:1px solid rgba(255,255,255,.2);border-radius:4px;padding:1px 4px;font-family:Tajawal,sans-serif;font-size:.72rem;cursor:pointer;outline:none}
+.weather-widget select option{background:var(--primary-dark);color:#fff}
+@media(max-width:700px){.top-left{gap:5px}.lang-btn{font-size:.65rem;padding:1px 6px}.weather-widget select{font-size:.65rem}.weather-widget{font-size:.7rem}}

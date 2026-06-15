@@ -11,7 +11,7 @@ function setCurrentDate() {
   const el = document.getElementById('current-date');
   if (!el) return;
   const now = new Date();
-  el.textContent = now.toLocaleDateString('ar-DZ', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+  el.textContent = now.toLocaleDateString('ar-SA',{weekday:'long',calendar:'islamic'})+' '+now.toLocaleDateString('ar-SA',{day:'numeric',month:'long',calendar:'islamic'})+' '+now.toLocaleDateString('ar-SA',{year:'numeric',calendar:'islamic'})+' الموافق ل '+now.toLocaleDateString('ar-DZ',{day:'numeric',month:'long',year:'numeric'});
 }
 
 function sourceBadge(item) {
