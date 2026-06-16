@@ -98,72 +98,20 @@ async function loadContent() {
   try {
     container.innerHTML = '<div class="loading">📡 جاري تحميل المحتوى...</div>';
 
-    // جلب المقالات الحديثة لكل تصنيف + الإحصائيات
+    // جلب المقالات الحديثة لكل تصنيف
     const catPromises = CATEGORY_ORDER.map(cat => API.getContent({ category: cat, limit: 4 }));
-    const [recent, stats, ...catResults] = await Promise.all([API.getRecent(), API.getStats(), ...catPromises]);
+    const [recent, ...catResults] = await Promise.all([API.getRecent(), ...catPromises]);
 
     let html = '<div class="content-grid">';
     html += '<div class="main-content">';
 
-    // ── Breaking News Ticker ──
-    if (recent && recent.length > 1) {
-      html += '<div class="breaking-news">';
-      html += '<span class="breaking-label">⚡ عاجل</span>';
-      html += '<div class="breaking-items"><div class="breaking-track">';
-      const tickerItems = recent.filter(r => r.importance === 'high' || true).slice(0, 6);
-      tickerItems.forEach(item => {
-        html += `<span class="breaking-item"><a href="/article/${item.id}">${item.title}</a></span>`;
-      });
-      // تكرار أول عنصر لضمان التمرير السلس
-      if (tickerItems.length > 1) {
-        html += `<span class="breaking-item"><a href="/article/${tickerItems[0].id}">${tickerItems[0].title}</a></span>`;
-      }
-      html += '</div></div></div>';
-    }
-
-    // ── Featured Article (مدمج مع الصورة) ──
+    // Hero: أهم خبر
     const heroItem = recent[0];
     if (heroItem) {
-      const catName = {'الوطن':'الوطن','اقتصاد':'اقتصاد','رياضة':'رياضة','العالم':'العالم','مجتمع':'مجتمع','اسلاميات':'اسلاميات','تكنولوجيا':'تكنولوجيا',news:'خبر',activity:'نشاط',announcement:'إعلان'}[heroItem.category] || 'خبر';
-      const imgSrc = heroItem.image_data || heroItem.image_url || '';
-      const bodyText = (heroItem.body || '').replace(/^[📰📸📢]\s*/, '').replace(/🗓.*?\n/, '');
-      html += '<div class="hero"><div class="featured-image">';
-      html += imgSrc ? `<img src="${imgSrc}" alt="${heroItem.title}" loading="lazy">` : `<div style="height:140px;background:linear-gradient(135deg,var(--primary),var(--primary-light));border-radius:var(--radius);"></div>`;
-      html += '<div class="featured-overlay">';
-      html += `<span class="featured-cat">${catName}</span>`;
-      html += `<h2>${heroItem.title}</h2>`;
-      html += `<p>${(heroItem.summary || bodyText).substring(0, 120)}...</p>`;
-      html += `<a href="/article/${heroItem.id}" class="btn btn-accent btn-sm" style="font-size:.78rem;padding:5px 14px;">قراءة المزيد ←</a>`;
-      html += '</div></div></div>';
+      html += '<div class="hero">' + createCard(heroItem, true) + '</div>';
     }
 
-    // ── Quick Stats ──
-    const publishedCount = stats.total_published || 0;
-    const officialCount = stats.total_published || 0; // تقريبي
-    const regionCount = 8; // ثابت: تيارت + 7 ولايات مجاورة
-    html += '<div class="quick-stats">';
-    html += `<div class="stat-item"><span class="stat-num">${publishedCount}</span><span class="stat-lbl">📰 مقال منشور</span></div>`;
-    html += `<div class="stat-item"><span class="stat-num">${officialCount > 0 ? Math.max(1, Math.floor(officialCount / 5)) : '~'}</span><span class="stat-lbl">🏛 مصدر رسمي</span></div>`;
-    html += `<div class="stat-item"><span class="stat-num">${regionCount}</span><span class="stat-lbl">📍 ولايات</span></div>`;
-    html += `<div class="stat-item"><span class="stat-num">📡</span><span class="stat-lbl">تحديث يومي</span></div>`;
-    html += '</div>';
-
-    // ── Quick Category Navigation ──
-    html += '<div class="cat-nav">';
-    const shortcuts = [
-      {cat:'الوطن', label:'الوطني', icon:'🇩🇿'},
-      {cat:'اقتصاد', label:'أخبار المنطقة', icon:'📍'},
-      {cat:'رياضة', label:'الرياضة', icon:'⚽'},
-      {cat:'مجتمع', label:'المجتمع', icon:'👥'},
-      {cat:'اسلاميات', label:'الثقافة', icon:'🕌'},
-      {cat:'تكنولوجيا', label:'التكنولوجيا', icon:'💻'},
-    ];
-    shortcuts.forEach(s => {
-      html += `<a href="news.html?cat=${encodeURIComponent(s.cat)}" class="cat-btn">${s.icon} ${s.label}</a>`;
-    });
-    html += '</div>';
-
-    // ── أقسام التصنيفات حسب الأولوية ──
+    // أقسام التصنيفات حسب الأولوية
     CATEGORY_ORDER.forEach((cat, idx) => {
       const data = catResults[idx];
       const items = (data.items || []).slice(0, 4);
@@ -311,6 +259,7 @@ function setupAutoRefresh() {
   const interval = parseInt(meta?.getAttribute('data-auto-refresh')) || 180000;
   setInterval(() => {
     loadContent();
+    loadStats();
   }, interval);
 }
 
