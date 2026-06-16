@@ -147,14 +147,12 @@ async function loadContent() {
     html += '  <div class="stats-col">';
     html += '    <div class="stats-grid">';
     if (stats) {
-      html += `      <div class="stat-mini"><span class="stat-num">${stats.total_published || 0}</span><span class="stat-lbl">📰 مقال منشور</span></div>`;
-      // Count unique sources
+      html += `      <div class="stat-mini"><div class="stat-icon">📰</div><span class="stat-num">${stats.total_published || 0}</span><span class="stat-lbl">مقال منشور</span></div>`;
       const srcCount = stats.by_category ? Object.keys(stats.by_category).length : 3;
-      html += `      <div class="stat-mini"><span class="stat-num">${srcCount}</span><span class="stat-lbl">📡 مصادر رسمية</span></div>`;
-      // Regions: count non-zero categories
+      html += `      <div class="stat-mini"><div class="stat-icon">📡</div><span class="stat-num">${srcCount}</span><span class="stat-lbl">مصادر رسمية</span></div>`;
       const regCount = Object.values(stats.by_category || {}).filter(v => v > 0).length || 1;
-      html += `      <div class="stat-mini"><span class="stat-num">${regCount}</span><span class="stat-lbl">📍 تغطية جهوية</span></div>`;
-      html += `      <div class="stat-mini"><span class="stat-num">🕐</span><span class="stat-lbl">${new Date().toLocaleDateString('ar-DZ',{hour:'2-digit',minute:'2-digit'})}</span></div>`;
+      html += `      <div class="stat-mini"><div class="stat-icon">📍</div><span class="stat-num">${regCount}</span><span class="stat-lbl">تغطية جهوية</span></div>`;
+      html += `      <div class="stat-mini"><div class="stat-icon">🕐</div><span class="stat-num">${new Date().toLocaleDateString('ar-DZ',{hour:'2-digit',minute:'2-digit'})}</span><span class="stat-lbl">آخر تحديث</span></div>`;
     }
     html += '    </div>';
     html += '  </div>';
