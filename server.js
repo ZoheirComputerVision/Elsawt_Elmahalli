@@ -41,11 +41,11 @@ const upload = multer({
   storage,
   limits: { fileSize: 10 * 1024 * 1024 },
   fileFilter: (req, file, cb) => {
-    const allowed = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/svg+xml'];
+    const allowed = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
     if (allowed.includes(file.mimetype)) {
       cb(null, true);
     } else {
-      cb(new Error('نوع الملف غير مدعوم. الأنواع المسموحة: JPG, PNG, GIF, WebP, SVG'), false);
+      cb(new Error('نوع الملف غير مدعوم. الأنواع المسموحة: JPG, PNG, GIF, WebP'), false);
     }
   },
 });
