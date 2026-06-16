@@ -74,6 +74,9 @@ class JsonDB {
       admin_actions: this._load('admin_actions'),
       settings: this._load('settings'),
       views: this._load('views'),
+      breaking_news: this._load('breaking_news'),
+      featured_stories: this._load('featured_stories'),
+      audit_log: this._load('audit_log'),
     };
     this._seedDefaults();
     this.initialized = true;
@@ -173,7 +176,7 @@ class JsonDB {
 
   insert(table, data) {
     const id = this._nextId(table);
-    const record = { id, ...data, created_at: new Date().toISOString() };
+    const record = { id, ...data, version: 1, created_at: new Date().toISOString() };
     if (!this.tables[table]) this.tables[table] = [];
     this.tables[table].push(record);
     this._saveNow(table);
@@ -181,21 +184,35 @@ class JsonDB {
     return record;
   }
 
-  update(table, id, data) {
+  update(table, id, data, modified_by) {
     const arr = this.tables[table];
     const idx = arr.findIndex(r => r.id === id);
     if (idx === -1) return null;
-    arr[idx] = { ...arr[idx], ...data, updated_at: new Date().toISOString() };
+    const prev = arr[idx];
+    const updates = {
+      ...data,
+      version: (prev.version || 1) + 1,
+      last_modified_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    };
+    if (modified_by) updates.last_modified_by = modified_by;
+    arr[idx] = { ...prev, ...updates };
     this._saveNow(table);
     this.cache.invalidate(table);
     return arr[idx];
   }
 
-  upsert(table, data, matchFn) {
+  upsert(table, data, matchFn, modified_by) {
     const arr = this.tables[table];
     const existing = matchFn ? arr.find(matchFn) : null;
     if (existing) {
-      Object.assign(existing, data, { updated_at: new Date().toISOString() });
+      const prev = existing;
+      Object.assign(existing, data, {
+        version: (prev.version || 1) + 1,
+        last_modified_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      });
+      if (modified_by) existing.last_modified_by = modified_by;
       this._saveNow(table);
       this.cache.invalidate(table);
       return existing;
