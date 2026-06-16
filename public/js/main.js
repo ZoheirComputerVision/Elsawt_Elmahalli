@@ -98,20 +98,81 @@ async function loadContent() {
   try {
     container.innerHTML = '<div class="loading">📡 جاري تحميل المحتوى...</div>';
 
-    // جلب المقالات الحديثة لكل تصنيف
+    const [recent, stats] = await Promise.all([
+      API.getRecent(),
+      API.getStats(),
+    ]);
+
     const catPromises = CATEGORY_ORDER.map(cat => API.getContent({ category: cat, limit: 4 }));
-    const [recent, ...catResults] = await Promise.all([API.getRecent(), ...catPromises]);
+    const catResults = await Promise.all(catPromises);
 
-    let html = '<div class="content-grid">';
-    html += '<div class="main-content">';
+    // Featured story = first recent item
+    const featured = recent[0];
 
-    // Hero: أهم خبر
-    const heroItem = recent[0];
-    if (heroItem) {
-      html += '<div class="hero">' + createCard(heroItem, true) + '</div>';
+    // Breaking news = items with high importance
+    const breakingItems = recent.filter(i => i.importance === 'high');
+
+    // Most important = high importance excluding featured
+    const importantItems = recent.filter(i =>
+      i.importance === 'high' && i.id !== featured?.id
+    ).slice(0, 4);
+
+    // Most read = fetch more items and sort by view_count
+    let mostRead = [];
+    try {
+      const allData = await API.getContent({ limit: 30 });
+      mostRead = (allData.items || []).sort((a, b) => (b.view_count || 0) - (a.view_count || 0)).slice(0, 5);
+    } catch (e) { /* silent */ }
+
+    let html = '';
+
+    // A. Breaking News Ticker
+    if (breakingItems.length > 0) {
+      const titles = breakingItems.map(item => item.title).join('  •  ');
+      html += '<div class="breaking-news-ticker">';
+      html += '  <span class="ticker-label">📢 عاجل</span>';
+      html += '  <div class="ticker-track">';
+      html += `    <span class="ticker-text">${titles}  •  ${titles}</span>`;
+      html += '  </div>';
+      html += '</div>';
     }
 
-    // أقسام التصنيفات حسب الأولوية
+    // B. Featured Story + Quick Stats side-by-side
+    html += '<div class="hero-stats-row">';
+    html += '  <div class="hero-col">';
+    if (featured) {
+      html += '<div class="hero">' + createCard(featured, true) + '</div>';
+    }
+    html += '  </div>';
+    html += '  <div class="stats-col">';
+    html += '    <div class="stats-grid">';
+    if (stats) {
+      html += `      <div class="stat-mini"><span class="stat-num">${stats.total_published || 0}</span><span class="stat-lbl">📰 مقال منشور</span></div>`;
+      // Count unique sources
+      const srcCount = stats.by_category ? Object.keys(stats.by_category).length : 3;
+      html += `      <div class="stat-mini"><span class="stat-num">${srcCount}</span><span class="stat-lbl">📡 مصادر رسمية</span></div>`;
+      // Regions: count non-zero categories
+      const regCount = Object.values(stats.by_category || {}).filter(v => v > 0).length || 1;
+      html += `      <div class="stat-mini"><span class="stat-num">${regCount}</span><span class="stat-lbl">📍 تغطية جهوية</span></div>`;
+      html += `      <div class="stat-mini"><span class="stat-num">🕐</span><span class="stat-lbl">${new Date().toLocaleDateString('ar-DZ',{hour:'2-digit',minute:'2-digit'})}</span></div>`;
+    }
+    html += '    </div>';
+    html += '  </div>';
+    html += '</div>';
+
+    // Start content grid
+    html += '<div class="content-grid">';
+    html += '  <div class="main-content">';
+
+    // C. Most Important News section
+    if (importantItems.length > 0) {
+      html += '<h3 class="section-title">⭐ أهم الأخبار <span class="badge">مهمة</span></h3>';
+      html += '<div class="news-grid important-grid">';
+      importantItems.forEach(item => { html += createCard(item); });
+      html += '</div>';
+    }
+
+    // D. Category sections by priority
     CATEGORY_ORDER.forEach((cat, idx) => {
       const data = catResults[idx];
       const items = (data.items || []).slice(0, 4);
@@ -123,8 +184,23 @@ async function loadContent() {
       html += '</div>';
     });
 
-    html += '</div>'; // close main-content
-    html += '<div class="sidebar" id="sidebar"></div>'; // sidebar
+    html += '  </div>'; // close main-content
+    html += '  <div class="sidebar" id="sidebar">';
+
+    // E. Most Read in sidebar
+    if (mostRead.length > 0) {
+      html += '    <div class="sidebar-mostread">';
+      html += '      <h3>🔥 الأكثر قراءة</h3>';
+      html += '      <ul>';
+      mostRead.forEach((item, i) => {
+        const views = item.view_count || 0;
+        html += `        <li><span class="read-rank">${i + 1}</span><a href="/article/${item.id}">${item.title}</a><span class="read-views">👁 ${views}</span></li>`;
+      });
+      html += '      </ul>';
+      html += '    </div>';
+    }
+
+    html += '  </div>'; // close sidebar
     html += '</div>'; // close content-grid
     container.innerHTML = html;
     loadSidebar();
@@ -148,7 +224,6 @@ async function loadSidebar() {
       'مجتمع': '👥', 'اسلاميات': '🕌', 'تكنولوجيا': '💻', news: '📰', activity: '📸', announcement: '📢',
     };
 
-    // ترتيب التصنيفات حسب CATEGORY_ORDER أولاً
     const sortedCats = [...(categories || [])].sort((a, b) => {
       const ia = CATEGORY_ORDER.indexOf(a.category);
       const ib = CATEGORY_ORDER.indexOf(b.category);
@@ -158,14 +233,17 @@ async function loadSidebar() {
       return 0;
     });
 
-    sidebar.innerHTML = `
-      <div>
+    // Append to existing sidebar content (most-read already rendered by loadContent)
+    const extra = document.createElement('div');
+    extra.className = 'sidebar-extra';
+    extra.innerHTML = `
+      <div class="sidebar-cats">
         <h3>📂 التصنيفات</h3>
         <ul>
           ${sortedCats.map(c => `<li><a href="news.html?cat=${encodeURIComponent(c.category)}">${catIcons[c.category] || '📰'} ${catNames[c.category] || c.category} (${c.count})</a></li>`).join('')}
         </ul>
       </div>
-      <div>
+      <div class="sidebar-recent">
         <h3>🕐 آخر المنشورات</h3>
         <ul>
           ${(recent || []).slice(0, 8).map(item => `
@@ -175,6 +253,7 @@ async function loadSidebar() {
         </ul>
       </div>
     `;
+    sidebar.appendChild(extra);
   } catch (e) { /* silent */ }
 }
 
@@ -259,7 +338,6 @@ function setupAutoRefresh() {
   const interval = parseInt(meta?.getAttribute('data-auto-refresh')) || 180000;
   setInterval(() => {
     loadContent();
-    loadStats();
   }, interval);
 }
 

@@ -224,9 +224,11 @@ a:hover { color: var(--accent); }
 .hero-card {
   background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
   color: white;
-  padding: 40px;
-  min-height: 350px;
-  display: flex; flex-direction: column; justify-content: flex-end;
+  padding: 32px;
+  min-height: 280px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
   position: relative;
 }
 .hero-card .hero-category {
@@ -642,8 +644,8 @@ select.form-control { cursor: pointer; }
   .header .logo { font-size: 1.8rem; }
   .header .logo-wrapper { gap: 10px; }
   .header .logo-mark svg { width: 32px; height: 32px; }
-  .hero-card { padding: 25px; min-height: 250px; }
-  .hero-card h2 { font-size: 1.4rem; }
+  .hero-card { padding: 24px; min-height: 220px; }
+  .hero-card h2 { font-size: 1.3rem; }
   .nav { overflow-x: auto; }
   .nav .container { flex-wrap: nowrap; }
   .nav a { padding: 10px 12px; font-size: 0.8rem; }
@@ -666,7 +668,7 @@ select.form-control { cursor: pointer; }
   .header .newsletter input { min-width: 0; width: 100%; }
   .header .newsletter button { width: 100%; }
   .header .newsletter .note { text-align: center; }
-  .hero-card { padding: 20px; min-height: 200px; }
+  .hero-card { padding: 18px; min-height: 180px; }
   .hero-card h2 { font-size: 1.1rem; }
   .news-grid { grid-template-columns: 1fr; }
   .gallery { grid-template-columns: repeat(2, 1fr); }
