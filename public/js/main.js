@@ -98,16 +98,24 @@ async function loadContent() {
   try {
     container.innerHTML = '<div class="loading">📡 جاري تحميل المحتوى...</div>';
 
-    const [recent, stats] = await Promise.all([
+    const [recent, stats, featuredData] = await Promise.all([
       API.getRecent(),
       API.getStats(),
+      API.getFeatured().catch(() => ({ items: [] })),
     ]);
 
     const catPromises = CATEGORY_ORDER.map(cat => API.getContent({ category: cat, limit: 4 }));
     const catResults = await Promise.all(catPromises);
 
-    // Featured story = first recent item
-    const featured = recent[0];
+    // Featured story: primary source = curated featured, fallback = most recent
+    let featured = null;
+    if (featuredData.items && featuredData.items.length > 0) {
+      const first = featuredData.items[0];
+      featured = first.article || first;
+    }
+    if (!featured) {
+      featured = recent[0];
+    }
 
     // Breaking news = items with high importance
     const breakingItems = recent.filter(i => i.importance === 'high');
