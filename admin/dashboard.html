@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>لوحة التحكم | Zoheir IT Solutions</title>
   <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="../css/admin.css">
 </head>
 <body class="admin-body">
   <div class="admin-header">
@@ -105,6 +107,7 @@
   </div>
 
   <script src="../js/api.js"></script>
+  <script src="../js/dashboard.js"></script>
   <script>
     function checkAuth() { if (!localStorage.getItem('admin_token')) window.location.href = '/admin'; }
     checkAuth();
@@ -204,6 +207,10 @@
       document.getElementById('edit-source').value = data.source_name || '';
       document.getElementById('edit-date').value = data.event_date || '';
       document.getElementById('edit-modal').classList.add('active');
+      const imgPanel = document.getElementById('article-image-panel');
+      if (imgPanel && typeof openImagePanel === 'function') {
+        setTimeout(() => openImagePanel(id, data.image_data), 100);
+      }
     }
     function closeEditModal() {
       document.getElementById('edit-modal').classList.remove('active');
@@ -360,10 +367,40 @@
           <input type="date" class="form-control" id="edit-date">
         </div>
       </form>
+      <!-- Article Image Panel -->
+      <div id="article-image-panel" class="article-image-panel" style="display:none;">
+        <div class="article-image-panel-title"><i class="fas fa-image"></i> صورة المقال</div>
+        <div id="article-image-preview" class="article-image-preview"></div>
+        <div id="article-image-none" class="article-image-none" style="display:none;">
+          <i class="fas fa-camera" style="opacity:0.4;font-size:1.2rem;"></i> لا توجد صورة للمقال
+        </div>
+        <div id="article-image-actions" class="article-image-actions"></div>
+      </div>
     </div>
     <div class="modal-footer">
       <button class="btn btn-primary" onclick="saveEdit()">💾 حفظ التعديلات</button>
       <button class="btn" onclick="closeEditModal()">إلغاء</button>
+    </div>
+  </div>
+</div>
+
+<!-- Library Selection Modal -->
+<div class="modal-overlay" id="library-modal">
+  <div class="modal" style="max-width:650px;">
+    <div class="modal-header">
+      <h3><i class="fas fa-images"></i> اختيار صورة من المكتبة</h3>
+      <button class="btn btn-sm" onclick="document.getElementById('library-modal').classList.remove('active')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="library-search-bar">
+        <input type="text" id="library-search" placeholder="بحث..." oninput="loadLibraryGrid(1)">
+        <select id="library-category" class="form-control" onchange="loadLibraryGrid(1)"><option value="">جميع التصنيفات</option></select>
+      </div>
+      <div id="library-grid" class="library-grid"><div class="loading">جاري التحميل...</div></div>
+      <div id="library-pagination"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" onclick="document.getElementById('library-modal').classList.remove('active')">إلغاء</button>
     </div>
   </div>
 </div>

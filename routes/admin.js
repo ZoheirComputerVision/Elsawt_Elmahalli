@@ -84,11 +84,66 @@ router.post('/content/:id/reject', async (req, res) => {
   } catch (e) { res.status(500).json({ success: false, error: e.message }); }
 });
 
+// ── Article Image Management ──
+
+router.post('/content/:id/image', async (req, res) => {
+  try {
+    const id = parseInt(req.params.id);
+    const content = db.get('processed_content', id);
+    if (!content) return res.status(404).json({ success: false, error: 'المقال غير موجود' });
+
+    const { media_id, remove } = req.body;
+
+    // Remove image
+    if (remove === true) {
+      if (content.image_data) {
+        const allMedia = db.query('media');
+        const linked = allMedia.find(m => m.path === content.image_data);
+        if (linked) {
+          mediaService.removeUsage(linked.id, id, 'article');
+        }
+      }
+      const updated = db.update('processed_content', id, { image_data: null });
+      db.saveNow('processed_content');
+      return res.json({ success: true, image_data: null, message: 'تمت إزالة الصورة' });
+    }
+
+    // Set or replace image
+    if (!media_id) return res.status(400).json({ success: false, error: 'media_id مطلوب' });
+    const media = db.get('media', parseInt(media_id));
+    if (!media) return res.status(404).json({ success: false, error: 'الوسيط غير موجود' });
+
+    // If article already has image, remove old usage
+    if (content.image_data) {
+      const oldMedia = db.query('media').find(m => m.path === content.image_data);
+      if (oldMedia && oldMedia.id !== parseInt(media_id)) {
+        try { mediaService.removeUsage(oldMedia.id, id, 'article'); } catch {}
+      }
+    }
+
+    // Add new usage
+    mediaService.addUsage(parseInt(media_id), id, 'article');
+    const updated = db.update('processed_content', id, { image_data: media.path });
+    db.saveNow('processed_content');
+    res.json({ success: true, image_data: media.path, media });
+  } catch (e) {
+    res.status(500).json({ success: false, error: e.message });
+  }
+});
+
 router.post('/content/:id/delete', async (req, res) => {
   try {
     const id = parseInt(req.params.id);
     const content = db.get('processed_content', id);
     if (!content) return res.status(404).json({ success: false, error: 'غير موجود' });
+    // Cleanup linked media usage
+    if (content.image_data) {
+      const allMedia = db.query('media');
+      const linkedMedia = allMedia.find(m => m.path === content.image_data || m.id === parseInt(content.image_data));
+      if (linkedMedia) {
+        try { mediaService.removeUsage(linkedMedia.id, id, 'article'); } catch {}
+      }
+    }
     db.delete('processed_content', id);
     db.saveNow('processed_content');
     const archived = db.findOne('archive', a => a.content_id === id);
