@@ -8,11 +8,37 @@ const analyzer = require('../modules/analyzer');
 const writer = require('../modules/writer');
 const publisher = require('../modules/publisher');
 const archive = require('../modules/archiver');
+const mediaService = require('../modules/media');
+const audit = require('../modules/audit');
+
+// ── Auth middleware ──
+const VALID_TOKEN = 'admin-token';
+
+function requireAuth(req, res, next) {
+  const token = req.headers['x-admin-auth'];
+  if (token === VALID_TOKEN) {
+    req.user = { username: 'الإدارة', role: 'admin' };
+    return next();
+  }
+  res.status(401).json({ error: 'غير مصرح. يرجى تسجيل الدخول' });
+}
+
+const ROLE_HIERARCHY = { admin: 3, editor: 2, author: 1 };
+
+function requireRole(role) {
+  return (req, res, next) => {
+    requireAuth(req, res, () => {
+      if ((ROLE_HIERARCHY[req.user?.role] || 0) >= (ROLE_HIERARCHY[role] || 0)) return next();
+      res.status(403).json({ error: 'صلاحية غير كافية لهذا الإجراء' });
+    });
+  };
+}
 
 router.post('/auth', (req, res) => {
   const { username, password } = req.body;
   if (username === 'zoheir' && password === 'admin2026') {
-    return res.json({ success: true, token: 'admin-token', user: 'Zoheir IT Solutions' });
+    const userData = { username: 'Zoheir IT Solutions', role: 'admin' };
+    return res.json({ success: true, token: VALID_TOKEN, user: userData.username, role: userData.role });
   }
   res.status(401).json({ success: false, error: 'بيانات الدخول غير صحيحة' });
 });
@@ -192,6 +218,102 @@ router.post('/scheduler/run-collector', async (req, res) => {
     await s.runCollector();
     res.json({ success: true });
   } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// ── Media Management ──
+
+router.get('/media', requireAuth, (req, res) => {
+  try {
+    const filters = {
+      category: req.query.category,
+      uploader: req.query.uploader,
+      search: req.query.search,
+      date_from: req.query.date_from,
+      date_to: req.query.date_to,
+      mime_type: req.query.mime_type,
+      limit: parseInt(req.query.limit) || 20,
+      offset: parseInt(req.query.offset) || 0,
+    };
+    const result = mediaService.query(filters);
+    res.json(result);
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+router.post('/media/upload', requireRole('editor'), (req, res) => {
+  const upload = req.app.get('upload');
+  if (!upload) return res.status(500).json({ error: 'مرفع الملفات غير مهيأ' });
+  upload.single('file')(req, res, (err) => {
+    if (err) {
+      return res.status(400).json({ error: err.message });
+    }
+    if (!req.file) return res.status(400).json({ error: 'الملف مطلوب' });
+    try {
+      const record = mediaService.upload(req.file, {
+        alt_text: req.body.alt_text || '',
+        caption: req.body.caption || '',
+        category: req.body.category || '',
+        uploader: req.user?.username || 'system',
+      });
+      res.status(201).json(record);
+    } catch (e) {
+      res.status(400).json({ error: e.message });
+    }
+  });
+});
+
+router.put('/media/:id', requireRole('editor'), (req, res) => {
+  try {
+    const id = parseInt(req.params.id);
+    const updates = {
+      alt_text: req.body.alt_text,
+      caption: req.body.caption,
+      category: req.body.category,
+      uploader: req.user?.username,
+    };
+    const updated = mediaService.updateMetadata(id, updates);
+    res.json(updated);
+  } catch (e) {
+    const status = e.message.includes('غير موجود') ? 404 : 400;
+    res.status(status).json({ error: e.message });
+  }
+});
+
+router.delete('/media/:id', requireRole('editor'), (req, res) => {
+  try {
+    const id = parseInt(req.params.id);
+    const result = mediaService.delete(id);
+    if (!result.success) {
+      if (result.error.includes('غير موجود')) return res.status(404).json(result);
+      return res.status(409).json(result);
+    }
+    res.status(204).end();
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+router.post('/media/bulk-delete', requireRole('editor'), (req, res) => {
+  try {
+    const { ids } = req.body;
+    if (!Array.isArray(ids) || ids.length === 0) {
+      return res.status(400).json({ error: 'المعرفات مطلوبة' });
+    }
+    const deleted = [];
+    const blocked = [];
+    for (const id of ids) {
+      const result = mediaService.delete(parseInt(id));
+      if (result.success) {
+        deleted.push(id);
+      } else {
+        blocked.push({ id, ...result });
+      }
+    }
+    res.json({ deleted, blocked });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
 });
 
 module.exports = router;

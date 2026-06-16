@@ -92,4 +92,37 @@ router.post('/contact', (req, res) => {
   res.json({ message: '✅ تم استلام رسالتك بنجاح، سنتواصل معك قريباً' });
 });
 
+// ── Media API ──
+const mediaService = require('../modules/media');
+
+router.get('/media', (req, res) => {
+  try {
+    const filters = {
+      category: req.query.category,
+      uploader: req.query.uploader,
+      search: req.query.search,
+      date_from: req.query.date_from,
+      date_to: req.query.date_to,
+      limit: parseInt(req.query.limit) || 20,
+      offset: parseInt(req.query.offset) || 0,
+    };
+    const result = mediaService.query(filters);
+    const page = Math.floor((filters.offset / filters.limit)) + 1;
+    res.json({ items: result.items, total: result.total, page, limit: filters.limit });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+router.get('/media/:id', (req, res) => {
+  try {
+    const id = parseInt(req.params.id);
+    const item = mediaService.getById(id);
+    if (!item) return res.status(404).json({ error: 'الوسيط غير موجود' });
+    res.json(item);
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
 module.exports = router;
