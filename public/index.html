@@ -24,10 +24,18 @@ a:hover{color:var(--accent)}
 .top-bar .container{display:flex;justify-content:space-between;align-items:center;max-width:1200px;margin:0 auto;padding:0 20px}
 .top-bar .date{color:var(--accent-light);font-weight:500}
 .top-bar .ai-badge{background:var(--accent);color:var(--primary-dark);padding:2px 12px;border-radius:12px;font-size:.7rem;font-weight:700}
-.header{background:linear-gradient(135deg,var(--primary),var(--primary-dark));color:#fff;padding:30px 0 20px;border-bottom:4px solid var(--accent);position:relative;overflow:hidden}
+.header{background:linear-gradient(135deg,var(--primary),var(--primary-dark));color:#fff;padding:18px 0;border-bottom:4px solid var(--accent);position:relative;overflow:hidden}
 .header::before{content:'';position:absolute;top:0;left:0;right:0;bottom:0;background:url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")}
-.header .container{max-width:1200px;margin:0 auto;padding:0 20px;position:relative;z-index:1;text-align:right}
-.header .logo-wrapper{display:flex;align-items:center;justify-content:flex-start;gap:14px;margin-bottom:5px}
+.header .container{max-width:1200px;margin:0 auto;padding:12px 20px;position:relative;z-index:1;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px}
+.header .logo-wrapper{display:flex;align-items:center;justify-content:flex-start;gap:14px}
+.header .newsletter{display:flex;flex-direction:column;align-items:flex-end;gap:5px;max-width:340px}
+.header .newsletter .nl-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:flex-end}
+.header .newsletter input{direction:rtl;padding:7px 12px;border-radius:6px;border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.1);color:#fff;font-family:Tajawal,sans-serif;font-size:.82rem;min-width:175px;outline:none;transition:var(--transition);width:auto}
+.header .newsletter input::placeholder{color:#aaa}
+.header .newsletter input:focus{border-color:var(--accent);background:rgba(255,255,255,.15)}
+.header .newsletter button{padding:7px 18px;border-radius:6px;border:none;background:var(--accent);color:var(--primary-dark);font-family:Tajawal,sans-serif;font-size:.82rem;font-weight:700;cursor:pointer;transition:var(--transition);white-space:nowrap}
+.header .newsletter button:hover{background:var(--accent-light)}
+.header .newsletter .note{color:#aaa;font-size:.72rem;text-align:left;line-height:1.5;width:100%}
 .header .logo-mark{flex-shrink:0}
 .header .logo-mark svg{display:block}
 .header .logo-text{display:flex;flex-direction:column;align-items:flex-start}
@@ -92,17 +100,9 @@ a:hover{color:var(--accent)}
 .footer-row{padding:18px 0;border-bottom:1px solid rgba(255,255,255,.06);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:15px}
 .footer-row:last-of-type{border-bottom:none}
 .footer-row-right{display:flex;flex-direction:column;align-items:flex-start;gap:4px;text-align:right}
-.footer-row-left{display:flex;flex-direction:column;align-items:flex-end;gap:4px;text-align:left}
 .footer-brand{font-family:Cairo,sans-serif;font-size:1.3rem;font-weight:700;color:#fff}
 .footer-brand span{color:var(--gold-rich)}
 .footer-desc{color:#888;font-size:.82rem}
-.footer .newsletter{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-.footer .newsletter input{direction:rtl;padding:8px 14px;border-radius:6px;border:1px solid rgba(255,255,255,.15);background:rgba(255,255,255,.08);color:#fff;font-family:Tajawal,sans-serif;font-size:.85rem;min-width:220px;outline:none;transition:var(--transition)}
-.footer .newsletter input::placeholder{color:#888}
-.footer .newsletter input:focus{border-color:var(--accent);background:rgba(255,255,255,.12)}
-.footer .newsletter button{padding:8px 20px;border-radius:6px;border:none;background:var(--accent);color:var(--primary-dark);font-family:Tajawal,sans-serif;font-size:.85rem;font-weight:700;cursor:pointer;transition:var(--transition);white-space:nowrap}
-.footer .newsletter button:hover{background:var(--accent-light)}
-.footer .newsletter .note{color:#777;font-size:.75rem;width:100%;text-align:right;margin-top:2px}
 .footer-links{display:flex;gap:8px 18px;flex-wrap:wrap;justify-content:flex-start}
 .footer-links a{color:var(--accent-light);font-size:.85rem;transition:var(--transition);white-space:nowrap}
 .footer-links a:hover{color:var(--accent)}
@@ -136,8 +136,8 @@ a:hover{color:var(--accent)}
 .btn-sm{padding:6px 14px;font-size:.8rem}
 .alert{padding:12px 18px;border-radius:var(--radius);margin-bottom:15px;font-size:.9rem;display:flex;align-items:center;gap:10px}
 .alert-info{background:#dbeafe;color:#1e40af;border:1px solid #bfdbfe}
-@media(max-width:900px){.content-grid{grid-template-columns:1fr}.header .logo{font-size:1.8rem}.header .logo-wrapper{gap:10px}.header .logo-mark svg{width:32px;height:32px}.hero-card{padding:25px;min-height:250px}.hero-card h2{font-size:1.4rem}.nav{overflow-x:auto}.nav .container{flex-wrap:nowrap}.nav a{padding:10px 12px;font-size:.8rem}.news-grid{grid-template-columns:1fr}}
-@media(max-width:600px){.top-bar .container{flex-direction:column;gap:5px}.header .logo{font-size:1.4rem}.header .logo-wrapper{gap:8px}.header .logo-mark svg{width:28px;height:28px}.header .subtitle{font-size:.8rem}.header .tagline{font-size:.65rem}.hero-card{padding:20px;min-height:200px}.hero-card h2{font-size:1.1rem}.news-grid{grid-template-columns:1fr}.footer-row{flex-direction:column;align-items:flex-start}.footer-row-left,.footer-row-right{align-items:flex-start}.footer .newsletter input{min-width:170px}.footer-links{gap:6px 12px}.footer-social{gap:8px}.footer-contact{text-align:right}}
+@media(max-width:900px){.content-grid{grid-template-columns:1fr}.header .container{flex-direction:column;align-items:stretch;gap:12px}.header .logo-wrapper{align-self:flex-start}.header .newsletter{align-items:stretch;max-width:none}.header .newsletter .nl-row{justify-content:flex-start}.header .newsletter input{flex:1;min-width:160px}.header .logo{font-size:1.8rem}.header .logo-wrapper{gap:10px}.header .logo-mark svg{width:32px;height:32px}.hero-card{padding:25px;min-height:250px}.hero-card h2{font-size:1.4rem}.nav{overflow-x:auto}.nav .container{flex-wrap:nowrap}.nav a{padding:10px 12px;font-size:.8rem}.news-grid{grid-template-columns:1fr}}
+@media(max-width:600px){.top-bar .container{flex-direction:column;gap:5px}.header{padding:14px 0}.header .container{flex-direction:column;align-items:stretch;gap:10px}.header .logo-wrapper{align-self:flex-start}.header .logo{font-size:1.4rem}.header .logo-wrapper{gap:8px}.header .logo-mark svg{width:28px;height:28px}.header .subtitle{font-size:.8rem}.header .tagline{font-size:.65rem}.header .newsletter{align-items:stretch;max-width:none}.header .newsletter .nl-row{flex-direction:column;align-items:stretch}.header .newsletter input{min-width:0;width:100%}.header .newsletter button{width:100%}.header .newsletter .note{text-align:center}.hero-card{padding:20px;min-height:200px}.hero-card h2{font-size:1.1rem}.news-grid{grid-template-columns:1fr}.footer-row{flex-direction:column;align-items:flex-start}.footer-links{gap:6px 12px}.footer-social{gap:8px}.footer-contact{text-align:right}}
 </style>
 </head>
 <body>
@@ -169,6 +169,13 @@ a:hover{color:var(--accent)}
 <div class="subtitle">نشرية جهوية للإعلام العام و التنمية المحلية</div>
 <div class="tagline">اهتمام محلي... التزام وطني</div>
 </div>
+</div>
+<div class="newsletter">
+  <div class="nl-row">
+    <input type="email" id="nl-email" placeholder="📧 البريد الإلكتروني">
+    <button onclick="subNewsletter()">اشتراك</button>
+  </div>
+  <div class="note">بإشتراكك معنا ستتمكن من الحصول على آخر الأخبار التي سيتم نشرها في الموقع</div>
 </div>
 </div></header>
 
@@ -204,17 +211,8 @@ a:hover{color:var(--accent)}
 <footer class="footer"><div class="container">
 
 <div class="footer-row">
-  <div class="footer-row-right">
-    <div class="footer-brand">📡 <span>الصوت</span> المحلي</div>
-    <div class="footer-desc">يومية جزائرية مستقلة - صدرت عام 2026</div>
-  </div>
-  <div class="footer-row-left">
-    <div class="newsletter">
-      <input type="email" id="nl-email" placeholder="📧 البريد الإلكتروني">
-      <button onclick="subNewsletter()">اشتراك</button>
-      <div class="note">بإشتراكك معنا ستتمكن من الحصول على آخر الأخبار التي سيتم نشرها في الموقع</div>
-    </div>
-  </div>
+  <div class="footer-brand">📡 <span>الصوت</span> المحلي</div>
+  <div class="footer-desc">يومية جزائرية مستقلة - صدرت عام 2026</div>
 </div>
 
 <div class="footer-row" style="justify-content:space-between">
