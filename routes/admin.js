@@ -281,6 +281,79 @@ router.post('/scheduler/run-collector', async (req, res) => {
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
+// ── Featured Stories ──
+const featured = require('../modules/featured');
+
+router.get('/featured-stories', requireAuth, (req, res) => {
+  try {
+    const result = featured.list({
+      is_active: req.query.is_active,
+      search: req.query.search,
+      limit: req.query.limit,
+      offset: req.query.offset,
+    });
+    res.json(result);
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+router.post('/featured-stories', requireRole('editor'), (req, res) => {
+  try {
+    const { article_id, featured_order, is_active } = req.body;
+    if (!article_id) return res.status(400).json({ error: 'article_id مطلوب' });
+    const record = featured.create({
+      article_id,
+      featured_order,
+      is_active,
+      created_by: req.user?.username || 'system',
+    });
+    audit.log(req.user?.username || 'system', 'featured.create', 'featured_stories', record.id, { article_id });
+    res.status(201).json(record);
+  } catch (e) {
+    const status = e.message.includes('غير موجود') || e.message.includes('مسبقاً') ? 409 : 400;
+    res.status(status).json({ error: e.message });
+  }
+});
+
+router.put('/featured-stories/:id', requireRole('editor'), (req, res) => {
+  try {
+    const id = parseInt(req.params.id);
+    const record = featured.update(id, req.body);
+    audit.log(req.user?.username || 'system', 'featured.update', 'featured_stories', id, req.body);
+    res.json(record);
+  } catch (e) {
+    const status = e.message.includes('غير موجود') ? 404 : 400;
+    res.status(status).json({ error: e.message });
+  }
+});
+
+router.delete('/featured-stories/:id', requireRole('editor'), (req, res) => {
+  try {
+    const id = parseInt(req.params.id);
+    const result = featured.remove(id);
+    audit.log(req.user?.username || 'system', 'featured.delete', 'featured_stories', id, {});
+    res.json(result);
+  } catch (e) {
+    const status = e.message.includes('غير موجود') ? 404 : 400;
+    res.status(status).json({ error: e.message });
+  }
+});
+
+router.post('/featured-stories/reorder', requireRole('editor'), (req, res) => {
+  try {
+    const { id, direction } = req.body;
+    if (!id || !direction) return res.status(400).json({ error: 'id و direction مطلوبان' });
+    if (!['up', 'down'].includes(direction)) return res.status(400).json({ error: 'direction يجب أن يكون up أو down' });
+    const result = featured.reorder(parseInt(id), direction);
+    audit.log(req.user?.username || 'system', 'featured.reorder', 'featured_stories', id, { direction });
+    res.json(result);
+  } catch (e) {
+    const status = e.message.includes('غير موجود') ? 404 : 400;
+    res.status(status).json({ error: e.message });
+  }
+});
+
 // ── Media Management ──
 
 router.get('/media', requireAuth, (req, res) => {

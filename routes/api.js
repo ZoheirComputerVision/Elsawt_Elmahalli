@@ -91,6 +91,16 @@ router.get('/search', (req, res) => {
   res.json({ items, total: items.length, query: q });
 });
 
+router.get('/featured', (req, res) => {
+  try {
+    const featured = require('../modules/featured');
+    const items = featured.getActive();
+    res.json({ items, total: items.length });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
 router.get('/recent', (req, res) => {
   const items = db.query('processed_content', i => i.status === 'published')
     .sort((a, b) => (b.published_at || '').localeCompare((a.published_at || '')))
