@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>إدارة المستخدمين | لوحة التحكم</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="../css/admin.css">
+  <link rel="stylesheet" href="../css/admin-users.css">
+</head>
+<body class="admin-body">
+  <div class="admin-header">
+    <h1>🔧 لوحة تحكم الصوت المحلي</h1>
+    <div class="user-info">
+      <span id="admin-user">المشرف</span>
+      <a href="/" class="btn btn-sm btn-accent">🏠 الموقع</a>
+      <button class="btn btn-sm btn-danger" onclick="logout()">🚪 خروج</button>
+    </div>
+  </div>
+  <div class="admin-nav">
+    <a href="/admin/dashboard.html">📊 لوحة القيادة</a>
+    <a href="/admin/review.html">📝 مراجعة المحتوى</a>
+    <a href="/admin/media.html">🖼 مكتبة الوسائط</a>
+    <a href="/admin/featured.html">⭐ الخبر الرئيسي</a>
+    <a href="/admin/breaking.html">📢 الأخبار العاجلة</a>
+    <a href="/admin/users.html" class="active">👥 المستخدمون</a>
+    <a href="/admin/logs.html">📋 سجل AI</a>
+    <a href="/admin/settings.html">⚙️ الإعدادات</a>
+  </div>
+  <div class="admin-content">
+    <!-- Stats Bar -->
+    <div class="users-stats" id="users-stats">
+      <div class="users-stat"><div class="num" id="stat-total">0</div><div class="lbl">المجموع</div></div>
+      <div class="users-stat"><div class="num" id="stat-active">0</div><div class="lbl">نشط</div></div>
+      <div class="users-stat"><div class="num" id="stat-publishers">0</div><div class="lbl">ناشرون</div></div>
+      <div class="users-stat"><div class="num" id="stat-editors">0</div><div class="lbl">رؤساء تحرير</div></div>
+      <div class="users-stat"><div class="num" id="stat-journalists">0</div><div class="lbl">صحفيون</div></div>
+    </div>
+
+    <!-- Filters & Actions -->
+    <div class="users-toolbar">
+      <div class="users-search">
+        <i class="fas fa-search"></i>
+        <input type="text" id="users-search" placeholder="بحث بالاسم أو البريد..." oninput="debouncedLoad()">
+      </div>
+      <select id="users-role-filter" class="form-control" onchange="loadUsers()">
+        <option value="">جميع الأدوار</option>
+        <option value="publisher">ناشر</option>
+        <option value="editor_in_chief">رئيس تحرير</option>
+        <option value="journalist">صحفي</option>
+      </select>
+      <select id="users-status-filter" class="form-control" onchange="loadUsers()">
+        <option value="">الكل</option>
+        <option value="true">نشط فقط</option>
+        <option value="false">موقوف فقط</option>
+      </select>
+      <button class="btn btn-primary" onclick="openCreateModal()">+ إضافة مستخدم</button>
+    </div>
+
+    <!-- Users Table -->
+    <div class="admin-card">
+      <div class="admin-card-header">
+        <span>👥 قائمة المستخدمين</span>
+        <span id="users-count" style="background:#e0e7ff;padding:2px 12px;border-radius:12px;font-size:0.8rem;">0</span>
+      </div>
+      <div class="admin-card-body" id="users-list">
+        <div class="loading">جاري التحميل...</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Create/Edit Modal -->
+  <div class="modal-overlay" id="user-modal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 id="user-modal-title">➕ إضافة مستخدم جديد</h3>
+        <button class="btn btn-sm" onclick="closeModal()">✕</button>
+      </div>
+      <div class="modal-body">
+        <form id="user-form">
+          <div class="form-group">
+            <label>الاسم الكامل <span class="required">*</span></label>
+            <input type="text" class="form-control" id="u-fullName" required>
+          </div>
+          <div class="form-group">
+            <label>اسم المستخدم <span class="required">*</span></label>
+            <input type="text" class="form-control" id="u-username" required>
+          </div>
+          <div class="form-group">
+            <label>البريد الإلكتروني</label>
+            <input type="email" class="form-control" id="u-email">
+          </div>
+          <div class="form-group">
+            <label>رقم الهاتف</label>
+            <input type="text" class="form-control" id="u-phone">
+          </div>
+          <div class="form-group" id="u-password-group">
+            <label>كلمة المرور <span class="required">*</span></label>
+            <input type="password" class="form-control" id="u-password" minlength="4">
+          </div>
+          <div class="form-group">
+            <label>الدور <span class="required">*</span></label>
+            <select class="form-control" id="u-role">
+              <option value="publisher">ناشر (مدير النشرية)</option>
+              <option value="editor_in_chief" selected>رئيس التحرير</option>
+              <option value="journalist">صحفي</option>
+            </select>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-primary" id="user-modal-submit" onclick="submitUser()">💾 حفظ</button>
+        <button class="btn" onclick="closeModal()">إلغاء</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Role Change Modal -->
+  <div class="modal-overlay" id="role-modal">
+    <div class="modal" style="max-width:400px;">
+      <div class="modal-header">
+        <h3>🔄 تغيير الدور</h3>
+        <button class="btn btn-sm" onclick="document.getElementById('role-modal').classList.remove('active')">✕</button>
+      </div>
+      <div class="modal-body">
+        <p id="role-change-info">تغيير دور المستخدم</p>
+        <div class="form-group">
+          <label>الدور الجديد</label>
+          <select class="form-control" id="role-select">
+            <option value="publisher">ناشر (مدير النشرية)</option>
+            <option value="editor_in_chief">رئيس التحرير</option>
+            <option value="journalist">صحفي</option>
+          </select>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-warning" onclick="submitRoleChange()">🔄 تغيير</button>
+        <button class="btn" onclick="document.getElementById('role-modal').classList.remove('active')">إلغاء</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Reset Password Modal -->
+  <div class="modal-overlay" id="password-modal">
+    <div class="modal" style="max-width:400px;">
+      <div class="modal-header">
+        <h3>🔑 إعادة تعيين كلمة المرور</h3>
+        <button class="btn btn-sm" onclick="document.getElementById('password-modal').classList.remove('active')">✕</button>
+      </div>
+      <div class="modal-body">
+        <p id="password-reset-info">إعادة تعيين كلمة المرور للمستخدم</p>
+        <div class="form-group">
+          <label>كلمة المرور الجديدة</label>
+          <input type="password" class="form-control" id="new-password" minlength="4" placeholder="أدخل كلمة المرور الجديدة">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-warning" onclick="submitPasswordReset()">🔑 تعيين</button>
+        <button class="btn" onclick="document.getElementById('password-modal').classList.remove('active')">إلغاء</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="../js/api.js"></script>
+  <script src="../js/admin-users.js"></script>
+</body>
+</html>

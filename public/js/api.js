@@ -1,6 +1,12 @@
 const API = {
   base: '/api',
 
+  _adminHeaders(headers = {}) {
+    const token = localStorage.getItem('admin_token');
+    if (token) headers['x-admin-auth'] = token;
+    return headers;
+  },
+
   async _fetch(url, options = {}) {
     const timeout = options.timeout || 30000;
     const controller = new AbortController();
@@ -16,16 +22,34 @@ const API = {
     }
   },
 
-  async get(endpoint) {
-    const res = await this._fetch(this.base + endpoint);
+  async get(endpoint, admin = false) {
+    const headers = admin ? this._adminHeaders() : {};
+    const res = await this._fetch(this.base + endpoint, { headers });
     if (!res.ok) throw new Error(`API Error: ${res.status}`);
     return res.json();
   },
 
-  async post(endpoint, data) {
+  async post(endpoint, data, admin = false) {
+    const headers = this._adminHeaders({ 'Content-Type': 'application/json' });
+    if (!admin) delete headers['x-admin-auth'];
     const res = await this._fetch(this.base + endpoint, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers,
+      body: JSON.stringify(data),
+    });
+    if (!res.ok) {
+      let msg = `API Error: ${res.status}`;
+      try { const err = await res.json(); if (err.error) msg = err.error; } catch {}
+      throw new Error(msg);
+    }
+    return res.json();
+  },
+
+  async put(endpoint, data) {
+    const headers = this._adminHeaders({ 'Content-Type': 'application/json' });
+    const res = await this._fetch(this.base + endpoint, {
+      method: 'PUT',
+      headers,
       body: JSON.stringify(data),
     });
     if (!res.ok) {
@@ -54,26 +78,36 @@ const API = {
   // Admin API
   admin: {
     login: (username, password) => API.post('/admin/auth', { username, password }),
-    dashboard: () => API.get('/admin/dashboard'),
-    getContent: (params) => API.get(`/admin/content?${new URLSearchParams(params).toString()}`),
-    getContentById: (id) => API.get(`/admin/content/${id}`),
-    approve: (id) => API.post(`/admin/content/${id}/approve`),
-    reject: (id, reason) => API.post(`/admin/content/${id}/reject`, { reason }),
-    generate: (id) => API.post(`/admin/content/${id}/generate`),
-    removeItem: (id) => API.post(`/admin/content/${id}/delete`),
-    updateItem: (id, data) => API.post(`/admin/content/${id}/update`, data),
-    setArticleImage: (id, mediaId) => API.post(`/admin/content/${id}/image`, { media_id: mediaId }),
-    removeArticleImage: (id) => API.post(`/admin/content/${id}/image`, { remove: true }),
-    collect: () => API.post('/admin/collect'),
-    collectManual: (data) => API.post('/admin/collect/manual', data),
-    analyze: () => API.post('/admin/analyze'),
-    publish: () => API.post('/admin/publish'),
-    getLogs: (params) => API.get(`/admin/logs?${new URLSearchParams(params).toString()}`),
-    getSettings: () => API.get('/admin/settings'),
-    updateSetting: (key, value) => API.post('/admin/settings', { key, value }),
-    exportArchive: () => API.post('/admin/archive/export'),
-    getTimeline: () => API.get('/admin/archive/timeline'),
-    getSources: () => API.get('/admin/sources'),
-    runCollector: () => API.post('/admin/scheduler/run-collector'),
+    dashboard: () => API.get('/admin/dashboard', true),
+    getContent: (params) => API.get(`/admin/content?${new URLSearchParams(params).toString()}`, true),
+    getContentById: (id) => API.get(`/admin/content/${id}`, true),
+    approve: (id) => API.post(`/admin/content/${id}/approve`, null, true),
+    reject: (id, reason) => API.post(`/admin/content/${id}/reject`, { reason }, true),
+    generate: (id) => API.post(`/admin/content/${id}/generate`, null, true),
+    removeItem: (id) => API.post(`/admin/content/${id}/delete`, null, true),
+    updateItem: (id, data) => API.post(`/admin/content/${id}/update`, data, true),
+    setArticleImage: (id, mediaId) => API.post(`/admin/content/${id}/image`, { media_id: mediaId }, true),
+    removeArticleImage: (id) => API.post(`/admin/content/${id}/image`, { remove: true }, true),
+    collect: () => API.post('/admin/collect', null, true),
+    collectManual: (data) => API.post('/admin/collect/manual', data, true),
+    analyze: () => API.post('/admin/analyze', null, true),
+    publish: () => API.post('/admin/publish', null, true),
+    getLogs: (params) => API.get(`/admin/logs?${new URLSearchParams(params).toString()}`, true),
+    getSettings: () => API.get('/admin/settings', true),
+    updateSetting: (key, value) => API.post('/admin/settings', { key, value }, true),
+    exportArchive: () => API.post('/admin/archive/export', null, true),
+    getTimeline: () => API.get('/admin/archive/timeline', true),
+    getSources: () => API.get('/admin/sources', true),
+    runCollector: () => API.post('/admin/scheduler/run-collector', null, true),
+
+    // User management
+    getUsers: (params) => API.get(`/admin/users?${new URLSearchParams(params).toString()}`, true),
+    createUser: (data) => API.post('/admin/users', data, true),
+    updateUser: (id, data) => API.put(`/admin/users/${id}`, data),
+    deactivateUser: (id) => API.post(`/admin/users/${id}/deactivate`, null, true),
+    activateUser: (id) => API.post(`/admin/users/${id}/activate`, null, true),
+    changeUserRole: (id, role) => API.post(`/admin/users/${id}/role`, { role }, true),
+    resetUserPassword: (id, password) => API.post(`/admin/users/${id}/reset-password`, { password }, true),
+    logout: () => API.post('/admin/auth/logout', null, true),
   },
 };

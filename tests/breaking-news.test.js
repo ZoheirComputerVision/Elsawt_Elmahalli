@@ -215,17 +215,17 @@ app.use(express.json());
 app.use(express.static(path.join(__dirname, '..', 'public')));
 
 // Setup auth middleware for tests
-const VALID_TOKEN = 'admin-token';
+const usersModule = require('../modules/users');
 function requireAuth(req, res, next) {
   const token = req.headers['x-admin-auth'];
-  if (token === VALID_TOKEN) { req.user = { username: 'test', role: 'admin' }; return next(); }
+  const user = usersModule.authenticate(token);
+  if (user) { req.user = user; return next(); }
   res.status(401).json({ error: 'Unauthorized' });
 }
 function requireRole(role) {
   return (req, res, next) => {
     requireAuth(req, res, () => {
-      const hierarchy = { admin: 3, editor: 2, author: 1 };
-      if ((hierarchy[req.user?.role] || 0) >= (hierarchy[role] || 0)) return next();
+      if (usersModule.isAuthorized(req.user?.role, role)) return next();
       res.status(403).json({ error: 'Forbidden' });
     });
   };
@@ -329,70 +329,78 @@ startServer(async (err, port) => {
   if (err) { console.error('Server start failed:', err); process.exit(1); }
 
   let createdId = null;
+  let AUTH_TOKEN;
+
+  // Create test user and get real auth token
+  usersModule.createUser({ fullName: 'Test Admin', username: 'testadmin', password: 'testpass123', role: 'publisher', createdBy: 'system' });
+  const authResult = usersModule.login('testadmin', 'testpass123');
+  AUTH_TOKEN = authResult.token;
+
+  const AUTH = (extra) => ({ 'Content-Type': 'application/json', 'x-admin-auth': AUTH_TOKEN, ...extra });
 
   // Wait for server to be ready
   await new Promise(r => setTimeout(r, 200));
 
   await apiTest('api create: returns 201 with id', async () => {
-    const res = await httpReq('POST', '/api/admin/breaking-news', port, { 'Content-Type': 'application/json', 'x-admin-auth': 'admin-token' }, { title: 'API Breaking News' });
+    const res = await httpReq('POST', '/api/admin/breaking-news', port, AUTH(), { title: 'API Breaking News' });
     if (res.status !== 201) throw new Error(`Expected 201, got ${res.status}: ${JSON.stringify(res.body)}`);
     if (!res.body?.id) throw new Error('No id returned');
     createdId = res.body.id;
   });
 
   await apiTest('api create: rejects empty title', async () => {
-    const res = await httpReq('POST', '/api/admin/breaking-news', port, { 'Content-Type': 'application/json', 'x-admin-auth': 'admin-token' }, { title: '' });
+    const res = await httpReq('POST', '/api/admin/breaking-news', port, AUTH(), { title: '' });
     if (res.status === 201) throw new Error('Should have rejected empty title');
   });
 
   await apiTest('api list: returns 200', async () => {
-    const res = await httpReq('GET', '/api/admin/breaking-news', port, { 'x-admin-auth': 'admin-token' });
+    const res = await httpReq('GET', '/api/admin/breaking-news', port, AUTH());
     if (res.status !== 200) throw new Error(`Expected 200, got ${res.status}`);
   });
 
   await apiTest('api list: has items', async () => {
-    const res = await httpReq('GET', '/api/admin/breaking-news', port, { 'x-admin-auth': 'admin-token' });
+    const res = await httpReq('GET', '/api/admin/breaking-news', port, AUTH());
     if (!res.body?.items) throw new Error('No items in response');
   });
 
   await apiTest('api list: returns total', async () => {
-    const res = await httpReq('GET', '/api/admin/breaking-news', port, { 'x-admin-auth': 'admin-token' });
+    const res = await httpReq('GET', '/api/admin/breaking-news', port, AUTH());
     if (typeof res.body?.total !== 'number') throw new Error('Total not a number');
   });
 
   await apiTest('api update: returns 200', async () => {
     if (!createdId) throw new Error('No created item to update');
-    const res = await httpReq('PUT', `/api/admin/breaking-news/${createdId}`, port, { 'Content-Type': 'application/json', 'x-admin-auth': 'admin-token' }, { title: 'API Updated' });
+    const res = await httpReq('PUT', `/api/admin/breaking-news/${createdId}`, port, AUTH(), { title: 'API Updated' });
     if (res.status !== 200) throw new Error(`Expected 200, got ${res.status}`);
   });
 
   await apiTest('api update: changes title', async () => {
     if (!createdId) throw new Error('No created item');
-    const res = await httpReq('PUT', `/api/admin/breaking-news/${createdId}`, port, { 'Content-Type': 'application/json', 'x-admin-auth': 'admin-token' }, { title: 'API Updated Final' });
+    const res = await httpReq('PUT', `/api/admin/breaking-news/${createdId}`, port, AUTH(), { title: 'API Updated Final' });
     if (res.body?.title !== 'API Updated Final') throw new Error(`Title not updated: ${res.body?.title}`);
   });
 
   await apiTest('api reorder: returns 200', async () => {
     const r1 = breakingAPI.create({ title: 'Reorder A' });
     const r2 = breakingAPI.create({ title: 'Reorder B' });
-    const res = await httpReq('POST', '/api/admin/breaking-news/reorder', port, { 'Content-Type': 'application/json', 'x-admin-auth': 'admin-token' }, { id: r2.id, direction: 'up' });
+    const res = await httpReq('POST', '/api/admin/breaking-news/reorder', port, AUTH(), { id: r2.id, direction: 'up' });
     if (res.status !== 200) throw new Error(`Expected 200, got ${res.status}`);
   });
 
   await apiTest('api delete: returns 200', async () => {
     if (!createdId) throw new Error('No created item to delete');
-    const res = await httpReq('DELETE', `/api/admin/breaking-news/${createdId}`, port, { 'x-admin-auth': 'admin-token' });
+    const res = await httpReq('DELETE', `/api/admin/breaking-news/${createdId}`, port, AUTH());
     if (res.status !== 200) throw new Error(`Expected 200, got ${res.status}`);
   });
 
   await apiTest('api delete: success true', async () => {
     const newRec = breakingAPI.create({ title: 'To Delete' });
-    const res = await httpReq('DELETE', `/api/admin/breaking-news/${newRec.id}`, port, { 'x-admin-auth': 'admin-token' });
+    const res = await httpReq('DELETE', `/api/admin/breaking-news/${newRec.id}`, port, AUTH());
     if (!res.body?.success) throw new Error('Delete did not return success: ' + JSON.stringify(res.body));
   });
 
   await apiTest('api archive expired: returns 200', async () => {
-    const res = await httpReq('POST', '/api/admin/breaking-news/archive-expired', port, { 'Content-Type': 'application/json', 'x-admin-auth': 'admin-token' }, {});
+    const res = await httpReq('POST', '/api/admin/breaking-news/archive-expired', port, AUTH(), {});
     if (res.status !== 200) throw new Error(`Expected 200, got ${res.status}`);
   });
 

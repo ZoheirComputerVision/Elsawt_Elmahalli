@@ -141,6 +141,16 @@ async function run() {
         res = await request('GET', '/api/media/abc');
         assertEqual(res.status, 404, 'non-numeric id returns 404');
 
+        // ── Create test user and get auth token ──
+        const testUsers = require('../modules/users');
+        const existingTestUser = testUsers.getUserByUsername('mediaadmin');
+        if (existingTestUser) { const testDb = require('../database'); testDb.delete('users', existingTestUser.id); testDb.saveNow('users'); }
+        testUsers.createUser({ fullName: 'Test Admin', username: 'mediaadmin', password: 'testpass123', role: 'publisher', createdBy: 'system' });
+        const authResult = testUsers.login('mediaadmin', 'testpass123');
+        const AUTH_TOKEN = authResult.token;
+        const AUTH_HEADERS = { 'x-admin-auth': AUTH_TOKEN };
+        const AUTH_JSON = { 'x-admin-auth': AUTH_TOKEN, 'Content-Type': 'application/json' };
+
         // ── Test GET /api/admin/media (admin list) ──
         console.log('\n\u2015\u2015 Admin GET /api/admin/media \u2015\u2015');
         // Without auth
@@ -148,13 +158,13 @@ async function run() {
         assertEqual(res.status, 401, 'returns 401 without auth token');
 
         // With auth
-        res = await request('GET', '/api/admin/media', { headers: { 'x-admin-auth': 'admin-token' } });
+        res = await request('GET', '/api/admin/media', { headers: AUTH_HEADERS });
         assertEqual(res.status, 200, 'returns 200 with auth');
         assert(Array.isArray(res.body.items), 'items is array');
         assert(typeof res.body.total === 'number', 'total is number');
 
         // With mime filter
-        res = await request('GET', '/api/admin/media?mime_type=image/jpeg', { headers: { 'x-admin-auth': 'admin-token' } });
+        res = await request('GET', '/api/admin/media?mime_type=image/jpeg', { headers: AUTH_HEADERS });
         assertEqual(res.status, 200, 'mime filter returns 200');
 
         // ── Test POST /api/admin/media/upload ──
@@ -180,7 +190,7 @@ async function run() {
         // Multer with disk storage will fail on fake data — test that we get a structured error
         res = await request('POST', '/api/admin/media/upload', {
           headers: {
-            'x-admin-auth': 'admin-token',
+            'x-admin-auth': AUTH_TOKEN,
             'Content-Type': `multipart/form-data; boundary=${formBoundary}`,
             'Content-Length': Buffer.byteLength(formBody),
           },
@@ -203,7 +213,7 @@ async function run() {
 
         // With auth
         res = await request('PUT', `/api/admin/media/${updateTarget}`, {
-          headers: { 'x-admin-auth': 'admin-token', 'Content-Type': 'application/json' },
+          headers: AUTH_JSON,
           body: { alt_text: 'مُحدّث', caption: 'وصف محدث', category: 'اقتصاد' },
         });
         assertEqual(res.status, 200, 'update returns 200 with auth');
@@ -215,7 +225,7 @@ async function run() {
 
         // Missing media
         res = await request('PUT', '/api/admin/media/99999', {
-          headers: { 'x-admin-auth': 'admin-token', 'Content-Type': 'application/json' },
+          headers: AUTH_JSON,
           body: { alt_text: 'x' },
         });
         assertEqual(res.status, 404, 'update returns 404 for missing');
@@ -233,14 +243,14 @@ async function run() {
 
         // With auth but blocked by usage
         res = await request('DELETE', `/api/admin/media/${deleteTarget}`, {
-          headers: { 'x-admin-auth': 'admin-token' },
+          headers: AUTH_HEADERS,
         });
         assertEqual(res.status, 409, 'delete returns 409 when in use');
 
         // Remove usage and delete
         mediaService.removeUsage(deleteTarget, 999, 'test');
         res = await request('DELETE', `/api/admin/media/${deleteTarget}`, {
-          headers: { 'x-admin-auth': 'admin-token' },
+          headers: AUTH_HEADERS,
         });
         assertEqual(res.status, 204, 'delete returns 204 on success');
         const removedIdx = createdIds.indexOf(deleteTarget);
@@ -248,7 +258,7 @@ async function run() {
 
         // Missing media
         res = await request('DELETE', '/api/admin/media/99999', {
-          headers: { 'x-admin-auth': 'admin-token' },
+          headers: AUTH_HEADERS,
         });
         assertEqual(res.status, 404, 'delete returns 404 for missing');
 
@@ -263,7 +273,7 @@ async function run() {
 
         // With auth
         res = await request('POST', '/api/admin/media/bulk-delete', {
-          headers: { 'x-admin-auth': 'admin-token', 'Content-Type': 'application/json' },
+          headers: AUTH_JSON,
           body: { ids: [99991, 99992] },
         });
         assertEqual(res.status, 200, 'bulk-delete returns 200 with auth');
@@ -272,14 +282,14 @@ async function run() {
 
         // Empty ids
         res = await request('POST', '/api/admin/media/bulk-delete', {
-          headers: { 'x-admin-auth': 'admin-token', 'Content-Type': 'application/json' },
+          headers: AUTH_JSON,
           body: { ids: [] },
         });
         assertEqual(res.status, 400, 'bulk-delete with empty ids returns 400');
 
         // Invalid body
         res = await request('POST', '/api/admin/media/bulk-delete', {
-          headers: { 'x-admin-auth': 'admin-token', 'Content-Type': 'application/json' },
+          headers: AUTH_JSON,
           body: {},
         });
         assertEqual(res.status, 400, 'bulk-delete without ids returns 400');

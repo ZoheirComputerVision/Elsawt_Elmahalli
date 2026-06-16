@@ -261,7 +261,7 @@ function stopServer(done) {
   if (server) server.close(done);
 }
 
-const AUTH_HEADERS = { 'x-admin-auth': 'admin-token' };
+let AUTH_HEADERS = { 'x-admin-auth': '' };
 
 function apiGet(path, headers) {
   return new Promise((resolve, reject) => {
@@ -355,6 +355,14 @@ function apiDelete(path) {
 startServer(async () => {
   const article = ensureTestArticle();
   const a2 = ensureSecondArticle();
+
+  // Create test user and get real auth token
+  const users = require('../modules/users');
+  const existingTestUser = users.getUserByUsername('featuredadmin');
+  if (existingTestUser) { const db = require('../database'); db.delete('users', existingTestUser.id); db.saveNow('users'); }
+  users.createUser({ fullName: 'Test Admin', username: 'featuredadmin', password: 'testpass123', role: 'publisher', createdBy: 'system' });
+  const loginRes = await apiPost('/api/admin/auth', { username: 'featuredadmin', password: 'testpass123' });
+  AUTH_HEADERS = { 'x-admin-auth': loginRes.body.token };
 
   try {
     // Admin API tests

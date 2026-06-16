@@ -50,16 +50,16 @@ const upload = multer({
   },
 });
 
-// ── Role Security Foundation ──
-const ROLE_HIERARCHY = { admin: 3, editor: 2, author: 1 };
+// ── Role Security Foundation (centralized in modules/users) ──
+const users = require('./modules/users');
 
 function isAuthorized(userRole, requiredRole) {
-  return (ROLE_HIERARCHY[userRole] || 0) >= (ROLE_HIERARCHY[requiredRole] || 0);
+  return users.isAuthorized(userRole, requiredRole);
 }
 
 function requireRole(role) {
   return (req, res, next) => {
-    const userRole = req.user?.role || 'author';
+    const userRole = req.user?.role || 'journalist';
     if (isAuthorized(userRole, role)) return next();
     res.status(403).json({ error: 'غير مصرح لك بهذا الإجراء' });
   };
@@ -145,6 +145,7 @@ app.listen(config.PORT, async () => {
 module.exports = app;
 module.exports.upload = upload;
 module.exports.audit = audit;
+module.exports.users = users;
 module.exports.isAuthorized = isAuthorized;
 module.exports.requireRole = requireRole;
 module.exports.createBackup = createBackup;

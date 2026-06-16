@@ -1,4 +1,5 @@
 const db = require('../database');
+const users = require('./users');
 
 async function seedIfEmpty() {
   const count = db.count('processed_content');
@@ -28,10 +29,51 @@ async function seedIfEmpty() {
       urgency_score: 0.3,
       is_ai_generated: 0,
       published_at: new Date().toISOString(),
+      authorId: null,
+      authorName: 'النظام',
+      createdBy: 'system',
     });
     seeded++;
   }
   console.log(`[Seed] تمت تهيئة ${seeded} مقال`);
+
+  // Seed default users
+  const userCount = db.count('users');
+  if (userCount === 0) {
+    console.log('[Seed] تهيئة المستخدمين الافتراضيين...');
+    try {
+      users.createUser({
+        fullName: 'Zoheir IT Solutions',
+        username: 'zoheir',
+        email: 'zoheir@elsawt-elmehalli.dz',
+        phone: '+213-',
+        password: 'admin2026',
+        role: 'publisher',
+        createdBy: 'system',
+      });
+      users.createUser({
+        fullName: 'رئيس التحرير',
+        username: 'editor',
+        email: 'editor@elsawt-elmehalli.dz',
+        phone: '+213-',
+        password: 'editor2026',
+        role: 'editor_in_chief',
+        createdBy: 'system',
+      });
+      users.createUser({
+        fullName: 'صحفي',
+        username: 'journalist',
+        email: 'journalist@elsawt-elmehalli.dz',
+        phone: '+213-',
+        password: 'journalist2026',
+        role: 'journalist',
+        createdBy: 'system',
+      });
+      console.log('[Seed] تمت تهيئة 3 مستخدمين افتراضيين');
+    } catch (e) {
+      console.log('[Seed] تحذير: فشل تهيئة المستخدمين:', e.message);
+    }
+  }
 }
 
 module.exports = { seedIfEmpty };

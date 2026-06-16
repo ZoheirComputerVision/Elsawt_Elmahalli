@@ -12,38 +12,162 @@ const mediaService = require('../modules/media');
 const audit = require('../modules/audit');
 
 // ── Auth middleware ──
-const VALID_TOKEN = 'admin-token';
+const users = require('../modules/users');
 
 function requireAuth(req, res, next) {
   const token = req.headers['x-admin-auth'];
-  if (token === VALID_TOKEN) {
-    req.user = { username: 'الإدارة', role: 'admin' };
+  const user = users.authenticate(token);
+  if (user) {
+    req.user = user;
     return next();
   }
   res.status(401).json({ error: 'غير مصرح. يرجى تسجيل الدخول' });
 }
 
-const ROLE_HIERARCHY = { admin: 3, editor: 2, author: 1 };
-
 function requireRole(role) {
   return (req, res, next) => {
     requireAuth(req, res, () => {
-      if ((ROLE_HIERARCHY[req.user?.role] || 0) >= (ROLE_HIERARCHY[role] || 0)) return next();
+      if (users.isAuthorized(req.user?.role, role)) return next();
       res.status(403).json({ error: 'صلاحية غير كافية لهذا الإجراء' });
     });
   };
 }
 
-router.post('/auth', (req, res) => {
+// ── Login rate limiting ──
+const LOGIN_RATE_WINDOW = 60000;
+const MAX_LOGIN_PER_WINDOW = 10;
+const loginRateMap = new Map();
+
+function loginRateLimit(req, res, next) {
+  const ip = req.headers['x-forwarded-for']?.split(',')[0]?.trim() || req.ip || 'unknown';
+  const now = Date.now();
+  const record = loginRateMap.get(ip) || { count: 0, windowStart: now };
+  if (now - record.windowStart > LOGIN_RATE_WINDOW) {
+    record.count = 0;
+    record.windowStart = now;
+  }
+  record.count++;
+  loginRateMap.set(ip, record);
+  if (record.count > MAX_LOGIN_PER_WINDOW) {
+    return res.status(429).json({ success: false, error: 'محاولات كثيرة جداً. حاول لاحقاً' });
+  }
+  next();
+}
+
+router.post('/auth', loginRateLimit, (req, res) => {
   const { username, password } = req.body;
-  if (username === 'zoheir' && password === 'admin2026') {
-    const userData = { username: 'Zoheir IT Solutions', role: 'admin' };
-    return res.json({ success: true, token: VALID_TOKEN, user: userData.username, role: userData.role });
+  const ip = req.headers['x-forwarded-for']?.split(',')[0]?.trim() || req.ip || 'unknown';
+  const result = users.login(username, password, ip);
+  if (result) {
+    audit.log(result.user.username, 'user.login', 'users', result.user.id, { role: result.user.role });
+    return res.json({ success: true, token: result.token, user: result.user.fullName || result.user.username, role: result.user.role });
+  }
+  // Check if rate-limited
+  const status = users.getRateLimitStatus(ip);
+  if (!status.allowed) {
+    return res.status(429).json({ success: false, error: `الحساب مقفل مؤقتاً. حاول بعد ${status.remaining} ثانية` });
   }
   res.status(401).json({ success: false, error: 'بيانات الدخول غير صحيحة' });
 });
 
 const { resolve: resolveCategory } = require('../modules/categories');
+
+// ── User Management ──
+
+router.get('/users', requireRole('editor_in_chief'), (req, res) => {
+  try {
+    const result = users.listUsers({
+      role: req.query.role,
+      active: req.query.active,
+      search: req.query.search,
+      limit: req.query.limit,
+      offset: req.query.offset,
+    });
+    res.json(result);
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+router.post('/users', requireRole('publisher'), (req, res) => {
+  try {
+    const { fullName, username, email, phone, password, role } = req.body;
+    const record = users.createUser({ fullName, username, email, phone, password, role, createdBy: req.user?.fullName || req.user?.username });
+    audit.log(req.user?.username, 'user.create', 'users', record.id, { username, role });
+    res.status(201).json(record);
+  } catch (e) {
+    const status = e.message.includes('موجود مسبقاً') ? 409 : 400;
+    res.status(status).json({ error: e.message });
+  }
+});
+
+router.put('/users/:id', requireRole('publisher'), (req, res) => {
+  try {
+    const id = parseInt(req.params.id);
+    const record = users.updateUser(id, req.body);
+    audit.log(req.user?.username, 'user.update', 'users', id, req.body);
+    res.json(record);
+  } catch (e) {
+    const status = e.message.includes('غير موجود') ? 404 : 400;
+    res.status(status).json({ error: e.message });
+  }
+});
+
+router.post('/users/:id/deactivate', requireRole('publisher'), (req, res) => {
+  try {
+    const id = parseInt(req.params.id);
+    const record = users.deactivateUser(id);
+    audit.log(req.user?.username, 'user.deactivate', 'users', id, {});
+    res.json(record);
+  } catch (e) {
+    const status = e.message.includes('غير موجود') ? 404 : 400;
+    res.status(status).json({ error: e.message });
+  }
+});
+
+router.post('/users/:id/activate', requireRole('publisher'), (req, res) => {
+  try {
+    const id = parseInt(req.params.id);
+    const record = users.activateUser(id);
+    audit.log(req.user?.username, 'user.activate', 'users', id, {});
+    res.json(record);
+  } catch (e) {
+    const status = e.message.includes('غير موجود') ? 404 : 400;
+    res.status(status).json({ error: e.message });
+  }
+});
+
+router.post('/users/:id/role', requireRole('publisher'), (req, res) => {
+  try {
+    const id = parseInt(req.params.id);
+    const { role } = req.body;
+    const record = users.changeRole(id, role);
+    audit.log(req.user?.username, 'user.role_change', 'users', id, { role });
+    res.json(record);
+  } catch (e) {
+    const status = e.message.includes('غير موجود') ? 404 : 400;
+    res.status(status).json({ error: e.message });
+  }
+});
+
+router.post('/users/:id/reset-password', requireRole('publisher'), (req, res) => {
+  try {
+    const id = parseInt(req.params.id);
+    const { password } = req.body;
+    const record = users.resetPassword(id, password);
+    audit.log(req.user?.username, 'user.password_reset', 'users', id, {});
+    res.json(record);
+  } catch (e) {
+    const status = e.message.includes('غير موجود') ? 404 : 400;
+    res.status(status).json({ error: e.message });
+  }
+});
+
+router.post('/auth/logout', requireAuth, (req, res) => {
+  const token = req.headers['x-admin-auth'];
+  users.logout(token);
+  res.json({ success: true });
+});
 
 router.get('/dashboard', (req, res) => res.json(archive.getStats()));
 
@@ -298,7 +422,7 @@ router.get('/featured-stories', requireAuth, (req, res) => {
   }
 });
 
-router.post('/featured-stories', requireRole('editor'), (req, res) => {
+router.post('/featured-stories', requireRole('editor_in_chief'), (req, res) => {
   try {
     const { article_id, featured_order, is_active } = req.body;
     if (!article_id) return res.status(400).json({ error: 'article_id مطلوب' });
@@ -316,7 +440,7 @@ router.post('/featured-stories', requireRole('editor'), (req, res) => {
   }
 });
 
-router.put('/featured-stories/:id', requireRole('editor'), (req, res) => {
+router.put('/featured-stories/:id', requireRole('editor_in_chief'), (req, res) => {
   try {
     const id = parseInt(req.params.id);
     const record = featured.update(id, req.body);
@@ -328,7 +452,7 @@ router.put('/featured-stories/:id', requireRole('editor'), (req, res) => {
   }
 });
 
-router.delete('/featured-stories/:id', requireRole('editor'), (req, res) => {
+router.delete('/featured-stories/:id', requireRole('editor_in_chief'), (req, res) => {
   try {
     const id = parseInt(req.params.id);
     const result = featured.remove(id);
@@ -340,7 +464,7 @@ router.delete('/featured-stories/:id', requireRole('editor'), (req, res) => {
   }
 });
 
-router.post('/featured-stories/reorder', requireRole('editor'), (req, res) => {
+router.post('/featured-stories/reorder', requireRole('editor_in_chief'), (req, res) => {
   try {
     const { id, direction } = req.body;
     if (!id || !direction) return res.status(400).json({ error: 'id و direction مطلوبان' });
@@ -372,7 +496,7 @@ router.get('/breaking-news', requireAuth, (req, res) => {
   }
 });
 
-router.post('/breaking-news', requireRole('editor'), (req, res) => {
+router.post('/breaking-news', requireRole('editor_in_chief'), (req, res) => {
   try {
     const { title, article_id, url, priority, is_active, starts_at, expires_at } = req.body;
     const errors = breaking.validate(req.body);
@@ -390,7 +514,7 @@ router.post('/breaking-news', requireRole('editor'), (req, res) => {
   }
 });
 
-router.put('/breaking-news/:id', requireRole('editor'), (req, res) => {
+router.put('/breaking-news/:id', requireRole('editor_in_chief'), (req, res) => {
   try {
     const id = parseInt(req.params.id);
     const record = breaking.update(id, req.body);
@@ -402,7 +526,7 @@ router.put('/breaking-news/:id', requireRole('editor'), (req, res) => {
   }
 });
 
-router.delete('/breaking-news/:id', requireRole('editor'), (req, res) => {
+router.delete('/breaking-news/:id', requireRole('editor_in_chief'), (req, res) => {
   try {
     const id = parseInt(req.params.id);
     const result = breaking.remove(id);
@@ -414,7 +538,7 @@ router.delete('/breaking-news/:id', requireRole('editor'), (req, res) => {
   }
 });
 
-router.post('/breaking-news/reorder', requireRole('editor'), (req, res) => {
+router.post('/breaking-news/reorder', requireRole('editor_in_chief'), (req, res) => {
   try {
     const { id, direction } = req.body;
     if (!id || !direction) return res.status(400).json({ error: 'id و direction مطلوبان' });
@@ -428,7 +552,7 @@ router.post('/breaking-news/reorder', requireRole('editor'), (req, res) => {
   }
 });
 
-router.post('/breaking-news/archive-expired', requireRole('editor'), (req, res) => {
+router.post('/breaking-news/archive-expired', requireRole('editor_in_chief'), (req, res) => {
   try {
     const result = breaking.archiveExpired();
     if (result.archived > 0) {
@@ -461,7 +585,7 @@ router.get('/media', requireAuth, (req, res) => {
   }
 });
 
-router.post('/media/upload', requireRole('editor'), (req, res) => {
+router.post('/media/upload', requireRole('editor_in_chief'), (req, res) => {
   const upload = req.app.get('upload');
   if (!upload) return res.status(500).json({ error: 'مرفع الملفات غير مهيأ' });
   upload.single('file')(req, res, (err) => {
@@ -483,7 +607,7 @@ router.post('/media/upload', requireRole('editor'), (req, res) => {
   });
 });
 
-router.put('/media/:id', requireRole('editor'), (req, res) => {
+router.put('/media/:id', requireRole('editor_in_chief'), (req, res) => {
   try {
     const id = parseInt(req.params.id);
     const updates = {
@@ -500,7 +624,7 @@ router.put('/media/:id', requireRole('editor'), (req, res) => {
   }
 });
 
-router.delete('/media/:id', requireRole('editor'), (req, res) => {
+router.delete('/media/:id', requireRole('editor_in_chief'), (req, res) => {
   try {
     const id = parseInt(req.params.id);
     const result = mediaService.delete(id);
@@ -514,7 +638,7 @@ router.delete('/media/:id', requireRole('editor'), (req, res) => {
   }
 });
 
-router.post('/media/bulk-delete', requireRole('editor'), (req, res) => {
+router.post('/media/bulk-delete', requireRole('editor_in_chief'), (req, res) => {
   try {
     const { ids } = req.body;
     if (!Array.isArray(ids) || ids.length === 0) {

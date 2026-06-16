@@ -77,6 +77,7 @@ class JsonDB {
       breaking_news: this._load('breaking_news'),
       featured_stories: this._load('featured_stories'),
       audit_log: this._load('audit_log'),
+      users: this._load('users'),
     };
     this._seedDefaults();
     this.initialized = true;
