@@ -255,8 +255,8 @@ a:hover { color: var(--accent); }
 .content-grid {
   display: grid;
   grid-template-columns: 2fr 1fr;
-  gap: 30px;
-  margin: 20px 0 10px;
+  gap: 24px;
+  margin: 10px 0 6px;
 }
 
 .main-content {
@@ -304,16 +304,16 @@ a:hover { color: var(--accent); }
 .news-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
-  gap: 15px;
-  margin: 10px 0;
+  gap: 12px;
+  margin: 6px 0;
 }
 
 .section-title {
   font-family: 'Cairo', sans-serif;
   font-size: 1.4rem; font-weight: 700;
   color: var(--primary);
-  margin: 20px 0 8px;
-  padding-bottom: 8px;
+  margin: 10px 0 6px;
+  padding-bottom: 6px;
   border-bottom: 2px solid var(--accent);
   display: flex; align-items: center; gap: 10px;
 }
@@ -327,20 +327,20 @@ a:hover { color: var(--accent); }
 .sidebar > div {
   background: var(--bg-card);
   border-radius: var(--radius);
-  padding: 15px;
-  margin-bottom: 15px;
+  padding: 12px;
+  margin-bottom: 10px;
   border: 1px solid var(--border);
 }
 .sidebar h3 {
   font-family: 'Cairo', sans-serif;
   font-size: 1rem; font-weight: 700;
   color: var(--primary);
-  margin-bottom: 15px;
-  padding-bottom: 8px;
+  margin-bottom: 10px;
+  padding-bottom: 6px;
   border-bottom: 2px solid var(--accent);
 }
 .sidebar ul { list-style: none; }
-.sidebar li { padding: 8px 0; border-bottom: 1px solid #f0eadb; }
+.sidebar li { padding: 6px 0; border-bottom: 1px solid #f0eadb; }
 .sidebar li:last-child { border-bottom: none; }
 .sidebar li a { font-size: 0.9rem; display: block; }
 .sidebar li .date { font-size: 0.75rem; color: #999; }
@@ -419,7 +419,7 @@ a:hover { color: var(--accent); }
   background: var(--primary-dark);
   color: #aaa;
   padding: 30px 0;
-  margin-top: 50px;
+  margin-top: 30px;
   border-top: 4px solid var(--accent);
   text-align: center;
 }
