@@ -193,21 +193,92 @@
       }
     }
 
-    let editingId = null;
+    let editingData = null;
+    let editImageRemove = false;
+
     async function openEditModal(id) {
       editingId = id;
-      const data = await API.admin.getContentById(id);
-      document.getElementById('edit-title').value = data.title || '';
-      document.getElementById('edit-body').value = (data.body || '').replace(/<br>/g, '\n');
-      document.getElementById('edit-category').value = data.category || 'uncategorized';
-      document.getElementById('edit-source').value = data.source_name || '';
-      document.getElementById('edit-date').value = data.event_date || '';
+      editingData = await API.admin.getContentById(id);
+      editImageRemove = false;
+      document.getElementById('edit-title').value = editingData.title || '';
+      document.getElementById('edit-body').value = (editingData.body || '').replace(/<br>/g, '\n');
+      document.getElementById('edit-category').value = editingData.category || 'uncategorized';
+      document.getElementById('edit-source').value = editingData.source_name || '';
+      document.getElementById('edit-date').value = editingData.event_date || '';
+      // Image
+      const currentImg = document.getElementById('edit-current-image');
+      const existingImg = editingData.image_data || editingData.image_url || '';
+      if (existingImg) {
+        currentImg.innerHTML = `<img src="${existingImg}" alt="الصورة الحالية" style="max-width:200px;border-radius:8px;border:1px solid #ddd;margin-bottom:4px;"><div style="font-size:0.75rem;color:#888;">الصورة الحالية</div>`;
+        document.getElementById('edit-remove-image-btn').hidden = false;
+      } else {
+        currentImg.innerHTML = '<span style="font-size:0.8rem;color:#999;">لا توجد صورة</span>';
+        document.getElementById('edit-remove-image-btn').hidden = true;
+      }
+      document.getElementById('edit-image-preview').innerHTML = '';
+      document.getElementById('edit-image').value = '';
+      // AI image button: show only for AI-generated articles
+      const aiGroup = document.getElementById('edit-ai-image-group');
+      aiGroup.hidden = !editingData.is_ai_generated;
       document.getElementById('edit-modal').classList.add('active');
     }
     function closeEditModal() {
       document.getElementById('edit-modal').classList.remove('active');
       editingId = null;
+      editingData = null;
+      editImageRemove = false;
     }
+
+    function previewEditImage(e) {
+      const file = e.target.files[0];
+      const preview = document.getElementById('edit-image-preview');
+      if (file) {
+        const maxSize = 5 * 1024 * 1024;
+        if (file.size > maxSize) { alert('⚠️ حجم الصورة كبير جداً. الحد الأقصى 5 ميغابايت'); preview.innerHTML = ''; return; }
+        const reader = new FileReader();
+        reader.onload = (ev) => { preview.innerHTML = `<img src="${ev.target.result}" style="max-width:200px;border-radius:8px;border:1px solid #ddd;">`; };
+        reader.readAsDataURL(file);
+      } else { preview.innerHTML = ''; }
+    }
+
+    function removeEditImage() {
+      editImageRemove = true;
+      document.getElementById('edit-current-image').innerHTML = '<span style="font-size:0.8rem;color:#999;">سيتم حذف الصورة</span>';
+      document.getElementById('edit-image').value = '';
+      document.getElementById('edit-image-preview').innerHTML = '';
+      document.getElementById('edit-remove-image-btn').hidden = true;
+    }
+
+    async function generateAIimage() {
+      if (!editingId) return;
+      try {
+        const btn = document.querySelector('#edit-ai-image-group .btn');
+        if (btn) { btn.disabled = true; btn.textContent = '⏳ جاري التوليد...'; }
+        const article = await API.admin.getContentById(editingId);
+        const prompt = article.title + ' - ' + (article.summary || article.body || '').substring(0, 200);
+        const res = await fetch('https://api.unsplash.com/search/photos?query=' + encodeURIComponent(prompt.substring(0, 100)) + '&per_page=1', {
+          headers: { 'Authorization': 'Client-ID ' + (localStorage.getItem('unsplash_key') || '') }
+        });
+        let imgUrl = '';
+        if (res.ok) {
+          const data = await res.json();
+          if (data.results && data.results.length > 0) imgUrl = data.results[0].urls.small;
+        }
+        if (imgUrl) {
+          const preview = document.getElementById('edit-image-preview');
+          preview.innerHTML = `<img src="${imgUrl}" style="max-width:200px;border-radius:8px;border:1px solid #ddd;"><div style="font-size:0.75rem;color:#888;">صورة من Unsplash</div>`;
+          editingData._temp_image_url = imgUrl;
+        } else {
+          alert('⚠️ تعذر العثور على صورة. استخدم الرفع اليدوي بدلاً من ذلك.');
+        }
+        if (btn) { btn.disabled = false; btn.textContent = '✨ توليد صورة تلقائياً'; }
+      } catch (e) {
+        const btn = document.querySelector('#edit-ai-image-group .btn');
+        if (btn) { btn.disabled = false; btn.textContent = '✨ توليد صورة تلقائياً'; }
+        document.getElementById('action-result').innerHTML = `<div class="alert alert-danger">${e.message}</div>`;
+      }
+    }
+
     async function saveEdit() {
       if (!editingId) return;
       const data = {
@@ -217,6 +288,24 @@
         source_name: document.getElementById('edit-source').value,
         event_date: document.getElementById('edit-date').value,
       };
+      // Handle image
+      const fileInput = document.getElementById('edit-image');
+      if (editImageRemove) {
+        data.remove_image = true;
+      } else if (editingData && editingData._temp_image_url) {
+        data.image_url = editingData._temp_image_url;
+      } else if (fileInput.files.length > 0) {
+        const maxSize = 5 * 1024 * 1024;
+        if (fileInput.files[0].size > maxSize) { alert('⚠️ حجم الصورة كبير جداً. الحد الأقصى 5 ميغابايت'); return; }
+        try {
+          data.image_data = await new Promise((resolve, reject) => {
+            const r = new FileReader();
+            r.onload = () => resolve(r.result);
+            r.onerror = () => reject(new Error('فشل قراءة الملف'));
+            r.readAsDataURL(fileInput.files[0]);
+          });
+        } catch (e) { alert('❌ ' + e.message); return; }
+      }
       try {
         await API.admin.updateItem(editingId, data);
         closeEditModal();
@@ -357,6 +446,19 @@
         <div class="form-group">
           <label>التاريخ</label>
           <input type="date" class="form-control" id="edit-date">
+        </div>
+        <div class="form-group">
+          <label>الصورة</label>
+          <div id="edit-current-image" style="margin-bottom:8px;"></div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+            <input type="file" class="form-control" id="edit-image" accept="image/*" onchange="previewEditImage(event)" style="flex:1;min-width:160px;">
+            <button type="button" class="btn btn-sm" style="background:#dc2626;color:white;" onclick="removeEditImage()" id="edit-remove-image-btn" hidden>🗑 حذف الصورة</button>
+          </div>
+          <div id="edit-image-preview" style="margin-top:5px;max-width:200px;"></div>
+        </div>
+        <div class="form-group" id="edit-ai-image-group" hidden>
+          <button type="button" class="btn btn-accent" onclick="generateAIimage()">✨ توليد صورة تلقائياً</button>
+          <span style="font-size:0.8rem;color:#888;margin-right:8px;">(للمقالات المنشأة بالذكاء الاصطناعي)</span>
         </div>
       </form>
     </div>

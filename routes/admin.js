@@ -57,6 +57,8 @@ router.post('/content/:id/delete', async (req, res) => {
     const id = parseInt(req.params.id);
     const content = db.get('processed_content', id);
     if (!content) return res.status(404).json({ success: false, error: 'غير موجود' });
+    if (content.image_data) deleteImageFile(content.image_data);
+    if (content.image_url && content.image_url.startsWith('/uploads/')) deleteImageFile(content.image_url);
     db.delete('processed_content', id);
     db.saveNow('processed_content');
     const archived = db.findOne('archive', a => a.content_id === id);
@@ -66,10 +68,35 @@ router.post('/content/:id/delete', async (req, res) => {
   } catch (e) { res.status(500).json({ success: false, error: e.message }); }
 });
 
+const UPLOADS_DIR = path.join(__dirname, '..', 'public', 'uploads');
+if (!fs.existsSync(UPLOADS_DIR)) fs.mkdirSync(UPLOADS_DIR, { recursive: true });
+
+function processImageData(image_data) {
+  if (image_data && typeof image_data === 'string' && image_data.startsWith('data:')) {
+    const matches = image_data.match(/^data:([^;]+);base64,(.+)$/);
+    if (matches) {
+      const ext = matches[1].split('/')[1] || 'jpg';
+      const buffer = Buffer.from(matches[2], 'base64');
+      const filename = `img_${Date.now()}_${Math.random().toString(36).slice(2, 8)}.${ext}`;
+      const filepath = path.join(UPLOADS_DIR, filename);
+      fs.writeFileSync(filepath, buffer);
+      return `/uploads/${filename}`;
+    }
+  }
+  return image_data || '';
+}
+
+function deleteImageFile(imagePath) {
+  if (imagePath && imagePath.startsWith('/uploads/')) {
+    const filepath = path.join(UPLOADS_DIR, path.basename(imagePath));
+    if (fs.existsSync(filepath)) fs.unlinkSync(filepath);
+  }
+}
+
 router.post('/content/:id/update', async (req, res) => {
   try {
     const id = parseInt(req.params.id);
-    const { title, body, category, source_name, event_date } = req.body;
+    const { title, body, category, source_name, event_date, image_data, image_url, remove_image } = req.body;
     const content = db.get('processed_content', id);
     if (!content) return res.status(404).json({ success: false, error: 'غير موجود' });
     const updateData = {};
@@ -78,6 +105,17 @@ router.post('/content/:id/update', async (req, res) => {
     if (category !== undefined) updateData.category = category;
     if (source_name !== undefined) updateData.source_name = source_name;
     if (event_date !== undefined) updateData.event_date = event_date;
+    if (remove_image) {
+      deleteImageFile(content.image_data);
+      updateData.image_data = '';
+      updateData.image_url = '';
+    } else if (image_data && image_data.startsWith('data:')) {
+      deleteImageFile(content.image_data);
+      updateData.image_data = processImageData(image_data);
+      if (image_url === undefined) updateData.image_url = '';
+    } else if (image_url !== undefined) {
+      updateData.image_url = image_url;
+    }
     const updated = db.update('processed_content', id, updateData);
     db.saveNow('processed_content');
     res.json({ success: true, content: updated, message: 'تم التعديل بنجاح' });
@@ -103,20 +141,8 @@ router.post('/collect/manual', async (req, res) => {
     const { title, body, category, source, event_date, image_data } = req.body;
     if (!title || !body) return res.status(400).json({ success: false, error: 'العنوان والمحتوى مطلوبان' });
     const data = { title, body, source: source || 'إداري', category: category || 'uncategorized', event_date: event_date || new Date().toISOString().split('T')[0], source_url: '' };
-    if (image_data && typeof image_data === 'string' && image_data.startsWith('data:')) {
-      const matches = image_data.match(/^data:([^;]+);base64,(.+)$/);
-      if (matches) {
-        const ext = matches[1].split('/')[1] || 'jpg';
-        const buffer = Buffer.from(matches[2], 'base64');
-        const filename = `img_${Date.now()}_${Math.random().toString(36).slice(2, 8)}.${ext}`;
-        const filepath = path.join(__dirname, '..', 'public', 'uploads', filename);
-        fs.writeFileSync(filepath, buffer);
-        data.image_data = `/uploads/${filename}`;
-      } else {
-        data.image_data = image_data;
-      }
-    } else if (image_data) {
-      data.image_data = image_data;
+    if (image_data) {
+      data.image_data = processImageData(image_data);
     }
     const result = await collector.collectManual(data);
     const rawRows = db.findOne('raw_data', r => r.content_hash === result.hash);
