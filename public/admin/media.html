@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>مكتبة الوسائط | لوحة التحكم</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="../../css/style.css">
+  <link rel="stylesheet" href="../../css/admin-media.css">
+</head>
+<body class="admin-body">
+  <div class="admin-header">
+    <h1>🔧 لوحة تحكم الصوت المحلي</h1>
+    <div class="user-info">
+      <span id="admin-user">المشرف</span>
+      <a href="/" class="btn btn-sm btn-accent">🏠 الموقع</a>
+      <button class="btn btn-sm btn-danger" onclick="logout()">🚪 خروج</button>
+    </div>
+  </div>
+  <div class="admin-nav">
+    <a href="/admin/dashboard.html">📊 لوحة القيادة</a>
+    <a href="/admin/review.html">📝 مراجعة المحتوى</a>
+    <a href="/admin/media.html" class="active">🖼 مكتبة الوسائط</a>
+    <a href="/admin/logs.html">📋 سجل AI</a>
+    <a href="/admin/settings.html">⚙️ الإعدادات</a>
+  </div>
+
+  <div class="admin-content">
+    <!-- Stats row -->
+    <div id="media-stats" class="admin-grid media-stats"></div>
+
+    <!-- Toolbar -->
+    <div class="media-toolbar">
+      <button class="btn btn-primary" onclick="openUploadModal()">
+        <i class="fas fa-upload"></i> رفع صورة
+      </button>
+      <div class="media-search">
+        <i class="fas fa-search search-icon"></i>
+        <input type="text" id="search-input" placeholder="بحث في اسم الملف أو النص البديل..." oninput="onSearch()">
+      </div>
+      <select id="filter-category" class="form-control media-filter" onchange="loadMedia()">
+        <option value="">جميع التصنيفات</option>
+      </select>
+      <select id="filter-uploader" class="form-control media-filter" onchange="loadMedia()">
+        <option value="">جميع الرافعين</option>
+      </select>
+      <input type="date" id="filter-date-from" class="form-control media-filter" onchange="loadMedia()" title="من تاريخ">
+      <input type="date" id="filter-date-to" class="form-control media-filter" onchange="loadMedia()" title="إلى تاريخ">
+    </div>
+
+    <!-- Upload notification -->
+    <div id="upload-notification" class="media-notification" style="display:none;"></div>
+
+    <!-- Media Grid -->
+    <div id="media-grid" class="media-grid">
+      <div class="loading">جاري التحميل...</div>
+    </div>
+
+    <!-- Pagination -->
+    <div id="media-pagination" class="media-pagination"></div>
+  </div>
+
+  <!-- Upload Modal -->
+  <div class="modal-overlay" id="upload-modal">
+    <div class="modal" style="max-width:500px;">
+      <div class="modal-header">
+        <h3><i class="fas fa-upload"></i> رفع صورة جديدة</h3>
+        <button class="btn btn-sm" onclick="closeModal('upload-modal')">✕</button>
+      </div>
+      <div class="modal-body">
+        <div id="drop-zone" class="drop-zone" ondragover="onDragOver(event)" ondrop="onDrop(event)" ondragleave="onDragLeave(event)">
+          <div class="drop-zone-content" id="drop-zone-content">
+            <i class="fas fa-cloud-upload-alt drop-icon"></i>
+            <p>اسحب وأفلت الصورة هنا أو</p>
+            <button type="button" class="btn btn-accent" onclick="document.getElementById('file-input').click()">
+              <i class="fas fa-folder-open"></i> اختر ملفاً
+            </button>
+          </div>
+          <div class="drop-zone-preview" id="drop-zone-preview" style="display:none;">
+            <img id="upload-preview-img" alt="معاينة">
+            <div id="upload-preview-info" class="upload-preview-info"></div>
+          </div>
+          <input type="file" id="file-input" accept="image/jpeg,image/png,image/webp" style="display:none;" onchange="onFileSelected(event)">
+        </div>
+        <div id="upload-progress" class="upload-progress" style="display:none;">
+          <div class="upload-progress-text">جاري الرفع...</div>
+          <div class="upload-progress-bar"><div class="upload-progress-fill"></div></div>
+        </div>
+        <div class="form-group">
+          <label>النص البديل (alt text)</label>
+          <input type="text" class="form-control" id="upload-alt-text" placeholder="وصف مختصر للصورة">
+        </div>
+        <div class="form-group">
+          <label>التعليق</label>
+          <input type="text" class="form-control" id="upload-caption" placeholder="تعليق يظهر أسفل الصورة">
+        </div>
+        <div class="form-group">
+          <label>التصنيف</label>
+          <select class="form-control" id="upload-category"></select>
+        </div>
+        <div id="upload-error" style="display:none;" class="alert alert-danger"></div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-primary" id="upload-submit-btn" onclick="submitUpload()">
+          <i class="fas fa-cloud-upload-alt"></i> رفع
+        </button>
+        <button class="btn" onclick="closeModal('upload-modal')">إلغاء</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Edit Modal -->
+  <div class="modal-overlay" id="edit-modal">
+    <div class="modal" style="max-width:500px;">
+      <div class="modal-header">
+        <h3><i class="fas fa-edit"></i> تعديل بيانات الوسيط</h3>
+        <button class="btn btn-sm" onclick="closeModal('edit-modal')">✕</button>
+      </div>
+      <div class="modal-body">
+        <div id="edit-preview" class="edit-preview"></div>
+        <div class="form-group">
+          <label>النص البديل (alt text)</label>
+          <input type="text" class="form-control" id="edit-alt-text">
+        </div>
+        <div class="form-group">
+          <label>التعليق</label>
+          <input type="text" class="form-control" id="edit-caption">
+        </div>
+        <div class="form-group">
+          <label>التصنيف</label>
+          <select class="form-control" id="edit-category"></select>
+        </div>
+        <div class="edit-readonly">
+          <div><strong>اسم الملف:</strong> <span id="edit-filename"></span></div>
+          <div><strong>الرافع:</strong> <span id="edit-uploader"></span></div>
+          <div><strong>تاريخ الرفع:</strong> <span id="edit-date"></span></div>
+          <div><strong>عدد الاستخدامات:</strong> <span id="edit-usage"></span></div>
+        </div>
+        <div id="edit-error" style="display:none;" class="alert alert-danger"></div>
+        <div id="edit-success" style="display:none;" class="alert alert-success"></div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-primary" onclick="saveEdit()">
+          <i class="fas fa-save"></i> حفظ
+        </button>
+        <button class="btn" onclick="closeModal('edit-modal')">إلغاء</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Delete Confirm Modal -->
+  <div class="modal-overlay" id="delete-modal">
+    <div class="modal" style="max-width:450px;">
+      <div class="modal-header">
+        <h3><i class="fas fa-trash-alt"></i> تأكيد الحذف</h3>
+        <button class="btn btn-sm" onclick="closeModal('delete-modal')">✕</button>
+      </div>
+      <div class="modal-body">
+        <div id="delete-warning" style="display:none;" class="alert alert-warning">
+          <i class="fas fa-exclamation-triangle"></i>
+          <span id="delete-warning-text"></span>
+        </div>
+        <div id="delete-success" style="display:none;" class="alert alert-success">
+          <i class="fas fa-check-circle"></i> تم الحذف بنجاح
+        </div>
+        <p id="delete-message">هل أنت متأكد من حذف هذه الصورة؟</p>
+        <div id="delete-blocked" style="display:none;">
+          <div class="alert alert-danger">
+            <i class="fas fa-ban"></i> هذه الصورة مستخدمة في محتوى منشور
+          </div>
+          <div class="delete-usage-details" id="delete-usage-details"></div>
+        </div>
+        <div id="delete-error" style="display:none;" class="alert alert-danger"></div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-danger" id="delete-confirm-btn" onclick="confirmDelete()">
+          <i class="fas fa-trash-alt"></i> حذف
+        </button>
+        <button class="btn" onclick="closeModal('delete-modal')">إلغاء</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="../../js/api.js"></script>
+  <script src="../../js/admin-media.js"></script>
+</body>
+</html>
