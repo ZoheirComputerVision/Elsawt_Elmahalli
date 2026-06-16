@@ -354,6 +354,92 @@ router.post('/featured-stories/reorder', requireRole('editor'), (req, res) => {
   }
 });
 
+// ── Breaking News ──
+const breaking = require('../modules/breaking-news');
+
+router.get('/breaking-news', requireAuth, (req, res) => {
+  try {
+    const result = breaking.list({
+      is_active: req.query.is_active,
+      search: req.query.search,
+      expired: req.query.expired,
+      limit: req.query.limit,
+      offset: req.query.offset,
+    });
+    res.json(result);
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+router.post('/breaking-news', requireRole('editor'), (req, res) => {
+  try {
+    const { title, article_id, url, priority, is_active, starts_at, expires_at } = req.body;
+    const errors = breaking.validate(req.body);
+    if (errors.length > 0) return res.status(400).json({ error: errors.join('; ') });
+    const record = breaking.create({
+      title, article_id, url, priority, is_active,
+      starts_at: starts_at || null,
+      expires_at: expires_at || null,
+      created_by: req.user?.username || 'system',
+    });
+    audit.log(req.user?.username || 'system', 'breaking.create', 'breaking_news', record.id, { title });
+    res.status(201).json(record);
+  } catch (e) {
+    res.status(400).json({ error: e.message });
+  }
+});
+
+router.put('/breaking-news/:id', requireRole('editor'), (req, res) => {
+  try {
+    const id = parseInt(req.params.id);
+    const record = breaking.update(id, req.body);
+    audit.log(req.user?.username || 'system', 'breaking.update', 'breaking_news', id, req.body);
+    res.json(record);
+  } catch (e) {
+    const status = e.message.includes('غير موجود') ? 404 : 400;
+    res.status(status).json({ error: e.message });
+  }
+});
+
+router.delete('/breaking-news/:id', requireRole('editor'), (req, res) => {
+  try {
+    const id = parseInt(req.params.id);
+    const result = breaking.remove(id);
+    audit.log(req.user?.username || 'system', 'breaking.delete', 'breaking_news', id, {});
+    res.json(result);
+  } catch (e) {
+    const status = e.message.includes('غير موجود') ? 404 : 400;
+    res.status(status).json({ error: e.message });
+  }
+});
+
+router.post('/breaking-news/reorder', requireRole('editor'), (req, res) => {
+  try {
+    const { id, direction } = req.body;
+    if (!id || !direction) return res.status(400).json({ error: 'id و direction مطلوبان' });
+    if (!['up', 'down'].includes(direction)) return res.status(400).json({ error: 'direction يجب أن يكون up أو down' });
+    const result = breaking.reorder(parseInt(id), direction);
+    audit.log(req.user?.username || 'system', 'breaking.reorder', 'breaking_news', id, { direction });
+    res.json(result);
+  } catch (e) {
+    const status = e.message.includes('غير موجود') ? 404 : 400;
+    res.status(status).json({ error: e.message });
+  }
+});
+
+router.post('/breaking-news/archive-expired', requireRole('editor'), (req, res) => {
+  try {
+    const result = breaking.archiveExpired();
+    if (result.archived > 0) {
+      audit.log(req.user?.username || 'system', 'breaking.archive', 'breaking_news', 0, { count: result.archived });
+    }
+    res.json(result);
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
 // ── Media Management ──
 
 router.get('/media', requireAuth, (req, res) => {

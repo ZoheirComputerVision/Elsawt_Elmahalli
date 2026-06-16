@@ -91,6 +91,16 @@ router.get('/search', (req, res) => {
   res.json({ items, total: items.length, query: q });
 });
 
+router.get('/breaking-news', (req, res) => {
+  try {
+    const breaking = require('../modules/breaking-news');
+    const items = breaking.getActive();
+    res.json({ items, total: items.length });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
 router.get('/featured', (req, res) => {
   try {
     const featured = require('../modules/featured');

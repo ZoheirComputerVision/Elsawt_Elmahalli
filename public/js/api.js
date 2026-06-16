@@ -48,6 +48,7 @@ const API = {
   search: (q) => API.get(`/search?q=${encodeURIComponent(q)}`),
   getRecent: () => API.get('/recent'),
   getFeatured: () => API.get('/featured'),
+  getBreakingNews: () => API.get('/breaking-news'),
   trackView: (id) => API.post(`/content/${id}/view`),
 
   // Admin API
