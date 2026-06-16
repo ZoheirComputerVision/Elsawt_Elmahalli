@@ -102,17 +102,14 @@ async function loadContent() {
     const catPromises = CATEGORY_ORDER.map(cat => API.getContent({ category: cat, limit: 4 }));
     const [recent, ...catResults] = await Promise.all([API.getRecent(), ...catPromises]);
 
-    let html = '<div class="main-content">';
-    html += '<div class="content-grid">';
-    html += '<div class="hero-area">';
+    let html = '<div class="content-grid">';
+    html += '<div class="main-content">';
 
     // Hero: أهم خبر
     const heroItem = recent[0];
     if (heroItem) {
       html += '<div class="hero">' + createCard(heroItem, true) + '</div>';
     }
-
-    html += '</div><div class="sidebar" id="sidebar"></div></div>';
 
     // أقسام التصنيفات حسب الأولوية
     CATEGORY_ORDER.forEach((cat, idx) => {
@@ -126,7 +123,9 @@ async function loadContent() {
       html += '</div>';
     });
 
-    html += '</div>';
+    html += '</div>'; // close main-content
+    html += '<div class="sidebar" id="sidebar"></div>'; // sidebar
+    html += '</div>'; // close content-grid
     container.innerHTML = html;
     loadSidebar();
   } catch (e) {

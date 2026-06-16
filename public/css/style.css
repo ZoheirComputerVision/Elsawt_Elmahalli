@@ -234,6 +234,11 @@ a:hover { color: var(--accent); }
   margin: 20px 0 10px;
 }
 
+.main-content {
+  min-height: auto;
+  height: auto;
+}
+
 /* ── Cards ── */
 .card {
   background: var(--bg-card);
