@@ -77,10 +77,10 @@ a:hover { color: var(--accent); }
 .header .container {
   max-width: 1200px; margin: 0 auto; padding: 0 20px;
   position: relative; z-index: 1;
-  text-align: center;
+  text-align: right;
 }
 .header .logo-wrapper {
-  display: flex; align-items: center; justify-content: center;
+  display: flex; align-items: center; justify-content: flex-start;
   gap: 14px; margin-bottom: 5px;
 }
 .header .logo-mark {
