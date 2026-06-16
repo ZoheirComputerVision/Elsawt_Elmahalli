@@ -1,6 +1,14 @@
 const db = require('../database');
+const { CATEGORIES, getAll, getLegacyMapping } = require('./categories');
 
-const KNOWN_CATEGORIES = ['الوطن', 'اقتصاد', 'رياضة', 'العالم', 'مجتمع', 'اسلاميات', 'تكنولوجيا'];
+const KNOWN_CATEGORIES = (() => {
+  const names = new Set();
+  for (const cat of getAll()) {
+    names.add(cat.name);
+    for (const old of cat.legacy || []) names.add(old);
+  }
+  return [...names];
+})();
 
 const CLASSIFIER = {
   الوطن: {

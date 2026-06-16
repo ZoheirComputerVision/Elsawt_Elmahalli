@@ -43,13 +43,19 @@ router.post('/auth', (req, res) => {
   res.status(401).json({ success: false, error: 'بيانات الدخول غير صحيحة' });
 });
 
+const { resolve: resolveCategory } = require('../modules/categories');
+
 router.get('/dashboard', (req, res) => res.json(archive.getStats()));
 
 router.get('/content', (req, res) => {
   let items = db.query('processed_content');
   const { status, category, limit = 50, offset = 0 } = req.query;
   if (status) items = items.filter(i => i.status === status);
-  if (category) items = items.filter(i => i.category === category);
+  if (category) {
+    const resolved = resolveCategory(category);
+    const matchNames = resolved ? [resolved.name, ...resolved.legacy] : [category];
+    items = items.filter(i => matchNames.includes(i.category));
+  }
   items.sort((a, b) => (b.created_at || '').localeCompare((a.created_at || '')));
   const total = items.length;
   items = items.slice(parseInt(offset), parseInt(offset) + parseInt(limit));

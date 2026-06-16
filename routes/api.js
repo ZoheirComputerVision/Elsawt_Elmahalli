@@ -11,7 +11,11 @@ router.get('/content', (req, res) => {
   let items = db.query('processed_content');
   const { category, status, limit = 20, offset = 0, sort } = req.query;
 
-  if (category) items = items.filter(i => i.category === category);
+  if (category) {
+    const resolved = resolveCategory(category);
+    const matchNames = resolved ? [resolved.name, ...resolved.legacy] : [category];
+    items = items.filter(i => matchNames.includes(i.category));
+  }
   if (status) items = items.filter(i => i.status === status);
   else items = items.filter(i => i.status === 'published');
 
@@ -52,11 +56,30 @@ router.post('/content/:id/view', (req, res) => {
 router.get('/timeline', (req, res) => res.json(archive.buildTimeline()));
 router.get('/stats', (req, res) => res.json(archive.getStats()));
 
+// ── Categories API ──
+const { getAll: getAllCategories, resolve: resolveCategory } = require('../modules/categories');
+
+router.get('/local-categories', (req, res) => {
+  res.json(getAllCategories());
+});
+
 router.get('/categories', (req, res) => {
   const items = db.query('processed_content', i => i.status === 'published');
   const counts = {};
-  items.forEach(i => { counts[i.category] = (counts[i.category] || 0) + 1; });
-  res.json(Object.entries(counts).map(([category, count]) => ({ category, count })));
+  items.forEach(i => {
+    const resolved = resolveCategory(i.category);
+    const key = resolved ? resolved.name : i.category;
+    counts[key] = (counts[key] || 0) + 1;
+  });
+  const enriched = Object.entries(counts).map(([category, count]) => {
+    const meta = resolveCategory(category);
+    return { category, count, icon: meta?.icon || null, slug: meta?.slug || null };
+  }).sort((a, b) => {
+    const pa = resolveCategory(a.category)?.priority || 99;
+    const pb = resolveCategory(b.category)?.priority || 99;
+    return pa - pb;
+  });
+  res.json(enriched);
 });
 
 router.get('/search', (req, res) => {
