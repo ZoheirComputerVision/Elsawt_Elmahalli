@@ -273,7 +273,7 @@ async function loadTimeline() {
   const container = document.getElementById('timeline-content');
   if (!container) return;
   try {
-    container.innerHTML = '<div class="loading">📅 جاري بناء الأرشفة الزمنية...</div>';
+    container.innerHTML = '<div class="loading">📂 جاري تحميل الأرشيف...</div>';
     const timeline = await API.getTimeline();
     let html = '';
     const years = Object.keys(timeline).sort((a, b) => b.localeCompare(a));
