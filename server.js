@@ -93,7 +93,7 @@ app.set('audit', audit);
 app.use(helmet({ crossOriginEmbedderPolicy: false, contentSecurityPolicy: false }));
 app.use(cors());
 app.use(morgan('dev'));
-app.use(express.json({ limit: '50mb' }));
+app.use(express.json({ limit: '50mb', strict: false }));
 app.use(express.urlencoded({ extended: true }));
 
 function parseCookies(str) {
