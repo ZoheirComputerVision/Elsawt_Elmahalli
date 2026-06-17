@@ -204,9 +204,15 @@ router.post('/auth/logout', requireAuth, (req, res) => {
 
 router.get('/dashboard', requireAuth, (req, res) => res.json(archive.getStats()));
 
+const expiration = require('../modules/expiration');
+
 router.get('/content', (req, res) => {
   let items = db.query('processed_content');
   const { status, category, visibility_status, limit = 50, offset = 0 } = req.query;
+  // Real-time expiration check
+  if (!visibility_status || visibility_status === 'active') {
+    items = items.map(item => expiration.checkAndExpireIfNeeded(item));
+  }
   if (status) items = items.filter(i => i.status === status);
   if (visibility_status) items = items.filter(i => i.visibility_status === visibility_status);
   if (category) {
@@ -222,7 +228,6 @@ router.get('/content', (req, res) => {
 
 router.get('/content/expiring-soon', requireRole('editor_in_chief'), (req, res) => {
   try {
-    const expiration = require('../modules/expiration');
     const items = expiration.getExpiringSoon(parseInt(req.query.days) || 7);
     res.json({ items, total: items.length });
   } catch (e) {
@@ -231,8 +236,9 @@ router.get('/content/expiring-soon', requireRole('editor_in_chief'), (req, res) 
 });
 
 router.get('/content/:id', (req, res) => {
-  const item = db.get('processed_content', parseInt(req.params.id));
+  let item = db.get('processed_content', parseInt(req.params.id));
   if (!item) return res.status(404).json({ error: 'غير موجود' });
+  item = expiration.checkAndExpireIfNeeded(item);
   const logs = db.query('ai_decision_log', l => l.content_id === item.id).sort((a, b) => (b.created_at || '').localeCompare((a.created_at || '')));
   res.json({ ...item, logs });
 });
@@ -344,7 +350,6 @@ router.post('/content/:id/update', async (req, res) => {
 
 router.post('/content/:id/reactivate', requireRole('editor_in_chief'), async (req, res) => {
   try {
-    const expiration = require('../modules/expiration');
     const result = expiration.reactivateContent(parseInt(req.params.id));
     audit.log(req.user?.username, 'content.reactivated', 'processed_content', result.id, { title: result.title });
     res.json({ success: true, content: result, message: 'تم إعادة تنشيط المحتوى' });
@@ -356,7 +361,6 @@ router.post('/content/:id/reactivate', requireRole('editor_in_chief'), async (re
 
 router.post('/content/:id/expire', requireRole('editor_in_chief'), async (req, res) => {
   try {
-    const expiration = require('../modules/expiration');
     const result = expiration.expireContent(parseInt(req.params.id));
     audit.log(req.user?.username, 'content.expired', 'processed_content', result.id, { title: result.title });
     res.json({ success: true, content: result, message: 'تم إنهاء صلاحية المحتوى' });

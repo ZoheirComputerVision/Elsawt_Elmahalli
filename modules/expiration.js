@@ -4,6 +4,21 @@ const audit = require('./audit');
 const VISIBILITY_STATUSES = ['active', 'expired', 'archived'];
 
 class ExpirationManager {
+  checkAndExpireIfNeeded(item) {
+    if (!item) return null;
+    if (item.status === 'published' && (item.visibility_status === 'active' || !item.visibility_status) && item.expires_at) {
+      const now = new Date().toISOString();
+      if (item.expires_at <= now) {
+        db.update('processed_content', item.id, { visibility_status: 'expired' });
+        audit.log('system', 'content.expired', 'processed_content', item.id, { title: item.title, expires_at: item.expires_at });
+        db.saveNow('processed_content');
+        console.log(`[Expiration] فوري: انتهت صلاحية #${item.id}`);
+        return { ...item, visibility_status: 'expired' };
+      }
+    }
+    return item;
+  }
+
   checkExpired() {
     const now = new Date().toISOString();
     let expired = 0;
@@ -33,7 +48,7 @@ class ExpirationManager {
   reactivateContent(id) {
     const item = db.get('processed_content', parseInt(id));
     if (!item) throw new Error('المحتوى غير موجود');
-    db.update('processed_content', item.id, { visibility_status: 'active' });
+    db.update('processed_content', item.id, { visibility_status: 'active', expires_at: null });
     db.saveNow('processed_content');
     return db.get('processed_content', item.id);
   }

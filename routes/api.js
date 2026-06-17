@@ -7,9 +7,14 @@ router.get('/status', (req, res) => {
   res.json({ school: 'الصوت المحلي', location: 'ولاية تيارت', system: 'نظام النشرية الجهوية الذكية AI', version: '1.0', status: 'active', last_update: new Date().toISOString() });
 });
 
+const expiration = require('../modules/expiration');
+
 router.get('/content', (req, res) => {
   let items = db.query('processed_content');
   const { category, status, visibility_status, limit = 20, offset = 0, sort } = req.query;
+
+  // Real-time expiration check for active items
+  items = items.map(item => expiration.checkAndExpireIfNeeded(item));
 
   // Default: show only active visibility
   if (visibility_status) items = items.filter(i => i.visibility_status === visibility_status);
@@ -37,8 +42,10 @@ router.get('/content', (req, res) => {
 });
 
 router.get('/content/:id', (req, res) => {
-  const item = db.get('processed_content', parseInt(req.params.id));
+  let item = db.get('processed_content', parseInt(req.params.id));
   if (!item) return res.status(404).json({ error: 'غير موجود' });
+  // Real-time expiration check
+  item = expiration.checkAndExpireIfNeeded(item);
   // Allow direct access if active or if requested from archive
   if (item.visibility_status === 'expired' || item.visibility_status === 'archived') {
     if (req.query.source !== 'archive') return res.status(404).json({ error: 'غير موجود' });
@@ -93,11 +100,14 @@ router.get('/categories', (req, res) => {
 router.get('/search', (req, res) => {
   const { q, archive } = req.query;
   if (!q || q.length < 2) return res.json({ items: [] });
-  const items = db.query('processed_content', i => {
+  let items = db.query('processed_content', i => {
     const matchesQuery = i.title.includes(q) || i.body.includes(q);
     if (archive === 'true') return matchesQuery && (i.visibility_status === 'expired' || i.visibility_status === 'archived');
     return matchesQuery && i.status === 'published' && (i.visibility_status === 'active' || !i.visibility_status);
-  }).slice(0, 20);
+  });
+  // Real-time expiration check
+  items = items.map(i => expiration.checkAndExpireIfNeeded(i)).filter(i => archive !== 'true' ? (i.visibility_status === 'active' || !i.visibility_status) : true);
+  items = items.slice(0, 20);
   res.json({ items, total: items.length, query: q });
 });
 
