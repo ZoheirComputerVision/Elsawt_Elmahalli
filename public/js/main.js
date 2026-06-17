@@ -31,13 +31,13 @@ function importanceBadge(item) {
 
 const CAT_ICONS = {
   'الوطن': '🇩🇿', 'اقتصاد': '💰', 'رياضة': '⚽', 'العالم': '🌍',
-  'مجتمع': '👥', 'اسلاميات': '🕌', 'تكنولوجيا': '💻',
+  'مجتمع': '👥', 'اسلاميات': '🕌', 'تكنولوجيا': '💻', 'إضاءات': '💡', 'رأي': '✍️',
 };
 
 function createCard(item, featured = false) {
   const catNames = {
     'الوطن': 'الوطن', 'اقتصاد': 'اقتصاد', 'رياضة': 'رياضة', 'العالم': 'العالم',
-    'مجتمع': 'مجتمع', 'اسلاميات': 'اسلاميات', 'تكنولوجيا': 'تكنولوجيا',
+    'مجتمع': 'مجتمع', 'اسلاميات': 'اسلاميات', 'تكنولوجيا': 'إضاءات', 'إضاءات': 'إضاءات', 'رأي': 'رأي',
     news: 'خبر', activity: 'نشاط', announcement: 'إعلان', uncategorized: 'غير مصنف',
   };
   const date = item.event_date || (item.published_at ? item.published_at.split('T')[0] : (item.created_at ? item.created_at.split('T')[0] : '')) || '';
@@ -89,7 +89,7 @@ function createCard(item, featured = false) {
   `;
 }
 
-const CATEGORY_ORDER = ['الوطن', 'اقتصاد', 'رياضة', 'العالم', 'مجتمع', 'اسلاميات', 'تكنولوجيا'];
+const CATEGORY_ORDER = ['الوطن', 'اقتصاد', 'رياضة', 'العالم', 'مجتمع', 'اسلاميات', 'إضاءات', 'رأي'];
 
 async function loadContent() {
   const container = document.getElementById('content-grid');
@@ -228,12 +228,12 @@ async function loadSidebar() {
     const [recent, categories] = await Promise.all([API.getRecent(), API.getCategories()]);
     const catNames = {
       'الوطن': 'الوطن', 'اقتصاد': 'اقتصاد', 'رياضة': 'رياضة', 'العالم': 'العالم',
-      'مجتمع': 'مجتمع', 'اسلاميات': 'اسلاميات', 'تكنولوجيا': 'تكنولوجيا',
+      'مجتمع': 'مجتمع', 'اسلاميات': 'اسلاميات', 'إضاءات': 'إضاءات', 'رأي': 'رأي',
       news: 'أخبار', activity: 'نشاطات', announcement: 'إعلانات',
     };
     const catIcons = {
       'الوطن': '🇩🇿', 'اقتصاد': '💰', 'رياضة': '⚽', 'العالم': '🌍',
-      'مجتمع': '👥', 'اسلاميات': '🕌', 'تكنولوجيا': '💻', news: '📰', activity: '📸', announcement: '📢',
+      'مجتمع': '👥', 'اسلاميات': '🕌', 'إضاءات': '💡', 'رأي': '✍️', news: '📰', activity: '📸', announcement: '📢',
     };
 
     const sortedCats = [...(categories || [])].sort((a, b) => {
@@ -316,7 +316,7 @@ async function loadCategoryPage(category) {
   const catNames = {
     'الوطن': '🇩🇿 الوطن', 'اقتصاد': '💰 اقتصاد', 'رياضة': '⚽ رياضة',
     'العالم': '🌍 العالم', 'مجتمع': '👥 مجتمع', 'اسلاميات': '🕌 اسلاميات',
-    'تكنولوجيا': '💻 تكنولوجيا',
+    'تكنولوجيا': '💡 إضاءات', 'إضاءات': '💡 إضاءات', 'رأي': '✍️ رأي',
     news: '📰 الأخبار', activity: '📸 النشاطات', announcement: '📢 الإعلانات'
   };
   try {

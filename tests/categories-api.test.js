@@ -56,7 +56,7 @@ async function run() {
         let res = await request('GET', '/api/local-categories');
         assertEqual(res.status, 200, 'returns 200');
         assert(Array.isArray(res.body), 'returns array');
-        assertEqual(res.body.length, 10, 'has 10 categories');
+        assertEqual(res.body.length, 11, 'has 11 categories');
         assertEqual(res.body[0].id, 'local-news', 'first is local-news');
         assertEqual(res.body[0].icon, 'fa-newspaper', 'has icon');
         assertEqual(res.body[0].slug, 'akbar-mahallia', 'has slug');

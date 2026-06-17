@@ -16,7 +16,7 @@
       <button class="lang-btn" id="lang-btn" onclick="toggleLangUI()">Français</button>
       <span class="weather-widget"><span id="wi">🌤</span> <span id="wt">21°</span>
       <select id="wc" onchange="updW()">
-        <option value="tiaret">تيارت</option><option value="tissemsilt">تسمسيلت</option><option value="medea">المدية</option><option value="djelfa">الجلفة</option><option value="laghouat">الأغواط</option><option value="saida">سعيدة</option><option value="mascara">معسكر</option><option value="relizane">غليزان</option>
+        <option value="tiaret">تيارت</option><option value="tissemsilt">تسمسيلت</option><option value="ksar-chelala">قصر الشلالة</option>
       </select></span>
     </span>
     <span class="date">📅 <span id="current-date"></span></span>
@@ -72,7 +72,7 @@
     <div class="footer-row">
       <div class="footer-row-right">
         <div class="footer-brand">📡 <span>الصوت</span> المحلي</div>
-        <div class="footer-desc">يومية جزائرية مستقلة - صدرت عام 2026</div>
+        <div class="footer-desc">نشرية جزائرية مستقلة - صدرت عام 2026</div>
       </div>
 
     </div>
@@ -108,7 +108,7 @@
   <script src="js/i18n.js"></script>
   <script src="js/api.js"></script>
   <script>
-    var WD={tiaret:{t:21,i:'🌤'},tissemsilt:{t:23,i:'⛅'},medea:{t:19,i:'🌥'},djelfa:{t:17,i:'⛅'},laghouat:{t:25,i:'☀️'},saida:{t:22,i:'🌤'},mascara:{t:24,i:'☀️'},relizane:{t:26,i:'☀️'}};function updW(){var w=WD[document.getElementById('wc').value];document.getElementById('wt').textContent=w.t+'°';document.getElementById('wi').textContent=w.i}    (function(){var d=new Date();document.getElementById('current-date').textContent=d.toLocaleDateString('ar-SA',{weekday:'long',calendar:'islamic'})+' '+d.toLocaleDateString('ar-SA',{day:'numeric',month:'long',calendar:'islamic'})+' '+d.toLocaleDateString('ar-SA',{year:'numeric',calendar:'islamic'})+' الموافق ل '+d.toLocaleDateString('ar-DZ',{day:'numeric',month:'long',year:'numeric'})})();
+    var WD={tiaret:{t:21,i:'🌤'},tissemsilt:{t:23,i:'⛅'},ksar-chelala:{t:22,i:'🌤'}};function updW(){var w=WD[document.getElementById('wc').value];document.getElementById('wt').textContent=w.t+'°';document.getElementById('wi').textContent=w.i}    (function(){var d=new Date();document.getElementById('current-date').textContent=d.toLocaleDateString('ar-SA',{weekday:'long',calendar:'islamic'})+' '+d.toLocaleDateString('ar-SA',{day:'numeric',month:'long',calendar:'islamic'})+' '+d.toLocaleDateString('ar-SA',{year:'numeric',calendar:'islamic'})+' الموافق ل '+d.toLocaleDateString('ar-DZ',{day:'numeric',month:'long',year:'numeric'})})();
 
     async function loadGallery() {
       const container = document.getElementById('media-gallery');

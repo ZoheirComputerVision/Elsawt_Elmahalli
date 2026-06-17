@@ -192,7 +192,7 @@ a:hover{color:var(--accent)}
   <button class="lang-btn" id="lang-btn" onclick="toggleLangUI()">Français</button>
   <span class="weather-widget"><span id="wi">🌤</span> <span id="wt">21°</span>
   <select id="wc" onchange="updW()">
-    <option value="tiaret">تيارت</option><option value="tissemsilt">تسمسيلت</option><option value="medea">المدية</option><option value="djelfa">الجلفة</option><option value="laghouat">الأغواط</option><option value="saida">سعيدة</option><option value="mascara">معسكر</option><option value="relizane">غليزان</option>
+    <option value="tiaret">تيارت</option><option value="tissemsilt">تسمسيلت</option><option value="ksar-chelala">قصر الشلالة</option>
   </select></span>
 </span>
 <span class="date">📅 <span id="cdate"></span></span>
@@ -228,13 +228,29 @@ a:hover{color:var(--accent)}
 <nav class="nav"><div class="container">
 <a href="index.html" class="active">🏠 الرئيسية</a>
 <div class="nav-dropdown">
-<a class="nav-dropdown-trigger">الإعلام المحلي ▾</a>
+<a class="nav-dropdown-trigger">محليات ▾</a>
 <div class="nav-dropdown-menu">
 <a href="news.html">📰 الأخبار</a>
 <a href="activities.html">📸 النشاطات</a>
 <a href="announcements.html">📢 الإعلانات</a>
 <a href="timeline.html">📅 الأرشفة الزمنية</a>
 <a href="archive.html">📂 الأرشيف</a>
+<div style="border-top:1px solid var(--border);margin:4px 0;"></div>
+<a href="news.html?cat=الوطن" style="font-weight:700;color:var(--primary);">🗺️ دوائر ولاية تيارت</a>
+<a href="news.html?district=tiaret">تيارت</a>
+<a href="news.html?district=ain-dheb">عين الذهب</a>
+<a href="news.html?district=sougueur">السوقر</a>
+<a href="news.html?district=mahdia">مهدية</a>
+<a href="news.html?district=frenda">فرندة</a>
+<a href="news.html?district=ksar-chelala">قصر الشلالة</a>
+<a href="news.html?district=hamadia">حمادية</a>
+<a href="news.html?district=rahouia">الرحوية</a>
+<a href="news.html?district=medroussa">مدروسة</a>
+<a href="news.html?district=ain-kermes">عين كرمس</a>
+<a href="news.html?district=sidi-ali-mellal">سيدي علي ملال</a>
+<a href="news.html?district=mghila">مغيلة</a>
+<a href="news.html?district=sebaine">سبعين</a>
+<a href="news.html?district=serghine">سرغين</a>
 </div></div>
 <a href="news.html?cat=الوطن">🇩🇿 الوطن</a>
 <a href="news.html?cat=اقتصاد">💰 اقتصاد</a>
@@ -246,7 +262,8 @@ a:hover{color:var(--accent)}
 <a href="news.html?cat=مجتمع">👥 مجتمع</a>
 <a href="news.html?cat=اسلاميات">🕌 اسلاميات</a>
 </div></div>
-<a href="news.html?cat=تكنولوجيا">💻 تكنولوجيا</a>
+<a href="news.html?cat=إضاءات">💡 إضاءات</a>
+<a href="news.html?cat=رأي">✍️ رأي</a>
 <a href="subscribe.html" style="background:var(--accent);color:var(--primary-dark);padding:8px 14px;border-radius:6px;font-weight:700;margin-right:5px">🔔 اشتراك</a>
 </div></nav>
 
@@ -254,11 +271,18 @@ a:hover{color:var(--accent)}
 <div id="content-grid"></div>
 </main>
 
+<section class="home-timeline-section">
+  <div class="container">
+    <h3 class="section-title">📅 الأرشفة الزمنية <span class="badge">أرشيف المحتوى</span></h3>
+    <div id="timeline-content"></div>
+  </div>
+</section>
+
 <footer class="footer"><div class="container">
 
 <div class="footer-row">
   <div class="footer-brand">📡 <span>الصوت</span> المحلي</div>
-  <div class="footer-desc">يومية جزائرية مستقلة - صدرت عام 2026</div>
+  <div class="footer-desc">نشرية جزائرية مستقلة - صدرت عام 2026</div>
 </div>
 
 <div class="footer-row" style="justify-content:space-between">
@@ -298,7 +322,7 @@ a:hover{color:var(--accent)}
 
 <script src="js/i18n.js"></script>
 <script>
-var WD={tiaret:{t:21,i:'🌤'},tissemsilt:{t:23,i:'⛅'},medea:{t:19,i:'🌥'},djelfa:{t:17,i:'⛅'},laghouat:{t:25,i:'☀️'},saida:{t:22,i:'🌤'},mascara:{t:24,i:'☀️'},relizane:{t:26,i:'☀️'}};function updW(){var w=WD[document.getElementById('wc').value];document.getElementById('wt').textContent=w.t+'°';document.getElementById('wi').textContent=w.i}
+var WD={tiaret:{t:21,i:'🌤'},tissemsilt:{t:23,i:'⛅'},ksar-chelala:{t:22,i:'🌤'}};function updW(){var w=WD[document.getElementById('wc').value];document.getElementById('wt').textContent=w.t+'°';document.getElementById('wi').textContent=w.i}
 function subNewsletter(){var e=document.getElementById('nl-email');var v=e.value.trim();if(!v||!v.includes('@')){alert('📧 الرجاء إدخال بريد إلكتروني صحيح');return}if(location.protocol==='file:'){localStorage.setItem('nl_'+Date.now(),v);e.value='';alert('✅ تم الاشتراك في النشرة البريدية بنجاح');return}var b=document.querySelector('base').href;fetch(b+'api/subscribe',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:v})}).then(function(r){return r.json()}).then(function(d){alert(d.message||d.error);if(!d.error)e.value=''}).catch(function(){alert('✅ تم الاشتراك في النشرة البريدية بنجاح');localStorage.setItem('nl_'+Date.now(),v);e.value=''})}
 
 const now = new Date();

@@ -27,7 +27,7 @@ async function run() {
   // ── 1. Registry completeness ──
   console.log('── Registry ──');
   const all = categories.getAll();
-  assertEqual(all.length, 10, 'has 10 categories');
+  assertEqual(all.length, 11, 'has 11 categories');
 
   // Each has required fields
   for (const cat of all) {
@@ -44,11 +44,11 @@ async function run() {
 
   // Unique priorities
   const priorities = all.map(c => c.priority);
-  assertEqual(new Set(priorities).size, 10, 'all priorities are unique');
+  assertEqual(new Set(priorities).size, 11, 'all priorities are unique');
 
   // Unique slugs
   const slugs = all.map(c => c.slug);
-  assertEqual(new Set(slugs).size, 10, 'all slugs are unique');
+  assertEqual(new Set(slugs).size, 11, 'all slugs are unique');
 
   // ── 2. Priority order is 1-10 ──
   const sorted = [...all].sort((a, b) => a.priority - b.priority);

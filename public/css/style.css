@@ -407,6 +407,30 @@ a:hover { color: var(--accent); }
   border-right: 4px solid var(--accent);
 }
 
+/* ── Home Timeline Section ── */
+.home-timeline-section {
+  background: var(--card-bg);
+  padding: 30px 0;
+  margin: 30px 0 0;
+  border-top: 3px solid var(--accent);
+  border-bottom: 3px solid var(--accent);
+}
+.home-timeline-section .section-title {
+  font-family: 'Cairo', sans-serif;
+  font-size: 1.5rem;
+  color: var(--primary);
+  text-align: center;
+  margin-bottom: 20px;
+}
+.home-timeline-section .badge {
+  background: var(--accent);
+  color: var(--primary-dark);
+  font-size: 0.75rem;
+  padding: 2px 10px;
+  border-radius: 12px;
+  vertical-align: middle;
+}
+
 /* ── Footer ── */
 .footer {
   background: var(--primary-dark);
