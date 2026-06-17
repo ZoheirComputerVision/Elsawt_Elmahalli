@@ -112,6 +112,8 @@ const API = {
     resetUserPassword: (id, password) => API.post(`/admin/users/${id}/reset-password`, { password }, true),
     reactivate: (id) => API.post(`/admin/content/${id}/reactivate`, null, true),
     expire: (id) => API.post(`/admin/content/${id}/expire`, null, true),
+    archiveContent: (id) => API.post(`/admin/content/${id}/archive`, null, true),
+    restoreContent: (id) => API.post(`/admin/content/${id}/restore`, null, true),
     getExpiringSoon: (days) => API.get(`/admin/content/expiring-soon?days=${days}`, true),
 
     logout: () => API.post('/admin/auth/logout', null, true),

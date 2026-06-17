@@ -348,6 +348,28 @@ router.post('/content/:id/update', async (req, res) => {
   } catch (e) { res.status(500).json({ success: false, error: e.message }); }
 });
 
+router.post('/content/:id/archive', requireRole('editor_in_chief'), async (req, res) => {
+  try {
+    const result = expiration.archiveContent(parseInt(req.params.id));
+    audit.log(req.user?.username, 'content.archived', 'processed_content', result.id, { title: result.title });
+    res.json({ success: true, content: result, message: 'تم أرشفة المحتوى' });
+  } catch (e) {
+    const status = e.message.includes('غير موجود') ? 404 : 400;
+    res.status(status).json({ success: false, error: e.message });
+  }
+});
+
+router.post('/content/:id/restore', requireRole('editor_in_chief'), async (req, res) => {
+  try {
+    const result = expiration.restoreContent(parseInt(req.params.id));
+    audit.log(req.user?.username, 'content.restored', 'processed_content', result.id, { title: result.title });
+    res.json({ success: true, content: result, message: 'تم استعادة المحتوى من الأرشيف' });
+  } catch (e) {
+    const status = e.message.includes('غير موجود') ? 404 : 400;
+    res.status(status).json({ success: false, error: e.message });
+  }
+});
+
 router.post('/content/:id/reactivate', requireRole('editor_in_chief'), async (req, res) => {
   try {
     const result = expiration.reactivateContent(parseInt(req.params.id));

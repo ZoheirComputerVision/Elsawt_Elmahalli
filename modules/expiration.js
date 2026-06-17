@@ -61,6 +61,41 @@ class ExpirationManager {
       c.expires_at > now.toISOString() && c.expires_at <= future
     );
   }
+
+  archiveContent(id) {
+    const item = db.get('processed_content', parseInt(id));
+    if (!item) throw new Error('المحتوى غير موجود');
+    db.update('processed_content', item.id, { visibility_status: 'archived' });
+    db.saveNow('processed_content');
+    return db.get('processed_content', item.id);
+  }
+
+  restoreContent(id) {
+    const item = db.get('processed_content', parseInt(id));
+    if (!item) throw new Error('المحتوى غير موجود');
+    db.update('processed_content', item.id, { visibility_status: 'active' });
+    db.saveNow('processed_content');
+    return db.get('processed_content', item.id);
+  }
+
+  archiveExpiredContent() {
+    const now = new Date();
+    const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000).toISOString();
+    let archived = 0;
+    const items = db.query('processed_content', c =>
+      c.status === 'published' && c.visibility_status === 'expired' && c.last_modified_at && c.last_modified_at <= thirtyDaysAgo
+    );
+    for (const item of items) {
+      db.update('processed_content', item.id, { visibility_status: 'archived' });
+      audit.log('system', 'content.auto_archived', 'processed_content', item.id, { title: item.title });
+      archived++;
+    }
+    if (archived > 0) {
+      db.saveNow('processed_content');
+      console.log(`[Expiration] أرشفة تلقائية: ${archived} محتوى منتهي منذ أكثر من 30 يوماً`);
+    }
+    return archived;
+  }
 }
 
 module.exports = new ExpirationManager();

@@ -155,6 +155,12 @@
               ${item.status !== 'published' ? `<button class="btn btn-sm btn-success" onclick="approveItem(${item.id})">✓ قبول</button>` : ''}
               ${item.status !== 'rejected' ? `<button class="btn btn-sm btn-danger" onclick="rejectItem(${item.id})">✗ رفض</button>` : ''}
               ${item.status === 'draft' ? `<button class="btn btn-sm btn-accent" onclick="generateItem(${item.id})">🖋 توليد</button>` : ''}
+              ${!isArchived && item.status === 'published'
+                ? `<button class="btn btn-sm" style="background:#6b7280;color:white;" onclick="archiveItem(${item.id})">📦 أرشفة</button>`
+                : ''}
+              ${isArchived
+                ? `<button class="btn btn-sm" style="background:#10b981;color:white;" onclick="restoreItem(${item.id})">📂 استعادة</button>`
+                : ''}
               ${isExpired || isArchived
                 ? `<button class="btn btn-sm" style="background:#10b981;color:white;" onclick="reactivateItem(${item.id})">🔄 إعادة تنشيط</button>`
                 : item.status === 'published' ? `<button class="btn btn-sm" style="background:#f59e0b;color:white;" onclick="expireItem(${item.id})">⏳ إنهاء صلاحية</button>` : ''}
@@ -200,6 +206,24 @@
       if (confirm('⚠️ هل أنت متأكد من إنهاء صلاحية هذا المحتوى؟')) {
         try {
           await API.admin.expire(id);
+          loadContent();
+        } catch (e) { alert('❌ ' + e.message); }
+      }
+    }
+
+    async function archiveItem(id) {
+      if (confirm('📦 هل أنت متأكد من أرشفة هذا المحتوى؟')) {
+        try {
+          await API.admin.archiveContent(id);
+          loadContent();
+        } catch (e) { alert('❌ ' + e.message); }
+      }
+    }
+
+    async function restoreItem(id) {
+      if (confirm('📂 هل تريد استعادة هذا المحتوى من الأرشيف؟')) {
+        try {
+          await API.admin.restoreContent(id);
           loadContent();
         } catch (e) { alert('❌ ' + e.message); }
       }

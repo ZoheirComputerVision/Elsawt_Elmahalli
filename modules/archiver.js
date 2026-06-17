@@ -37,6 +37,9 @@ class ArchiveSystem {
       total_review: items.filter(i => i.status === 'review').length,
       total_ai_decisions: logs.length,
       total_views: views.length,
+      total_archived_visibility: items.filter(i => i.visibility_status === 'archived').length,
+      total_expired: items.filter(i => i.visibility_status === 'expired').length,
+      total_active: items.filter(i => i.visibility_status === 'active' || !i.visibility_status).length,
       by_category: {
         news: items.filter(i => i.category === 'news' && i.status === 'published').length,
         activity: items.filter(i => i.category === 'activity' && i.status === 'published').length,

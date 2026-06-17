@@ -12,6 +12,7 @@ class Scheduler {
     this.jobs.push(cron.schedule('*/10 * * * *', () => this.runPublisher()));
     this.jobs.push(cron.schedule('*/5 * * * *', () => this.runExpirationCheck()));
     this.jobs.push(cron.schedule('0 */6 * * *', () => this.runArchiveSync()));
+    this.jobs.push(cron.schedule('0 2 * * *', () => this.runAutoArchive()));
     this.jobs.push(cron.schedule('0 0 * * *', () => this.resetDailyCount()));
     console.log(`[Scheduler] ${this.jobs.length} مهمة مجدولة بدأت`);
   }
@@ -82,10 +83,19 @@ class Scheduler {
       });
       const publisher = require('./publisher');
       for (const item of unarchived) {
-        publisher.archive(item.id, 'scheduler_sync');
+        publisher._archive(item.id, 'scheduler_sync');
       }
       console.log(`[Scheduler] ✓ أرشفة ${unarchived.length} عنصر`);
     } catch (e) { console.error('[Scheduler] ✗ فشل الأرشفة:', e.message); }
+  }
+
+  async runAutoArchive() {
+    console.log('[Scheduler] تشغيل الأرشفة التلقائية للمحتوى المنتهي...');
+    try {
+      const expiration = require('./expiration');
+      const count = expiration.archiveExpiredContent();
+      console.log(`[Scheduler] ✓ أرشفة ${count} محتوى منتهي`);
+    } catch (e) { console.error('[Scheduler] ✗ فشل الأرشفة التلقائية:', e.message); }
   }
 
   resetDailyCount() {
