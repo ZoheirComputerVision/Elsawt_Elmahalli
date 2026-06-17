@@ -96,7 +96,29 @@ app.use(morgan('dev'));
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true }));
 
+function parseCookies(str) {
+  if (!str) return {};
+  const result = {};
+  str.split(';').forEach(c => {
+    const i = c.indexOf('=');
+    if (i > 0) result[c.slice(0, i).trim()] = decodeURIComponent(c.slice(i + 1).trim());
+  });
+  return result;
+}
+
+app.use('/admin', (req, res, next) => {
+  const p = req.path;
+  if (p === '' || p === '/' || p === '/index.html') return next();
+  const ext = path.extname(p).toLowerCase();
+  if (ext && ext !== '.html') return next();
+  const cookies = parseCookies(req.headers.cookie);
+  const token = cookies.admin_token || '';
+  if (token && users.authenticate(token)) return next();
+  return res.redirect('/admin');
+});
+
 app.use(express.static(config.PUBLIC_DIR));
+
 app.use('/admin', express.static(config.ADMIN_DIR));
 
 app.use('/api', apiRoutes);

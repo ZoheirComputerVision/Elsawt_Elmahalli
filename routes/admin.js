@@ -60,14 +60,19 @@ router.post('/auth', loginRateLimit, (req, res) => {
   const result = users.login(username, password, ip);
   if (result) {
     audit.log(result.user.username, 'user.login', 'users', result.user.id, { role: result.user.role });
+    res.cookie('admin_token', result.token, { httpOnly: true, sameSite: 'lax', maxAge: 24 * 60 * 60 * 1000 });
     return res.json({ success: true, token: result.token, user: result.user.fullName || result.user.username, role: result.user.role });
   }
-  // Check if rate-limited
+  // Differentiate error for suspended accounts
+  const existing = users.getUserByUsername(username);
+  if (existing && existing.active === false) {
+    return res.status(401).json({ success: false, error: '❌ الحساب موقوف' });
+  }
   const status = users.getRateLimitStatus(ip);
   if (!status.allowed) {
     return res.status(429).json({ success: false, error: `الحساب مقفل مؤقتاً. حاول بعد ${status.remaining} ثانية` });
   }
-  res.status(401).json({ success: false, error: 'بيانات الدخول غير صحيحة' });
+  res.status(401).json({ success: false, error: '❌ اسم المستخدم أو كلمة المرور غير صحيحة' });
 });
 
 const { resolve: resolveCategory } = require('../modules/categories');
@@ -166,10 +171,11 @@ router.post('/users/:id/reset-password', requireRole('publisher'), (req, res) =>
 router.post('/auth/logout', requireAuth, (req, res) => {
   const token = req.headers['x-admin-auth'];
   users.logout(token);
+  res.clearCookie('admin_token');
   res.json({ success: true });
 });
 
-router.get('/dashboard', (req, res) => res.json(archive.getStats()));
+router.get('/dashboard', requireAuth, (req, res) => res.json(archive.getStats()));
 
 router.get('/content', (req, res) => {
   let items = db.query('processed_content');
