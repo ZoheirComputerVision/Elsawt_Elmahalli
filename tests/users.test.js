@@ -55,15 +55,15 @@ test('updateUser: changes fullName', () => { const r = users.updateUser(publishe
 test('updateUser: changes email', () => { const r = users.updateUser(publisherId, { email: 'x@y.com' }); assert.strictEqual(r.email, 'x@y.com'); });
 test('updateUser: rejects invalid role', () => assert.throws(() => users.updateUser(publisherId, { role: 'admin' })));
 test('updateUser: throws for missing', () => assert.throws(() => users.updateUser(99999, { fullName: 'X' })));
-test('deactivateUser: sets false', () => { const r = users.deactivateUser(publisherId); assert.strictEqual(r.active, false); });
-test('activateUser: sets true', () => { const r = users.activateUser(publisherId); assert.strictEqual(r.active, true); });
+test('suspendUser: sets suspended', () => { const r = users.suspendUser(publisherId); assert.strictEqual(r.status, 'suspended'); });
+test('activateUser: sets active', () => { const r = users.activateUser(publisherId); assert.strictEqual(r.status, 'active'); });
 test('changeRole: changes role', () => { users.changeRole(editorId, 'publisher'); users.changeRole(editorId, 'editor_in_chief'); assert.ok(true); });
 test('changeRole: rejects invalid', () => assert.throws(() => users.changeRole(editorId, 'superadmin')));
 test('resetPassword: new pw works', () => { users.resetPassword(publisherId, 'newpass12'); assert.ok(users.validateUser('pub1', 'newpass12')); users.resetPassword(publisherId, 'pass1234'); });
 test('resetPassword: rejects short', () => assert.throws(() => users.resetPassword(publisherId, 'ab')));
 test('validateUser: correct', () => { const u = users.validateUser('pub1', 'pass1234'); assert.ok(u); assert.strictEqual(u.username, 'pub1'); assert.ok(u.lastLoginAt); });
 test('validateUser: wrong pw null', () => assert.strictEqual(users.validateUser('pub1', 'wrong'), null));
-test('validateUser: deactivated null', () => { users.deactivateUser(publisherId); assert.strictEqual(users.validateUser('pub1', 'pass1234'), null); users.activateUser(publisherId); });
+test('validateUser: suspended null', () => { users.suspendUser(publisherId); assert.strictEqual(users.validateUser('pub1', 'pass1234'), null); users.activateUser(publisherId); });
 test('validateUser: nonexistent null', () => assert.strictEqual(users.validateUser('nobody', 'pass'), null));
 test('login: returns token', () => { const r = users.login('pub1', 'pass1234'); assert.ok(r); assert.ok(r.token); assert.strictEqual(r.user.username, 'pub1'); });
 test('login: wrong pw null', () => assert.strictEqual(users.login('pub1', 'wrong'), null));
@@ -184,16 +184,16 @@ const server = app.listen(0, async () => {
   assert.strictEqual(r10.status, 404);
   apiTest('update non-existent returns 404', async () => assert.ok(true));
 
-  // 11. Deactivate user as publisher
-  const r11 = await apiReq('POST', `/api/admin/users/${newUserId}/deactivate`, pubToken);
+  // 11. Suspend user as publisher
+  const r11 = await apiReq('POST', `/api/admin/users/${newUserId}/suspend`, pubToken);
   assert.strictEqual(r11.status, 200);
-  assert.strictEqual(r11.body.active, false);
-  apiTest('publisher can deactivate user', async () => assert.ok(true));
+  assert.strictEqual(r11.body.status, 'suspended');
+  apiTest('publisher can suspend user', async () => assert.ok(true));
 
   // 12. Activate user as publisher
   const r12 = await apiReq('POST', `/api/admin/users/${newUserId}/activate`, pubToken);
   assert.strictEqual(r12.status, 200);
-  assert.strictEqual(r12.body.active, true);
+  assert.strictEqual(r12.body.status, 'active');
   apiTest('publisher can activate user', async () => assert.ok(true));
 
   // 13. Change role as publisher
@@ -229,7 +229,7 @@ const server = app.listen(0, async () => {
   const actions = logs.map(l => l.action);
   assert.ok(actions.includes('user.create'));
   assert.ok(actions.includes('user.update'));
-  assert.ok(actions.includes('user.deactivate'));
+  assert.ok(actions.includes('user.suspend'));
   assert.ok(actions.includes('user.activate'));
   assert.ok(actions.includes('user.role_change'));
   assert.ok(actions.includes('user.password_reset'));

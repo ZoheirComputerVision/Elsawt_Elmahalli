@@ -33,6 +33,8 @@
     <div class="users-stats" id="users-stats">
       <div class="users-stat"><div class="num" id="stat-total">0</div><div class="lbl">المجموع</div></div>
       <div class="users-stat"><div class="num" id="stat-active">0</div><div class="lbl">نشط</div></div>
+      <div class="users-stat"><div class="num" id="stat-suspended">0</div><div class="lbl">موقوف</div></div>
+      <div class="users-stat"><div class="num" id="stat-archived">0</div><div class="lbl">مؤرشف</div></div>
       <div class="users-stat"><div class="num" id="stat-publishers">0</div><div class="lbl">ناشرون</div></div>
       <div class="users-stat"><div class="num" id="stat-editors">0</div><div class="lbl">رؤساء تحرير</div></div>
       <div class="users-stat"><div class="num" id="stat-journalists">0</div><div class="lbl">صحفيون</div></div>
@@ -51,9 +53,10 @@
         <option value="journalist">صحفي</option>
       </select>
       <select id="users-status-filter" class="form-control" onchange="loadUsers()">
-        <option value="">الكل</option>
-        <option value="true">نشط فقط</option>
-        <option value="false">موقوف فقط</option>
+        <option value="">جميع المستخدمين</option>
+        <option value="active">النشطون</option>
+        <option value="suspended">الموقوفون</option>
+        <option value="archived">المؤرشفون</option>
       </select>
       <button class="btn btn-primary" onclick="openCreateModal()">+ إضافة مستخدم</button>
     </div>

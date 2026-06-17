@@ -63,10 +63,13 @@ router.post('/auth', loginRateLimit, (req, res) => {
     res.cookie('admin_token', result.token, { httpOnly: true, sameSite: 'lax', maxAge: 24 * 60 * 60 * 1000 });
     return res.json({ success: true, token: result.token, user: result.user.fullName || result.user.username, role: result.user.role });
   }
-  // Differentiate error for suspended accounts
+  // Differentiate error for suspended/archived accounts
   const existing = users.getUserByUsername(username);
-  if (existing && existing.active === false) {
+  if (existing && existing.status === 'suspended') {
     return res.status(401).json({ success: false, error: '❌ الحساب موقوف' });
+  }
+  if (existing && existing.status === 'archived') {
+    return res.status(401).json({ success: false, error: '❌ الحساب مؤرشف' });
   }
   const status = users.getRateLimitStatus(ip);
   if (!status.allowed) {
@@ -83,7 +86,7 @@ router.get('/users', requireRole('editor_in_chief'), (req, res) => {
   try {
     const result = users.listUsers({
       role: req.query.role,
-      active: req.query.active,
+      status: req.query.status,
       search: req.query.search,
       limit: req.query.limit,
       offset: req.query.offset,
@@ -118,11 +121,11 @@ router.put('/users/:id', requireRole('publisher'), (req, res) => {
   }
 });
 
-router.post('/users/:id/deactivate', requireRole('publisher'), (req, res) => {
+router.post('/users/:id/suspend', requireRole('publisher'), (req, res) => {
   try {
     const id = parseInt(req.params.id);
-    const record = users.deactivateUser(id);
-    audit.log(req.user?.username, 'user.deactivate', 'users', id, {});
+    const record = users.suspendUser(id);
+    audit.log(req.user?.username, 'user.suspend', 'users', id, {});
     res.json(record);
   } catch (e) {
     const status = e.message.includes('غير موجود') ? 404 : 400;
@@ -135,6 +138,30 @@ router.post('/users/:id/activate', requireRole('publisher'), (req, res) => {
     const id = parseInt(req.params.id);
     const record = users.activateUser(id);
     audit.log(req.user?.username, 'user.activate', 'users', id, {});
+    res.json(record);
+  } catch (e) {
+    const status = e.message.includes('غير موجود') ? 404 : 400;
+    res.status(status).json({ error: e.message });
+  }
+});
+
+router.post('/users/:id/archive', requireRole('publisher'), (req, res) => {
+  try {
+    const id = parseInt(req.params.id);
+    const record = users.archiveUser(id);
+    audit.log(req.user?.username, 'user.archive', 'users', id, {});
+    res.json(record);
+  } catch (e) {
+    const status = e.message.includes('غير موجود') ? 404 : 400;
+    res.status(status).json({ error: e.message });
+  }
+});
+
+router.post('/users/:id/restore', requireRole('publisher'), (req, res) => {
+  try {
+    const id = parseInt(req.params.id);
+    const record = users.restoreUser(id);
+    audit.log(req.user?.username, 'user.restore', 'users', id, {});
     res.json(record);
   } catch (e) {
     const status = e.message.includes('غير موجود') ? 404 : 400;

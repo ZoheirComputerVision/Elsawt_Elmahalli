@@ -3,6 +3,7 @@ const db = require('../database');
 
 const TABLE = 'users';
 const ROLE_HIERARCHY = { publisher: 3, editor_in_chief: 2, journalist: 1 };
+const VALID_STATUSES = ['active', 'suspended', 'archived'];
 const PBKDF2_ITERATIONS = 100000;
 const PBKDF2_KEYLEN = 64;
 const PBKDF2_DIGEST = 'sha512';
@@ -110,7 +111,7 @@ class UserManager {
       passwordHash: hash,
       passwordSalt: salt,
       role,
-      active: true,
+      status: 'active',
       lastLoginAt: null,
       createdBy: createdBy || 'system',
     });
@@ -119,7 +120,7 @@ class UserManager {
   }
 
   updateUser(id, updates) {
-    const allowed = ['fullName', 'email', 'phone', 'role', 'active'];
+    const allowed = ['fullName', 'email', 'phone', 'role', 'status'];
     const clean = {};
     for (const key of allowed) {
       if (updates[key] !== undefined) clean[key] = updates[key];
@@ -127,16 +128,21 @@ class UserManager {
     if (clean.role && !['publisher', 'editor_in_chief', 'journalist'].includes(clean.role)) {
       throw new Error('الدور غير صالح');
     }
+    if (clean.status && !VALID_STATUSES.includes(clean.status)) {
+      throw new Error('الحالة غير صالحة');
+    }
     const prev = db.get(TABLE, id);
     if (!prev) throw new Error('المستخدم غير موجود');
     const updated = db.update(TABLE, id, clean);
-    if (clean.active === false) sessions.invalidateUser(id);
+    if (clean.status === 'suspended' || clean.status === 'archived') sessions.invalidateUser(id);
     const { passwordHash, passwordSalt, ...safe } = updated;
     return safe;
   }
 
-  deactivateUser(id) { return this.updateUser(id, { active: false }); }
-  activateUser(id) { return this.updateUser(id, { active: true }); }
+  suspendUser(id) { return this.updateUser(id, { status: 'suspended' }); }
+  activateUser(id) { return this.updateUser(id, { status: 'active' }); }
+  archiveUser(id) { return this.updateUser(id, { status: 'archived' }); }
+  restoreUser(id) { return this.updateUser(id, { status: 'active' }); }
   changeRole(id, role) { return this.updateUser(id, { role }); }
 
   resetPassword(id, newPassword) {
@@ -153,7 +159,7 @@ class UserManager {
   listUsers(filters = {}) {
     let items = db.query(TABLE);
     if (filters.role) items = items.filter(u => u.role === filters.role);
-    if (filters.active !== undefined) items = items.filter(u => u.active === (filters.active === 'true' || filters.active === true));
+    if (filters.status) items = items.filter(u => u.status === filters.status);
     if (filters.search) {
       const s = filters.search.toLowerCase();
       items = items.filter(u =>
@@ -185,9 +191,8 @@ class UserManager {
   }
 
   validateUser(username, password, ip) {
-    const user = db.findOne(TABLE, u => u.username === username && u.active === true);
+    const user = db.findOne(TABLE, u => u.username === username && u.status === 'active');
     if (!user) return null;
-    // Rate limit check
     const limitCheck = rateLimiter.check(ip || 'unknown');
     if (!limitCheck.allowed) return null;
     const inputHash = hashPassword(password, user.passwordSalt);
@@ -221,7 +226,7 @@ class UserManager {
     const session = sessions.get(token);
     if (!session) return null;
     const user = db.get(TABLE, session.userId);
-    if (!user || !user.active) {
+    if (!user || user.status !== 'active') {
       sessions.delete(token);
       return null;
     }
@@ -234,6 +239,23 @@ class UserManager {
 
   get ROLE_HIERARCHY() { return ROLE_HIERARCHY; }
 }
+
+// ── Migration: active boolean → status field ──
+(function migrate() {
+  const items = db.query(TABLE);
+  let migrated = 0;
+  for (const u of items) {
+    if (u.status === undefined || u.status === null) {
+      u.status = u.active === false ? 'suspended' : 'active';
+      delete u.active;
+      migrated++;
+    }
+  }
+  if (migrated > 0) {
+    db.saveNow(TABLE);
+    console.log(`[Users] تم ترحيل ${migrated} مستخدم (active → status)`);
+  }
+})();
 
 module.exports = new UserManager();
 module.exports.UserManager = UserManager;

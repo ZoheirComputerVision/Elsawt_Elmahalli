@@ -22,8 +22,6 @@ function logout() {
   window.location.href = '/admin';
 }
 
-// ── Load ──
-
 async function loadUsers() {
   try {
     const params = {};
@@ -32,7 +30,7 @@ async function loadUsers() {
     const role = document.getElementById('users-role-filter').value;
     if (role) params.role = role;
     const status = document.getElementById('users-status-filter').value;
-    if (status !== '') params.active = status;
+    if (status) params.status = status;
 
     const result = await API.admin.getUsers(params);
     renderUsers(result.items || []);
@@ -45,16 +43,26 @@ async function loadUsers() {
 
 function updateStats(users) {
   const total = users.length;
-  const active = users.filter(u => u.active).length;
+  const active = users.filter(u => u.status === 'active').length;
+  const suspended = users.filter(u => u.status === 'suspended').length;
+  const archived = users.filter(u => u.status === 'archived').length;
   const publishers = users.filter(u => u.role === 'publisher').length;
   const editors = users.filter(u => u.role === 'editor_in_chief').length;
   const journalists = users.filter(u => u.role === 'journalist').length;
   document.getElementById('stat-total').textContent = total;
   document.getElementById('stat-active').textContent = active;
+  document.getElementById('stat-suspended').textContent = suspended;
+  document.getElementById('stat-archived').textContent = archived;
   document.getElementById('stat-publishers').textContent = publishers;
   document.getElementById('stat-editors').textContent = editors;
   document.getElementById('stat-journalists').textContent = journalists;
 }
+
+const STATUS_NAMES = {
+  active: '🟢 نشط',
+  suspended: '🔴 موقوف',
+  archived: '⚪ مؤرشف',
+};
 
 const ROLE_NAMES = {
   publisher: 'ناشر',
@@ -79,10 +87,11 @@ function renderUsers(users) {
       <th>الإجراءات</th>
     </tr>`;
   users.forEach(u => {
-    const rowClass = u.active ? 'user-row-active' : 'user-row-inactive';
+    const s = u.status || 'active';
+    const rowClass = `user-row-${s}`;
     const roleClass = `user-role-${u.role}`;
-    const statusClass = u.active ? 'user-status-active' : 'user-status-inactive';
-    const statusText = u.active ? '🟢 نشط' : '🔴 موقوف';
+    const statusClass = `user-status-${s}`;
+    const statusText = STATUS_NAMES[s] || STATUS_NAMES.active;
     const lastLogin = u.lastLoginAt ? new Date(u.lastLoginAt).toLocaleDateString('ar-DZ') : '—';
     html += `<tr class="${rowClass}">
       <td>${u.id}</td>
@@ -96,18 +105,23 @@ function renderUsers(users) {
         <button class="btn btn-sm btn-primary" onclick="openEditModal(${u.id})" title="تعديل">✏️</button>
         <button class="btn btn-sm" style="background:#8b5cf6;color:white;" onclick="openRoleModal(${u.id}, '${u.role}', '${u.fullName}')" title="تغيير الدور">🔄</button>
         <button class="btn btn-sm btn-warning" onclick="openPasswordModal(${u.id}, '${u.fullName}')" title="إعادة تعيين كلمة المرور">🔑</button>
-        ${u.active
-          ? `<button class="btn btn-sm btn-danger" onclick="deactivateUser(${u.id})" title="إيقاف">⛔</button>`
-          : `<button class="btn btn-sm btn-success" onclick="activateUser(${u.id})" title="تفعيل">✅</button>`
-        }
+        ${s === 'active'
+          ? `<button class="btn btn-sm btn-danger" onclick="suspendUser(${u.id})" title="إيقاف">⛔</button>
+             <button class="btn btn-sm" style="background:#6b7280;color:white;" onclick="archiveUser(${u.id})" title="أرشفة">📦</button>`
+          : ''}
+        ${s === 'suspended'
+          ? `<button class="btn btn-sm btn-success" onclick="activateUser(${u.id})" title="تفعيل">✅</button>
+             <button class="btn btn-sm" style="background:#6b7280;color:white;" onclick="archiveUser(${u.id})" title="أرشفة">📦</button>`
+          : ''}
+        ${s === 'archived'
+          ? `<button class="btn btn-sm btn-success" onclick="restoreUser(${u.id})" title="استعادة">↩️</button>`
+          : ''}
       </td>
     </tr>`;
   });
   html += '</table>';
   document.getElementById('users-list').innerHTML = html;
 }
-
-// ── Create / Edit ──
 
 function openCreateModal() {
   editingUserId = null;
@@ -172,24 +186,37 @@ async function submitUser() {
   }
 }
 
-// ── Deactivate / Activate ──
-
-async function deactivateUser(id) {
+async function suspendUser(id) {
   if (!confirm('⛔ هل أنت متأكد من إيقاف هذا المستخدم؟')) return;
   try {
-    await API.admin.deactivateUser(id);
+    await API.admin.suspendUser(id);
     loadUsers();
   } catch (e) { alert(e.message); }
 }
 
 async function activateUser(id) {
+  if (!confirm('✅ هل أنت متأكد من تفعيل هذا المستخدم؟')) return;
   try {
     await API.admin.activateUser(id);
     loadUsers();
   } catch (e) { alert(e.message); }
 }
 
-// ── Role Change ──
+async function archiveUser(id) {
+  if (!confirm('📦 هل أنت متأكد من أرشفة هذا المستخدم؟ سيبقى محفوظاً مع جميع مقالاته وسجلاته.')) return;
+  try {
+    await API.admin.archiveUser(id);
+    loadUsers();
+  } catch (e) { alert(e.message); }
+}
+
+async function restoreUser(id) {
+  if (!confirm('↩️ هل أنت متأكد من استعادة هذا المستخدم من الأرشيف؟')) return;
+  try {
+    await API.admin.restoreUser(id);
+    loadUsers();
+  } catch (e) { alert(e.message); }
+}
 
 function openRoleModal(id, currentRole, fullName) {
   roleChangeUserId = id;
@@ -208,8 +235,6 @@ async function submitRoleChange() {
     loadUsers();
   } catch (e) { alert(e.message); }
 }
-
-// ── Password Reset ──
 
 function openPasswordModal(id, fullName) {
   passwordResetUserId = id;
@@ -230,7 +255,5 @@ async function submitPasswordReset() {
     loadUsers();
   } catch (e) { alert(e.message); }
 }
-
-// ── Init ──
 
 document.addEventListener('DOMContentLoaded', loadUsers);
