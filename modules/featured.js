@@ -85,11 +85,12 @@ class FeaturedManager {
     const items = db.query('featured_stories')
       .filter(i => i.is_active === true)
       .sort((a, b) => (a.featured_order || 0) - (b.featured_order || 0));
-    // Enrich with article data
+    // Enrich with article data, filter out expired
     return items.map(item => {
       const article = db.get('processed_content', item.article_id);
+      if (!article || (article.visibility_status && article.visibility_status !== 'active')) return null;
       return { ...item, article: article || null };
-    });
+    }).filter(Boolean);
   }
 
   reorder(id, direction) {

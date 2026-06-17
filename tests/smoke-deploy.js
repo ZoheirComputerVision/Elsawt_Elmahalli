@@ -60,9 +60,9 @@ function check(name, cond, detail) {
   const smokeUserId = r.body?.id;
   if (!smokeUserId) console.log('  ⚠ No user ID returned for new user');
 
-  // ── 5. User deactivation/activation ──
-  r = await req('POST', `/api/admin/users/${smokeUserId}/deactivate`, {}, { 'x-admin-auth': publisherToken });
-  check('5a. User deactivation', r.status === 200, `status=${r.status}`);
+  // ── 5. User suspension/activation ──
+  r = await req('POST', `/api/admin/users/${smokeUserId}/suspend`, {}, { 'x-admin-auth': publisherToken });
+  check('5a. User suspension', r.status === 200, `status=${r.status}`);
   r = await req('POST', `/api/admin/users/${smokeUserId}/activate`, {}, { 'x-admin-auth': publisherToken });
   check('5b. User activation', r.status === 200, `status=${r.status}`);
 
@@ -74,10 +74,10 @@ function check(name, cond, detail) {
   r = await req('POST', `/api/admin/users/${smokeUserId}/reset-password`, { password: 'newpass1234' }, { 'x-admin-auth': publisherToken });
   check('7. Password reset', r.status === 200, `status=${r.status}`);
 
-  // ── 8. Deactivated user login blocked ──
-  r = await req('POST', `/api/admin/users/${smokeUserId}/deactivate`, {}, { 'x-admin-auth': publisherToken });
+  // ── 8. Suspended user login blocked ──
+  r = await req('POST', `/api/admin/users/${smokeUserId}/suspend`, {}, { 'x-admin-auth': publisherToken });
   r = await req('POST', '/api/admin/auth', { username: smokeUser, password: 'newpass1234' });
-  check('8. Deactivated user login blocked', r.status === 401 || r.status === 403, `status=${r.status}`);
+  check('8. Suspended user login blocked', r.status === 401 || r.status === 403, `status=${r.status}`);
 
   // ── 9. Failed-login lockout (using journalist to avoid locking publisher) ──
   let fails = 0;
@@ -86,15 +86,14 @@ function check(name, cond, detail) {
     if (r.status !== 200) fails++;
   }
   check('9. Failed-login lockout', fails >= 5, `${fails} rejects out of 6 attempts`);
-  // Also verify correct password for locked user returns 401
+  // Also verify correct password for locked user returns 401 or 429
   r = await req('POST', '/api/admin/auth', { username: 'journo1', password: 'pass1234' });
   check('9b. Locked user cannot auth even with correct pw', r.status !== 200, `status=${r.status}`);
-  check('9. Failed-login lockout', fails >= 5, `${fails} rejects out of 6 attempts`);
 
   // ── 10. Audit log ──
   const dbCheck = require('../database');
   const auditLog = dbCheck.query('audit_log');
-  const hasUserActions = auditLog.some(e => e.action && (e.action.includes('user.create') || e.action.includes('user.update') || e.action.includes('user.deactivate')));
+  const hasUserActions = auditLog.some(e => e.action && (e.action.includes('user.create') || e.action.includes('user.update') || e.action.includes('user.suspend')));
   check('10. Audit log generation', hasUserActions, `audit entries: ${auditLog.length}`);
 
   // ── 11. Featured Stories access control ──

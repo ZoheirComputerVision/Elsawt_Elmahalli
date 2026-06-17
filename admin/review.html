@@ -32,6 +32,10 @@
       <button class="btn btn-sm" onclick="loadContent('draft')">📝 مسودات</button>
       <button class="btn btn-sm btn-success" onclick="loadContent('published')">✅ منشور</button>
       <button class="btn btn-sm btn-danger" onclick="loadContent('rejected')">❌ مرفوض</button>
+      <span style="width:2px;background:#ddd;margin:0 5px;"></span>
+      <button class="btn btn-sm" style="background:#10b981;color:white;" onclick="loadVisibility('active')">🟢 نشط</button>
+      <button class="btn btn-sm" style="background:#f59e0b;color:white;" onclick="loadVisibility('expired')">🟡 منتهي</button>
+      <button class="btn btn-sm" style="background:#6b7280;color:white;" onclick="loadVisibility('archived')">⚪ مؤرشف</button>
     </div>
     <div class="admin-card">
       <div class="admin-card-header">
@@ -62,9 +66,25 @@
 
     let cachedData = null;
     let currentStatus = 'all';
+    let currentVisibility = null;
+
+    async function loadVisibility(vStatus) {
+      currentVisibility = vStatus;
+      const container = document.getElementById('content-list');
+      container.innerHTML = '<div class="loading">📡 جاري التحميل...</div>';
+      try {
+        const data = await API.admin.getContent({ visibility_status: vStatus });
+        cachedData = data.items;
+        document.getElementById('content-count').textContent = data.items.length;
+        renderContent();
+      } catch (e) {
+        container.innerHTML = `<div class="alert alert-danger">⚠️ ${e.message}</div>`;
+      }
+    }
 
     async function loadContent(status = 'all') {
       currentStatus = status;
+      currentVisibility = null;
       const container = document.getElementById('content-list');
       container.innerHTML = '<div class="loading">📡 جاري التحميل... <span style="font-size:0.8rem;color:#888;">(قد يستغرق 30-60 ثانية في أول مرة)</span></div>';
       // مهلة أمان 45 ثانية
@@ -113,23 +133,31 @@
         news: '📰 خبر', activity: '📸 نشاط', announcement: '📢 إعلان', uncategorized: '❓ غير مصنف',
       };
       const stNames = { published: '✅ منشور', draft: '📝 مسودة', review: '⏳ مراجعة', rejected: '❌ مرفوض' };
+      const visNames = { active: '🟢 نشط', expired: '🟡 منتهي', archived: '⚪ مؤرشف' };
 
         let html = `<table class="table">
-          <tr><th>#</th><th>العنوان</th><th onclick="sortByCategory()" style="cursor:pointer">التصنيف ${sortDir('category')}</th><th>الحالة</th><th>الثقة</th><th onclick="sortByDate()" style="cursor:pointer">التاريخ ${sortDir('date')}</th><th>الإجراءات</th></tr>`;
+          <tr><th>#</th><th>العنوان</th><th onclick="sortByCategory()" style="cursor:pointer">التصنيف ${sortDir('category')}</th><th>الحالة</th><th>الظهور</th><th>الثقة</th><th onclick="sortByDate()" style="cursor:pointer">التاريخ ${sortDir('date')}</th><th>الإجراءات</th></tr>`;
 
         items.forEach(item => {
-          html += `<tr>
+          const isExpired = item.visibility_status === 'expired';
+          const isArchived = item.visibility_status === 'archived';
+          const rowStyle = isExpired ? 'style="opacity:0.6;"' : isArchived ? 'style="opacity:0.4;"' : '';
+          html += `<tr ${rowStyle}>
             <td>${item.id}</td>
             <td>${item.title.substring(0,40)}${item.title.length>40?'...':''}</td>
             <td>${catNames[item.category]||item.category}</td>
             <td><span class="status-badge ${item.status}">${stNames[item.status]||item.status}</span></td>
+            <td><span class="status-badge ${item.visibility_status||'active'}">${visNames[item.visibility_status]||'🟢 نشط'}</span></td>
             <td>${Math.round(item.overall_score*100)}%</td>
             <td>${(item.event_date||item.created_at||'').substring(0,10)}</td>
             <td style="display:flex;gap:4px;flex-wrap:wrap;">
-              <a href="/article/${item.id}" class="btn btn-sm btn-primary">عرض</a>
+              <a href="/article/${item.id}${isExpired||isArchived?'?source=archive':''}" class="btn btn-sm btn-primary">عرض</a>
               ${item.status !== 'published' ? `<button class="btn btn-sm btn-success" onclick="approveItem(${item.id})">✓ قبول</button>` : ''}
               ${item.status !== 'rejected' ? `<button class="btn btn-sm btn-danger" onclick="rejectItem(${item.id})">✗ رفض</button>` : ''}
               ${item.status === 'draft' ? `<button class="btn btn-sm btn-accent" onclick="generateItem(${item.id})">🖋 توليد</button>` : ''}
+              ${isExpired || isArchived
+                ? `<button class="btn btn-sm" style="background:#10b981;color:white;" onclick="reactivateItem(${item.id})">🔄 إعادة تنشيط</button>`
+                : item.status === 'published' ? `<button class="btn btn-sm" style="background:#f59e0b;color:white;" onclick="expireItem(${item.id})">⏳ إنهاء صلاحية</button>` : ''}
               <button class="btn btn-sm" style="background:#2563eb;color:white;" onclick="openEditModal(${item.id})">✏️ تعديل</button>
               <button class="btn btn-sm" style="background:#6b7280;color:white;" onclick="deleteItem(${item.id})">🗑 حذف</button>
             </td>
@@ -162,6 +190,21 @@
         loadContent();
       } catch (e) { alert('❌ ' + e.message); }
     }
+    async function reactivateItem(id) {
+      try {
+        await API.admin.reactivate(id);
+        loadContent();
+      } catch (e) { alert('❌ ' + e.message); }
+    }
+    async function expireItem(id) {
+      if (confirm('⚠️ هل أنت متأكد من إنهاء صلاحية هذا المحتوى؟')) {
+        try {
+          await API.admin.expire(id);
+          loadContent();
+        } catch (e) { alert('❌ ' + e.message); }
+      }
+    }
+
     async function deleteItem(id) {
       if (confirm('⚠️ هل أنت متأكد من حذف هذا المحتوى نهائيًا؟')) {
         try {
@@ -180,6 +223,17 @@
       document.getElementById('edit-category').value = data.category || 'uncategorized';
       document.getElementById('edit-source').value = data.source_name || '';
       document.getElementById('edit-date').value = data.event_date || '';
+      // Expiration fields
+      if (data.expires_at) {
+        document.getElementById('edit-no-expire').checked = false;
+        document.getElementById('edit-expire-fields').style.display = 'block';
+        const d = new Date(data.expires_at);
+        document.getElementById('edit-expire-date').value = d.toISOString().split('T')[0];
+        document.getElementById('edit-expire-time').value = d.toTimeString().slice(0, 5);
+      } else {
+        document.getElementById('edit-no-expire').checked = true;
+        document.getElementById('edit-expire-fields').style.display = 'none';
+      }
       document.getElementById('edit-modal').classList.add('active');
     }
     function closeEditModal() {
@@ -194,6 +248,7 @@
         category: document.getElementById('edit-category').value,
         source_name: document.getElementById('edit-source').value,
         event_date: document.getElementById('edit-date').value,
+        expires_at: getExpiresAt('edit'),
       };
       try {
         await API.admin.updateItem(editingId, data);
@@ -201,6 +256,29 @@
         loadContent();
       } catch (e) { alert('❌ ' + e.message); }
     }
+    // Expiration helpers
+    function toggleEditExpire() {
+      const noExpire = document.getElementById('edit-no-expire').checked;
+      document.getElementById('edit-expire-fields').style.display = noExpire ? 'none' : 'block';
+    }
+    function applyEditQuickExpire() {
+      const days = parseInt(document.getElementById('edit-expire-quick').value);
+      if (!days) return;
+      const now = new Date();
+      if (days === 1) now.setHours(now.getHours() + 24);
+      else now.setDate(now.getDate() + days);
+      document.getElementById('edit-expire-date').value = now.toISOString().split('T')[0];
+      document.getElementById('edit-expire-time').value = now.toTimeString().slice(0, 5);
+    }
+    function getExpiresAt(prefix) {
+      const noExpire = document.getElementById(prefix + '-no-expire').checked;
+      if (noExpire) return null;
+      const date = document.getElementById(prefix + '-expire-date').value;
+      const time = document.getElementById(prefix + '-expire-time').value;
+      if (!date) return null;
+      return new Date(date + 'T' + (time || '23:59')).toISOString();
+    }
+
     document.addEventListener('DOMContentLoaded', () => loadContent('all'));
   </script>
 </head>
@@ -240,6 +318,34 @@
         <div class="form-group">
           <label>التاريخ</label>
           <input type="date" class="form-control" id="edit-date">
+        </div>
+        <div class="form-group">
+          <label style="display:flex;align-items:center;gap:8px;">
+            <input type="checkbox" id="edit-no-expire" checked onchange="toggleEditExpire()">
+            ☑ بدون تاريخ انتهاء
+          </label>
+        </div>
+        <div id="edit-expire-fields" style="display:none;">
+          <div class="form-group">
+            <label>تاريخ انتهاء الظهور</label>
+            <input type="date" class="form-control" id="edit-expire-date">
+          </div>
+          <div class="form-group">
+            <label>وقت انتهاء الظهور</label>
+            <input type="time" class="form-control" id="edit-expire-time" value="23:59">
+          </div>
+          <div class="form-group">
+            <label>مدة جاهزة</label>
+            <select class="form-control" id="edit-expire-quick" onchange="applyEditQuickExpire()">
+              <option value="">-- اختر المدة --</option>
+              <option value="1">24 ساعة</option>
+              <option value="3">3 أيام</option>
+              <option value="7">7 أيام</option>
+              <option value="15">15 يوماً</option>
+              <option value="30">30 يوماً</option>
+              <option value="90">90 يوماً</option>
+            </select>
+          </div>
         </div>
       </form>
     </div>

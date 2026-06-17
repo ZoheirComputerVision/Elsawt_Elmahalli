@@ -110,6 +110,10 @@ const API = {
     restoreUser: (id) => API.post(`/admin/users/${id}/restore`, null, true),
     changeUserRole: (id, role) => API.post(`/admin/users/${id}/role`, { role }, true),
     resetUserPassword: (id, password) => API.post(`/admin/users/${id}/reset-password`, { password }, true),
+    reactivate: (id) => API.post(`/admin/content/${id}/reactivate`, null, true),
+    expire: (id) => API.post(`/admin/content/${id}/expire`, null, true),
+    getExpiringSoon: (days) => API.get(`/admin/content/expiring-soon?days=${days}`, true),
+
     logout: () => API.post('/admin/auth/logout', null, true),
   },
 };

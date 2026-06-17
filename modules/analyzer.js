@@ -332,6 +332,8 @@ class ContentAnalyzer {
       event_date: data.event_date || null,
       image_url: data.image_url || '',
       image_data: data.image_data || '',
+      expires_at: data.expires_at || null,
+      visibility_status: 'active',
       is_ai_generated: 1,
       writer_version: null,
     });

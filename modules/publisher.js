@@ -131,6 +131,7 @@ class PublishingEngine {
       db.update('processed_content', contentId, {
         status: 'published',
         published_at: new Date().toISOString(),
+        visibility_status: 'active',
       });
       db.saveNow('processed_content');
       this._updateDailyCount();
@@ -161,6 +162,7 @@ class PublishingEngine {
     db.update('processed_content', contentId, {
       status: 'published',
       published_at: new Date().toISOString(),
+      visibility_status: 'active',
       reviewed_at: new Date().toISOString(),
       reviewed_by: reviewer,
     });

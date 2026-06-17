@@ -206,8 +206,9 @@ router.get('/dashboard', requireAuth, (req, res) => res.json(archive.getStats())
 
 router.get('/content', (req, res) => {
   let items = db.query('processed_content');
-  const { status, category, limit = 50, offset = 0 } = req.query;
+  const { status, category, visibility_status, limit = 50, offset = 0 } = req.query;
   if (status) items = items.filter(i => i.status === status);
+  if (visibility_status) items = items.filter(i => i.visibility_status === visibility_status);
   if (category) {
     const resolved = resolveCategory(category);
     const matchNames = resolved ? [resolved.name, ...resolved.legacy] : [category];
@@ -217,6 +218,16 @@ router.get('/content', (req, res) => {
   const total = items.length;
   items = items.slice(parseInt(offset), parseInt(offset) + parseInt(limit));
   res.json({ items, total });
+});
+
+router.get('/content/expiring-soon', requireRole('editor_in_chief'), (req, res) => {
+  try {
+    const expiration = require('../modules/expiration');
+    const items = expiration.getExpiringSoon(parseInt(req.query.days) || 7);
+    res.json({ items, total: items.length });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
 });
 
 router.get('/content/:id', (req, res) => {
@@ -313,7 +324,7 @@ router.post('/content/:id/delete', async (req, res) => {
 router.post('/content/:id/update', async (req, res) => {
   try {
     const id = parseInt(req.params.id);
-    const { title, body, category, source_name, event_date } = req.body;
+    const { title, body, category, source_name, event_date, expires_at, visibility_status } = req.body;
     const content = db.get('processed_content', id);
     if (!content) return res.status(404).json({ success: false, error: 'غير موجود' });
     const updateData = {};
@@ -322,10 +333,37 @@ router.post('/content/:id/update', async (req, res) => {
     if (category !== undefined) updateData.category = category;
     if (source_name !== undefined) updateData.source_name = source_name;
     if (event_date !== undefined) updateData.event_date = event_date;
+    if (expires_at !== undefined) updateData.expires_at = expires_at;
+    if (visibility_status !== undefined) updateData.visibility_status = visibility_status;
+    updateData.last_modified_at = new Date().toISOString();
     const updated = db.update('processed_content', id, updateData);
     db.saveNow('processed_content');
     res.json({ success: true, content: updated, message: 'تم التعديل بنجاح' });
   } catch (e) { res.status(500).json({ success: false, error: e.message }); }
+});
+
+router.post('/content/:id/reactivate', requireRole('editor_in_chief'), async (req, res) => {
+  try {
+    const expiration = require('../modules/expiration');
+    const result = expiration.reactivateContent(parseInt(req.params.id));
+    audit.log(req.user?.username, 'content.reactivated', 'processed_content', result.id, { title: result.title });
+    res.json({ success: true, content: result, message: 'تم إعادة تنشيط المحتوى' });
+  } catch (e) {
+    const status = e.message.includes('غير موجود') ? 404 : 400;
+    res.status(status).json({ success: false, error: e.message });
+  }
+});
+
+router.post('/content/:id/expire', requireRole('editor_in_chief'), async (req, res) => {
+  try {
+    const expiration = require('../modules/expiration');
+    const result = expiration.expireContent(parseInt(req.params.id));
+    audit.log(req.user?.username, 'content.expired', 'processed_content', result.id, { title: result.title });
+    res.json({ success: true, content: result, message: 'تم إنهاء صلاحية المحتوى' });
+  } catch (e) {
+    const status = e.message.includes('غير موجود') ? 404 : 400;
+    res.status(status).json({ success: false, error: e.message });
+  }
 });
 
 router.post('/content/:id/generate', async (req, res) => {
@@ -344,9 +382,9 @@ router.post('/collect', async (req, res) => {
 
 router.post('/collect/manual', async (req, res) => {
   try {
-    const { title, body, category, source, event_date, image_data } = req.body;
+    const { title, body, category, source, event_date, image_data, expires_at } = req.body;
     if (!title || !body) return res.status(400).json({ success: false, error: 'العنوان والمحتوى مطلوبان' });
-    const data = { title, body, source: source || 'إداري', category: category || 'uncategorized', event_date: event_date || new Date().toISOString().split('T')[0], source_url: '' };
+    const data = { title, body, source: source || 'إداري', category: category || 'uncategorized', event_date: event_date || new Date().toISOString().split('T')[0], source_url: '', expires_at: expires_at || null };
     if (image_data && typeof image_data === 'string' && image_data.startsWith('data:')) {
       const matches = image_data.match(/^data:([^;]+);base64,(.+)$/);
       if (matches) {

@@ -10,6 +10,7 @@ class Scheduler {
     this.jobs.push(cron.schedule('*/30 * * * *', () => this.runCollector()));
     this.jobs.push(cron.schedule('*/15 * * * *', () => this.runAnalyzer()));
     this.jobs.push(cron.schedule('*/10 * * * *', () => this.runPublisher()));
+    this.jobs.push(cron.schedule('*/5 * * * *', () => this.runExpirationCheck()));
     this.jobs.push(cron.schedule('0 */6 * * *', () => this.runArchiveSync()));
     this.jobs.push(cron.schedule('0 0 * * *', () => this.resetDailyCount()));
     console.log(`[Scheduler] ${this.jobs.length} مهمة مجدولة بدأت`);
@@ -61,6 +62,15 @@ class Scheduler {
       }
       console.log(`[Scheduler] ✓ معالجة ${Math.min(drafts.length, 3)} مسودة`);
     } catch (e) { console.error('[Scheduler] ✗ فشل النشر:', e.message); }
+  }
+
+  async runExpirationCheck() {
+    console.log('[Scheduler] تشغيل فحص انتهاء الصلاحية...');
+    try {
+      const expiration = require('./expiration');
+      const count = expiration.checkExpired();
+      if (count > 0) console.log(`[Scheduler] ✓ انتهت صلاحية ${count} محتوى`);
+    } catch (e) { console.error('[Scheduler] ✗ فشل فحص الصلاحية:', e.message); }
   }
 
   async runArchiveSync() {

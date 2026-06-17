@@ -9,7 +9,11 @@ router.get('/status', (req, res) => {
 
 router.get('/content', (req, res) => {
   let items = db.query('processed_content');
-  const { category, status, limit = 20, offset = 0, sort } = req.query;
+  const { category, status, visibility_status, limit = 20, offset = 0, sort } = req.query;
+
+  // Default: show only active visibility
+  if (visibility_status) items = items.filter(i => i.visibility_status === visibility_status);
+  else items = items.filter(i => i.visibility_status === 'active' || !i.visibility_status);
 
   if (category) {
     const resolved = resolveCategory(category);
@@ -35,6 +39,10 @@ router.get('/content', (req, res) => {
 router.get('/content/:id', (req, res) => {
   const item = db.get('processed_content', parseInt(req.params.id));
   if (!item) return res.status(404).json({ error: 'غير موجود' });
+  // Allow direct access if active or if requested from archive
+  if (item.visibility_status === 'expired' || item.visibility_status === 'archived') {
+    if (req.query.source !== 'archive') return res.status(404).json({ error: 'غير موجود' });
+  }
   const media = db.where('media', { content_id: item.id });
   const viewCount = db.count('views', v => v.content_id === item.id);
   res.json({ ...item, media, view_count: viewCount });
@@ -64,7 +72,7 @@ router.get('/local-categories', (req, res) => {
 });
 
 router.get('/categories', (req, res) => {
-  const items = db.query('processed_content', i => i.status === 'published');
+  const items = db.query('processed_content', i => i.status === 'published' && (i.visibility_status === 'active' || !i.visibility_status));
   const counts = {};
   items.forEach(i => {
     const resolved = resolveCategory(i.category);
@@ -83,11 +91,13 @@ router.get('/categories', (req, res) => {
 });
 
 router.get('/search', (req, res) => {
-  const { q } = req.query;
+  const { q, archive } = req.query;
   if (!q || q.length < 2) return res.json({ items: [] });
-  const items = db.query('processed_content', i =>
-    i.status === 'published' && (i.title.includes(q) || i.body.includes(q))
-  ).slice(0, 20);
+  const items = db.query('processed_content', i => {
+    const matchesQuery = i.title.includes(q) || i.body.includes(q);
+    if (archive === 'true') return matchesQuery && (i.visibility_status === 'expired' || i.visibility_status === 'archived');
+    return matchesQuery && i.status === 'published' && (i.visibility_status === 'active' || !i.visibility_status);
+  }).slice(0, 20);
   res.json({ items, total: items.length, query: q });
 });
 
@@ -112,8 +122,9 @@ router.get('/featured', (req, res) => {
 });
 
 router.get('/recent', (req, res) => {
-  const items = db.query('processed_content', i => i.status === 'published')
-    .sort((a, b) => (b.published_at || '').localeCompare((a.published_at || '')))
+  const items = db.query('processed_content', i =>
+    i.status === 'published' && (i.visibility_status === 'active' || !i.visibility_status)
+  ).sort((a, b) => (b.published_at || '').localeCompare((a.published_at || '')))
     .slice(0, 10);
   res.json(items);
 });

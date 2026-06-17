@@ -100,6 +100,34 @@
             <input type="file" class="form-control" id="m-image" accept="image/*" onchange="previewImage(event)">
             <div id="m-image-preview" style="margin-top:5px;max-width:200px;"></div>
           </div>
+          <div class="form-group">
+            <label style="display:flex;align-items:center;gap:8px;">
+              <input type="checkbox" id="m-no-expire" checked onchange="toggleManualExpire()">
+              ☑ بدون تاريخ انتهاء
+            </label>
+          </div>
+          <div id="m-expire-fields" style="display:none;">
+            <div class="form-group">
+              <label>تاريخ انتهاء الظهور</label>
+              <input type="date" class="form-control" id="m-expire-date">
+            </div>
+            <div class="form-group">
+              <label>وقت انتهاء الظهور</label>
+              <input type="time" class="form-control" id="m-expire-time" value="23:59">
+            </div>
+            <div class="form-group">
+              <label>مدة جاهزة</label>
+              <select class="form-control" id="m-expire-quick" onchange="applyManualQuickExpire()">
+                <option value="">-- اختر المدة --</option>
+                <option value="1">24 ساعة</option>
+                <option value="3">3 أيام</option>
+                <option value="7">7 أيام</option>
+                <option value="15">15 يوماً</option>
+                <option value="30">30 يوماً</option>
+                <option value="90">90 يوماً</option>
+              </select>
+            </div>
+          </div>
         </form>
       </div>
       <div class="modal-footer">
@@ -129,6 +157,7 @@
           <div class="admin-stat"><div class="num">${stats.total_rejected||0}</div><div class="lbl">❌ مرفوض</div></div>
           <div class="admin-stat"><div class="num">${stats.total_ai_decisions||0}</div><div class="lbl">🤖 قرارات AI</div></div>
           <div class="admin-stat"><div class="num">${stats.total_archived||0}</div><div class="lbl">📦 مؤرشف</div></div>
+          <div class="admin-stat"><div class="num" id="expiring-soon-count" style="color:#f59e0b;">0</div><div class="lbl">⏳ تنتهي قريباً</div></div>
         `;
 
         const review = await API.admin.getContent({ status: 'review' });
@@ -155,6 +184,11 @@
         } else {
           document.getElementById('review-list').innerHTML = '<p style="color:#888;text-align:center;">✅ لا يوجد محتوى بانتظار المراجعة</p>';
         }
+
+        try {
+          const expiring = await API.admin.getExpiringSoon(7);
+          document.getElementById('expiring-soon-count').textContent = expiring.total;
+        } catch (e) {}
 
         const logs = await API.admin.getLogs({ limit: 10 });
         if (logs.items.length) {
@@ -209,6 +243,17 @@
       document.getElementById('edit-category').value = data.category || 'uncategorized';
       document.getElementById('edit-source').value = data.source_name || '';
       document.getElementById('edit-date').value = data.event_date || '';
+      // Expiration fields
+      if (data.expires_at) {
+        document.getElementById('edit-no-expire').checked = false;
+        document.getElementById('edit-expire-fields').style.display = 'block';
+        const d = new Date(data.expires_at);
+        document.getElementById('edit-expire-date').value = d.toISOString().split('T')[0];
+        document.getElementById('edit-expire-time').value = d.toTimeString().slice(0, 5);
+      } else {
+        document.getElementById('edit-no-expire').checked = true;
+        document.getElementById('edit-expire-fields').style.display = 'none';
+      }
       document.getElementById('edit-modal').classList.add('active');
       const imgPanel = document.getElementById('article-image-panel');
       if (imgPanel && typeof openImagePanel === 'function') {
@@ -227,6 +272,7 @@
         category: document.getElementById('edit-category').value,
         source_name: document.getElementById('edit-source').value,
         event_date: document.getElementById('edit-date').value,
+        expires_at: getExpiresAt('edit'),
       };
       try {
         await API.admin.updateItem(editingId, data);
@@ -255,6 +301,41 @@
       const msg = res.results.map(r => `#${r.id}: ${r.message}`).join('<br>');
       document.getElementById('action-result').innerHTML = `<div class="alert alert-success">✅${msg}</div>`;
       loadDashboard();
+    }
+
+    function toggleManualExpire() {
+      const noExpire = document.getElementById('m-no-expire').checked;
+      document.getElementById('m-expire-fields').style.display = noExpire ? 'none' : 'block';
+    }
+    function toggleEditExpire() {
+      const noExpire = document.getElementById('edit-no-expire').checked;
+      document.getElementById('edit-expire-fields').style.display = noExpire ? 'none' : 'block';
+    }
+    function applyManualQuickExpire() {
+      const days = parseInt(document.getElementById('m-expire-quick').value);
+      if (!days) return;
+      const now = new Date();
+      if (days === 1) now.setHours(now.getHours() + 24);
+      else now.setDate(now.getDate() + days);
+      document.getElementById('m-expire-date').value = now.toISOString().split('T')[0];
+      document.getElementById('m-expire-time').value = now.toTimeString().slice(0, 5);
+    }
+    function applyEditQuickExpire() {
+      const days = parseInt(document.getElementById('edit-expire-quick').value);
+      if (!days) return;
+      const now = new Date();
+      if (days === 1) now.setHours(now.getHours() + 24);
+      else now.setDate(now.getDate() + days);
+      document.getElementById('edit-expire-date').value = now.toISOString().split('T')[0];
+      document.getElementById('edit-expire-time').value = now.toTimeString().slice(0, 5);
+    }
+    function getExpiresAt(prefix) {
+      const noExpire = document.getElementById(prefix + '-no-expire').checked;
+      if (noExpire) return null;
+      const date = document.getElementById(prefix + '-expire-date').value;
+      const time = document.getElementById(prefix + '-expire-time').value;
+      if (!date) return null;
+      return new Date(date + 'T' + (time || '23:59')).toISOString();
     }
 
     function previewImage(e) {
@@ -302,6 +383,7 @@
         category: document.getElementById('m-category').value,
         source: document.getElementById('m-source').value,
         event_date: document.getElementById('m-date').value,
+        expires_at: getExpiresAt('m'),
       };
       if (!data.title || !data.body) { showModalError('العنوان والمحتوى مطلوبان'); return; }
       const fileInput = document.getElementById('m-image');
@@ -368,6 +450,34 @@
         <div class="form-group">
           <label>التاريخ</label>
           <input type="date" class="form-control" id="edit-date">
+        </div>
+        <div class="form-group">
+          <label style="display:flex;align-items:center;gap:8px;">
+            <input type="checkbox" id="edit-no-expire" checked onchange="toggleEditExpire()">
+            ☑ بدون تاريخ انتهاء
+          </label>
+        </div>
+        <div id="edit-expire-fields" style="display:none;">
+          <div class="form-group">
+            <label>تاريخ انتهاء الظهور</label>
+            <input type="date" class="form-control" id="edit-expire-date">
+          </div>
+          <div class="form-group">
+            <label>وقت انتهاء الظهور</label>
+            <input type="time" class="form-control" id="edit-expire-time" value="23:59">
+          </div>
+          <div class="form-group">
+            <label>مدة جاهزة</label>
+            <select class="form-control" id="edit-expire-quick" onchange="applyEditQuickExpire()">
+              <option value="">-- اختر المدة --</option>
+              <option value="1">24 ساعة</option>
+              <option value="3">3 أيام</option>
+              <option value="7">7 أيام</option>
+              <option value="15">15 يوماً</option>
+              <option value="30">30 يوماً</option>
+              <option value="90">90 يوماً</option>
+            </select>
+          </div>
         </div>
       </form>
       <!-- Article Image Panel -->
